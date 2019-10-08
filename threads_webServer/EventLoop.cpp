@@ -75,7 +75,7 @@ int eventLoop :: wakeup(int fd) {
 
 //为唤醒描述符设置channel
 int loopInfo :: setChannel() {
-    
+       
     chl = make_shared<channel>() ;
     int fd = wakeupFd[1] ;
     //设置非阻塞
@@ -204,6 +204,7 @@ vector<pair<int, channel>> eventLoop :: doPendingFunc(shared_ptr<channel> chl) {
     return ls ;
 }
 
+
 void eventLoop :: addQueue(vector<pair<int, channel>>&ls, loopInfo&loop, shared_ptr<epOperation>ep) {
     //将新连接加入到epoll中,操作局部变量线程安全
     for(pair<int, channel>p:ls) {
@@ -274,7 +275,6 @@ int eventLoop :: queueInLoop(channel chl, int& num) {
         lock_guard<mutex>lk(mute) ;
         std::pair< std::map<int, channel>::iterator,bool > ret ;
         try{
-            //info[num].print() ;
         chl.setWakeFd(info[num].getReadFd()) ;
         ret = qChl.insert(make_pair(chl.getFd() ,chl)) ;
         }catch(exception e) {

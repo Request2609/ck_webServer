@@ -137,7 +137,6 @@ void FastCgi::startConnect(void)
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = inet_addr(ip.c_str());
     server_address.sin_port = htons(9000);
-
     int result = connect(sockfd,(struct sockaddr *)&server_address,sizeof(server_address));
     if(result < 0) {
         std:: cout << __FILE__ << "      " << __LINE__ << std::endl ;

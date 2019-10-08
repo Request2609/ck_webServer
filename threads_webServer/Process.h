@@ -11,6 +11,9 @@
 #define DEFAULT_PATH "index.html"
 #define BUFLEN 65535 
 
+#define FASTCGI 1
+#define CGI 2 
+
 using namespace std ;
 enum {
     GET = 1, POST, DEFAULT
@@ -20,6 +23,7 @@ enum {
     NOT_FOUND=404, OK=200
 } ;
 
+int method = CGI ;
 //向进程发送的登录信息
 struct logBuf {
     //暂时业务为登录

@@ -17,7 +17,6 @@ void wakeCb(channel* chl) {
         cout << __FILE__ << "         " << __LINE__ << endl ;   
         return  ;
     } 
-    cout <<"------------------------------->"<< ret << endl ;
 }
 
 

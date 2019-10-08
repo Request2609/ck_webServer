@@ -4,6 +4,7 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
         long ret = 0 ;
         //获取到请求路径和版本号
         getVersionPath(tmp) ;
+        cout << "POST请求，路径:" << paths << endl ;
         //获取尾部长度
         ret = getContentLength(bf, chl) ;
         if(ret == -5) {
@@ -16,7 +17,7 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
                 sendNotFind(chl) ;
                 return -1 ;
             }
-            
+
             int ret = paths.find("php") ;
             //如果请求php文件
             if(ret != -1) {
@@ -44,12 +45,16 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
 string process :: changePostHtml(long len, string& bf) {
     //现根据contentlen找相应提交内容
     string tmp = getSubmit(len, bf) ;
+    //将要提交的内容
     if(tmp == "") {
         return "";
     }
+
     if(paths[0] == '/') {
         paths = paths.c_str()+1 ;
     }
+        
+    //fastCgi处理请求
     ::FastCgi fc ;
     fc.setRequestId(1) ;
     fc.startConnect() ;
@@ -59,7 +64,7 @@ string process :: changePostHtml(long len, string& bf) {
     sprintf(l, "%ld", size) ;
     char p[1024] ;
     //构造路径,绝对路径
-    sprintf(p, "/home/changke/summer2019/util/summer2019/test/www/%s", paths.c_str()) ;
+    sprintf(p, "/home/changke/ck_webServer/www/%s", paths.c_str()) ;
     fc.sendParams("SCRIPT_FILENAME", p) ;
     //设置方法
     fc.sendParams("REQUEST_METHOD", "POST") ;
@@ -88,7 +93,6 @@ string process :: getSubmit(long len, string& bf) {
     }
     index = index+4 ;
     long l = bf.size() ;
-
     for(int i=index; i<l; i++) {
         info+=bf[i] ;
         len -- ;
@@ -325,7 +329,7 @@ int process :: messageSend(const string& tmp, channel* chl) {
         struct stat st ;
         int ret = stat(DEFAULT_PATH, &st) ;
         if(ret < 0) {
-            cout << __FILE__ << __LINE__ << endl ;
+            cout << __FILE__ << "      " << __LINE__ << strerror(errno)<< endl ;
             return -1 ;
         }
         //获取文件的大小
@@ -491,6 +495,7 @@ int process :: isExist() {
 //获取版本号和请求路径
 int process :: getVersionPath(string tmp) {
     
+    cout << tmp << endl ;
     int pathIndex = tmp.find(' ') ;
     pathIndex += 1 ;
     while(tmp[pathIndex] != ' ') {

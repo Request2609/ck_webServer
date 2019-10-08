@@ -426,6 +426,9 @@ string process :: getFileType() {
         if(type == "css") {
             return "text/css" ;
         }
+        if(type == "md") {
+            return "text/x-markdown;charset=utf-8" ;
+        }
     }
     return "text/plain;charset=utf-8" ;
 }
