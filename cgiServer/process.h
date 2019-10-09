@@ -260,6 +260,7 @@ public :
                 break ;
             }
             else {
+                cout << "接收到消息---->" << buf << endl ;
                 //处理消息
                 //web服务器传来cgi文件路径
                 ret  = send(sockFd, buf, sizeof(buf), 0) ;
