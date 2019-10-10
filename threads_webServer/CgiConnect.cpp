@@ -30,20 +30,18 @@ int cgiConnect :: sendMsg(const char*  buffer) {
             cout << __LINE__ << "     " << __FILE__ << endl ;
             return -1 ;
     }
+    cout << "发送成功!" << endl ;
     return 1 ;
 }
 
 string cgiConnect :: recvMsg() {
     string ss ;
-    while(1) {
-        if(recv(sockFd, buf, sizeof(buf), 0)<0) {       
-            cout << __LINE__ << "     " << __FILE__ << endl ;
-            return "" ;
-        } 
-        if(buf[0] == '0') {
-            break ;      
-        }
-        ss += buf ;
-    }
+    if(recv(sockFd, buf, sizeof(buf), 0)<0) {       
+        cout << __LINE__ << "     " << __FILE__ << "     " << strerror(errno)<< endl ;
+        return "" ;
+    } 
+    cout << "接收到了数据" << endl ;
+
+    ss += buf ;
     return ss ;
 }

@@ -136,7 +136,7 @@ void processPool<T> :: setupSigPipe() {
 
 template<typename T> 
 void processPool<T> :: runParent() {
-    cout << "在父进程"  << "　　　" << "序号:" << index << endl ;
+    cout << "运行父进程" << endl ; 
     //设置信号
     setupSigPipe() ;
     tool :: addFd(epollFd, listenFd)  ; 
@@ -168,7 +168,6 @@ void processPool<T> :: runParent() {
                     cout << __LINE__ << "         " << __FILE__ << endl ;
                     return ;
                 }
-                cout << "给进程" << index << "发送消息"<< endl ;
             }
         }   
     }
@@ -179,8 +178,8 @@ void processPool<T> :: runParent() {
 template<typename T>
 void processPool<T> :: runChild() {
 
-    cout << "在子进程中" << "     " << "序号:" << index << endl ;
     setupSigPipe() ;
+    cout << "运行子进程" << endl ;
     int pipeFd = proDescInfo[index]->getReadFd() ;
     //将管道描述符加入到epoll中
     tool::addFd(epollFd, pipeFd) ;
@@ -197,31 +196,29 @@ void processPool<T> :: runChild() {
         for(int i=0; i<num; i++) {
             int fd =ev[i].data.fd ;
             if(fd == pipeFd&&(ev[i].events&EPOLLIN)) {
-                cout << "管道信号！" << endl ;
                 char client ;
                 int ret = recv(fd, &client, sizeof(client), 0) ;
                 if(ret < 0) {
                     cout << __LINE__ << "      " << __FILE__ << endl ;
                     return ;
                 }
-                cout << "接收到信号！" << endl ;
                 int connFd = accept(listenFd, NULL, NULL) ;
                 if(connFd < 0) {
                     cout << __LINE__ << "       " << __FILE__ << endl ;
                     return ;
                 }
-                cout << "接收到新连接！" << endl ;
+                cout << "接收新连接" << endl ;
                 ret = tool::addFd(epollFd, connFd) ;
                 if(ret < 0) {
                     cout << __LINE__ <<  "         " << __FILE__ << endl ;
                     return ;
                 }
-                cout << "创建用户对象" << endl ;
                 //创建用户对象
                 user[connFd] = make_shared<T>(epollFd, connFd) ;
             } 
             //处理事件
             else if(ev[i].events&EPOLLIN) {
+                cout << "发生可读事件" << endl ;
                 user[fd]->process() ;
             }
         }
@@ -240,9 +237,18 @@ public :
         endIndex = 0 ;
     }
     ~cgiConn() {close(sockFd) ;}
+    int createSocketPair() {
+        int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) ;
+        if(ret < 0) {
+            cout << __LINE__ << "        " << __FILE__ << endl ;
+            return -1 ;
+        }
+        return 1 ;
+    }
+
     void process() {
         while(true) {
-            int ret = recv(sockFd, buf, BUFFERSIZE-1, 0) ;
+            int ret = recv(sockFd, buf, BUFFERSIZE, 0) ;
             if(ret < 0) {
                 if(errno != EAGAIN) {
                     tool :: removeFd(epollFd, sockFd) ;
@@ -252,32 +258,64 @@ public :
                 return ;
             }
             else if(ret == 0) {
+                cout << "接收数据" << endl ;
+                cout << buf << endl ;
                 int res = tool :: removeFd(epollFd, sockFd) ;
                 if(res < 0) {
-                    cout << "移除失败！" << endl ;
                     return ;
                 }
                 break ;
             }
             else {
-                cout << "接收到消息---->" << buf << endl ;
+                cout << "接收数据:--->" << buf << endl ;
+                cout << "结束" << endl ;
+                cgiArg = buf ;
+                if(cgiArg[0] == '1') {
+                    int a, b ;
+                    getArg(a, b) ;
+                    cgiProcess(a, b, a+b) ;
+                    cout <<"设置完成!" << endl ;
+                }
                 //处理消息
                 //web服务器传来cgi文件路径
-                ret  = send(sockFd, buf, sizeof(buf), 0) ;
-                if(ret < 0) {
-                    cout << __LINE__ << "         " << __FILE__ << endl ;
-                    break ;
-                }
                 break ;
             }
         }
     }
 
+    int cgiProcess(int a, int b, int t) {
+        string body = "<html><meta charset=\"UTF-8\"><head><title>CK_webServerCGI</title></head>";
+        body += "<body><p>The result is " + to_string(a) + "+" + to_string(b) + " = " + to_string(t);
+        body += "</p></body></html>";
+        strcpy(buf, body.data()) ;
+        cout <<"发送数据" << buf << endl ;
+        int ret  = send(sockFd, buf, sizeof(buf), 0) ;
+        cout << "发送完成"<< "     长度:" << ret << endl ;
+        if(ret < 0) {
+            cout << __LINE__ << "          " <<  __FILE__ << endl ;
+            return -1 ;
+        }
+        bzero(buf, sizeof(buf)) ;
+        return 1 ;
+    }
+
+    void getArg(int& a, int& b) {
+        cout << cgiArg << endl ;
+        cgiArg = cgiArg.data()+3 ;
+        cout << "数据:" << cgiArg << endl ;
+        sscanf(cgiArg.data(), "a=%d&b=%d", &a, &b) ;
+    }
 public :
+    
+    //cgi路径
+    string cgiPath ;
+    //cgi参数
+    string cgiArg ;
     static int epollFd ;
     int sockFd ;
     char buf[BUFFERSIZE] ;
     int endIndex ;
+    int pipe[2] ;
 } ;
 
 int cgiConn :: epollFd ;

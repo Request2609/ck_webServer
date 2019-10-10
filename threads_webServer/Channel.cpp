@@ -96,7 +96,6 @@ int channel :: handleWrite() {
             buf[j] = output[i] ;
             j++ ;
         }
-
         buf[j] = '\0' ;
         //写文件长度
         int ret = writen(cliFd, buf, sizeof(buf)) ;

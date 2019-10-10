@@ -280,12 +280,6 @@ int eventLoop :: queueInLoop(channel chl, int& num) {
         }catch(exception e) {
             cout <<"出现异常情况！"<<e.what() << endl ;
         }
-        if(ret.second) {
-            cout << "插入成功！"<< endl ;
-        }
-        else {
-            cout << "插入失败！"<< endl ;
-        }
     }
     
     wakeup(info[num].getWriteFd()) ;

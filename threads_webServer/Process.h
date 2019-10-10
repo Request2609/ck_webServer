@@ -14,7 +14,7 @@
 
 #define FASTCGI 1
 #define CGI 2 
-const char* CGI_PATH = "a.out" ;
+
 using namespace std ;
 enum {
     GET = 1, POST, DEFAULT
@@ -23,7 +23,6 @@ enum {
 enum {
     NOT_FOUND=404, OK=200
 } ;
-int method = CGI ;
 //向进程发送的登录信息
 struct logBuf {
     //暂时业务为登录
@@ -64,7 +63,9 @@ public :
     string changePostHtml(long len, string&bf) ;
     string getSubmit(long len, string&bf) ;
     int sendCgiResult(channel * chl, string res) ;
-    int processCgi() ;
+    string processCgi() ;
+    void getSendBuffer(channel* chl, const string res) ;
+    void sendBuffer(channel* chl) ;
 private :
     string post ;
     string paths ;

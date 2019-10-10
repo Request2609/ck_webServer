@@ -1,4 +1,5 @@
-#include "process.h"
+#include "processPool.h"
+
 void handle(int sig) {
     if(sig == SIGINT) {
         exit(0) ;

@@ -17,6 +17,7 @@ public:
     static int connectCgiServer() ;
     static string recvMsg() ;
     static int sendMsg(const char* buf) ;
+    static void closeFd() {close(sockFd) ;}
 private:
     static int sockFd ;
     static struct sockaddr_in addr ;
