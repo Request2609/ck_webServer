@@ -20,12 +20,13 @@ void wakeCb(channel* chl) {
 }
 
 
-void onRead(channel* chl) {
+void onRead(channel* chl, map<int, shared_ptr<channel>>&tmp) {
+    cout << "事件" << endl ;
     //将信息获取完成，再解析
     //解析请求头
     process pro ;
     chl->getReadBuffer()->getCanProcess() ;
-    pro.requestHeader(chl) ;    
+    pro.requestHeader(chl, tmp) ;    
 }
 
 
@@ -63,7 +64,7 @@ int main(int argc, char** argv) {
     }
        
     //设置新连接的回调函数
-    conn.setReadCallBack(std::bind(onRead, placeholders::_1)) ;
+    conn.setReadCallBack(std::bind(onRead, placeholders::_1, placeholders::_2)) ;
     conn.setWakeCb(std::bind(wakeCb, placeholders::_1)) ;
     //将新建的连接加入到loop中
     server.addNewConnection(&conn) ;

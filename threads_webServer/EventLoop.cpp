@@ -82,9 +82,8 @@ int loopInfo :: setChannel() {
     //setNoBlock(fd) ;
     chl->setFd(fd) ;
     chl->setEvents(READ) ;
-    int epFd = ep->getEpFd() ;
+    chl->setEp(ep) ;
     //为唤醒套接字设置epoll
-    chl->setEpFd(epFd) ;
     //现在不能添加到epoll中!!!
     ep->add(fd, READ) ;
     //设置读回调
@@ -137,49 +136,55 @@ void eventLoop :: round(loopInfo loop, shared_ptr<channel>chl, shared_ptr<epOper
 
     //将当前唤醒的channel加入到list中
     loop.add(chl->getFd(), chl) ;
+    vector<shared_ptr<channel>>actChl ;
     //将wakeFd加入到epoll中
     while(!stop) {
-        vector<shared_ptr<channel>>actChl ;
-        vector<shared_ptr<channel>>closeChannel ;
         int ret = ep->roundWait(loop, actChl) ;    
         if(ret < 0) {
             stop = true  ;
         }
+        int flag = 0 ;
         //处理
         //事件
+        cout << "kehuduan ge shu :" << loop.chlList.size() << endl ;
+        int t = loop.chlList.size() ;
+        for(auto res:loop.chlList) {
+            cout << "-------->" << res.second->getFd() << endl ;
+        }
         for(shared_ptr<channel> chl : actChl) {
+            if(chl == nullptr) {
+                break ;
+            }
             int fd = chl->getFd() ;
             //该从队列中取连接了
             if(fd == wakeFd) {
-                chl->handleEvent(wakeFd) ;
+                chl->handleEvent(wakeFd, loop.chlList) ;
+                cout << "wakeUpFd:" << wakeFd << endl ;
                 ls = doPendingFunc(chl) ;
                 addQueue(ls, loop, ep) ;
                 ls.clear() ;
                 continue ;
             }
-            int res = chl->handleEvent(wakeFd) ;
-            if(res == 0) {
-                closeChannel.push_back(chl) ;
-            }
+            flag = 1 ;
+            //设置当前epoll句柄
+            chl->setEp(ep) ;
+            chl->handleEvent(wakeFd, loop.chlList) ;
         }
-        //处理完就删除
+        //处理完成，清空队
         actChl.clear() ;
-        //清理map中的channel 
-        for(shared_ptr<channel> chl : closeChannel) {
-            int fd = chl->getFd() ;
-            ep->del(fd) ;
-            loop.delChl(fd) ;
-            //关闭套接字
-            close(fd) ;
-            //从epolｌ中移除
+        cout << "处理完后" << loop.chlList.size()<< endl ;
+        if(flag == 1) {
+        for(auto res:loop.chlList) {
+            cout << "-------->" << res.second->getFd() << endl ;
         }
-        closeChannel.clear() ;
+            exit(1) ;
+        }
     }
 }
 
 //唤醒线程
 vector<pair<int, channel>> eventLoop :: doPendingFunc(shared_ptr<channel> chl) {
-
+    
     vector<pair<int, channel>>ls ;
     if(qChl.empty()) { 
         return ls ;
@@ -201,14 +206,18 @@ vector<pair<int, channel>> eventLoop :: doPendingFunc(shared_ptr<channel> chl) {
             qChl.erase(qChl.find(p.first)) ;
         }
     }
+    for(auto s:ls) {    
+        cout << s.first << endl ;
+    }
     return ls ;
 }
 
 
-void eventLoop :: addQueue(vector<pair<int, channel>>&ls, loopInfo&loop, shared_ptr<epOperation>ep) {
+void eventLoop :: addQueue(vector<pair<int, channel>>&ls, 
+                           loopInfo&loop, 
+                           shared_ptr<epOperation>ep) {
     //将新连接加入到epoll中,操作局部变量线程安全
     for(pair<int, channel>p:ls) {
-        p.second.setEpFd(ep->getEpFd()) ;
         //设置可读事件并加入到epoll中
         ep->add(p.first, READ) ;
         //将fd加入到事件表中
@@ -216,14 +225,13 @@ void eventLoop :: addQueue(vector<pair<int, channel>>&ls, loopInfo&loop, shared_
     }
 }
 
-int loopInfo :: delChl(int fd) {
-
-    map<int, shared_ptr<channel>>::iterator iter = chlList.find(fd) ;
-    if(iter == chlList.end()) {
+int loopInfo :: delChl(int fd, map<int, shared_ptr<channel>>& tmp) {
+    auto iter = tmp.find(fd) ;
+    if(iter == tmp.end()) {
         return -1 ;
     }
     //删除fd对应的事件
-    chlList.erase(iter) ;
+    tmp.erase(iter) ;
     return 1 ;
 } 
 
@@ -260,7 +268,7 @@ void eventLoop :: loop() {
                 int num = getNum() ; 
                 queueInLoop(chl, num) ;
             }
-
+            
             //清空活跃事件集合
             activeChannels.clear() ;
         }
@@ -281,7 +289,6 @@ int eventLoop :: queueInLoop(channel chl, int& num) {
             cout <<"出现异常情况！"<<e.what() << endl ;
         }
     }
-    
     wakeup(info[num].getWriteFd()) ;
     return 1 ;
 }   
@@ -300,7 +307,6 @@ void eventLoop :: addConnection(connection* con) {
     std::shared_ptr<channel> channel_ = conn->getChannel() ;
     int fd = channel_->getFd() ;
     servFd = fd ;
-    channel_->setEpFd(epPtr->getEpFd()) ;
     //将这个服务器监听套接字加入到epoll中，只负责监听可读事件，LT模式
     channel_->setEvents(READ) ;
     //将fd和channel作为键值存入channelMap中

@@ -14,8 +14,10 @@ using namespace std ;
 class epOperation ;
 class channel ;
 class connection ;
+class eventLoop ;
 
 class loopInfo {
+    friend eventLoop ;
 public :
     loopInfo() { 
         ep = make_shared<epOperation>() ;
@@ -27,7 +29,7 @@ public :
     size_t size() { return chlList.size() ; }
     static void wakeCb(channel* chl); 
     void print() ;
-    void add(int fd, shared_ptr<channel>chl) { 
+    void add(int fd, shared_ptr<channel>chl) {
           chlList.insert(make_pair(fd, chl)) ; 
     }
     shared_ptr<channel> getChl() { return chl ; }
@@ -42,10 +44,11 @@ public :
     int getReadFd() { return wakeupFd[1] ; }
     //返回所属线程epoll句柄
     //返回线程id
-    int delChl(int fd) ;
+    static int delChl(int fd, map<int, shared_ptr<channel>>& tmp) ;
     void setThreadId(long id) { threadId = id ; }
     int setNoBlock(int fd) ;
 private :
+    map<int, shared_ptr<channel>>chlList ;
     shared_ptr<channel>chl ;
     //事件循环中的epoll
     shared_ptr<epOperation>ep ;
@@ -54,7 +57,6 @@ private :
     //线程id
     long threadId ; 
     //该loop管理的事件集合
-    map<int, shared_ptr<channel>>chlList ;
 } ;
 
 //事件循环 EventLoop和connection共享channel对象

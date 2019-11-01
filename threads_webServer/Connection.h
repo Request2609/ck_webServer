@@ -18,7 +18,8 @@ public:
     ~connection() ;
 public :
     //将套接字类和channel进行绑定
-    typedef std :: function<void(channel* chl)> callBack ;
+    typedef std :: function<void(channel*, std::map<int, std::shared_ptr<channel>>&)> callBack ;
+    typedef std :: function<void(channel*)> wakeCallBack ;
 public :
     void createListenFd(socketFd* sock) ;
     void createChannel() {channel_ = std :: make_shared<channel>() ;}
@@ -33,7 +34,7 @@ public :
     void setReadCallBack(callBack cb) ;
     void setTimeoutCallBack(callBack cb) ;
     //绑定唤醒函数
-    void setWakeCb(callBack cb) { wakeCb = move(cb) ; }
+    void setWakeCb(wakeCallBack cb) { wakeCb = move(cb) ; }
     void setWakeChlCall(std::shared_ptr<channel>&chl) ;
 public :
     //创建监听套接字
@@ -51,7 +52,7 @@ public :
         return (this->channel_) ;
     }
 private :
-    callBack wakeCb ;
+    wakeCallBack wakeCb ;
     //三种回调
     callBack readCallBack ;
     callBack writeCallBack ;

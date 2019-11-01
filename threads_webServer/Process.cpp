@@ -197,7 +197,7 @@ int process :: getRequest(channel* chl, string& tmp) {
         int ret =  tmp.find("?") ;
         //带参数的url，搜索功能
         if(ret != -1) { 
-            processArgGet(tmp, chl) ;      
+            cout <<"这是带参数的get 请求" << endl ;
         }
         //要是php的话，就得转成html然后给服务器发
         //有php-fpm完成
@@ -210,7 +210,6 @@ int process :: getRequest(channel* chl, string& tmp) {
 
             string file = changeHtml() ;
             if(isExist() < 0) {
-                sendNotFind(chl) ;
                 return -1;
             }
             ///构造响应头
@@ -228,24 +227,20 @@ int process :: getRequest(channel* chl, string& tmp) {
 }
 
 int process:: sendCgiResult(channel* chl, string res) {
-            Buffer* bf =  chl->getWriteBuffer() ;
-            long len = res.size() ;
-            responseHead(chl, "text/html", len, OK, "OK") ;
-            for(int i=0; i<len; i++) {
-                bf->append(res[i]) ;
-            }
-        
-            chl->enableWriting() ;
-            int ret = chl->updateChannel() ;
-            if(ret < 0) {
-                cout << __FILE__ << "      " << __LINE__ << endl ;
-                return -1 ;
-            }
-        return 1 ;
+    Buffer* bf =  chl->getWriteBuffer() ;
+    long len = res.size() ;
+    responseHead(chl, "text/html", len, OK, "OK") ;
+    for(int i=0; i<len; i++) {
+        bf->append(res[i]) ;
+    }
+    sss.sendInfo(chl) ;
+    return 1 ;
 }
 
 //获取请求头
-int process :: requestHeader(channel* chl) {
+int process :: requestHeader(channel* chl, map<int, shared_ptr<channel>>& mp) {
+    cout <<"获取的数据" << endl ;
+    canDel = 0 ;
     Buffer* bf =chl->getReadBuffer() ;
     //解析请求行
     int readIndex = bf->getReadIndex() ;
@@ -264,23 +259,17 @@ int process :: requestHeader(channel* chl) {
     //如果是GET方法，解析路径名
     if(ret == GET) {
         getRequest(chl, tmp) ;
-        return GET ;
     }
     //如果是post请求，找出content_length
     if(ret == POST) {
         postRequest(tmp, chl, a) ;
     }
-    if(ret == DEFAULT) {
-        return DEFAULT ;
+    //当canDel设置成1的时候就会将相应的channel对象移除
+    if(canDel == 1) {
+        loopInfo :: delChl(chl->getFd(), mp) ;
     }
     return 0  ;  
 }   
-
-int process :: processArgGet(string tmp, channel* chl) {
-    
-    return 1 ;
-}
-
 //获取请求的长度
 int process :: getContentLength(string a, channel* chl) {
     
@@ -370,7 +359,6 @@ int process :: getSubmitInfo(string& info, int pos, int l, string &a, channel* c
         i++ ;
         l-- ;
     }
-    cout << "info" << " :  " << info << endl ;
     //用户态修改读取的字节数,每次来post请求读到l为０，表示post接收数据完成
     chl->getReadBuffer()->setPostPos(l) ;
     //如果post请求被读取完成
@@ -401,6 +389,7 @@ void  process :: responseHead(channel* chl, string type, long len, int statusCod
 
 //处理get请求，发送响应头和
 int process :: messageSend(const string& tmp, channel* chl) {
+    int s = 0  ;
     //找出现第一个空格的地方
     if(flag == 0)
         getVersionPath(tmp) ;
@@ -419,15 +408,12 @@ int process :: messageSend(const string& tmp, channel* chl) {
         paths = DEFAULT_PATH ;
         string type = getFileType() ;
         responseHead(chl, type, len, 200, "OK") ;
-        //将文件信息全部写入度缓冲区
+        //将文件信息全部写入读缓冲区
         readFile(DEFAULT_PATH, chl) ;
-       // ret = sendFile(chl) ;
-        //设置可写事件
-        chl->enableWriting() ;
-        //发送完数据关闭连接 
-        ret = chl->updateChannel() ;
-        if(ret < 0) {
-            return -1 ;
+        //设置发送文件的对象!
+        s = sss.sendInfo(chl) ;
+        if(ret <= 0) {
+            canDel = 1 ;
         }
         return 1 ;
     }
@@ -436,18 +422,20 @@ int process :: messageSend(const string& tmp, channel* chl) {
     paths = paths.c_str()+1 ;
     //获取资源类型,资源长度，状态码，提示语
     int ret = isExist() ;
-    chl->enableWriting() ;
     if(!ret) {
         //发送404页面
-        sendNotFind(chl) ;   
-        chl->updateChannel() ;
+        sendNotFind(chl) ; 
+        s = sss.sendInfo(chl) ;
     }
     //请求其他的资源
     else {
         readFile(chl) ;
-        chl->updateChannel() ;
+        s = sss.sendInfo(chl) ;
     }
-    flag  = 0 ;
+    if(s <= 0) {
+        canDel = 1 ;
+    }
+    flag = 0 ;
     return 1 ;
 }
 
@@ -528,7 +516,6 @@ void process :: sendNotFind(channel* chl) {
     int len = st.st_size ;
     responseHead(chl, "text/html", len, 404, "NOT FOUND") ;
     readFile("404.html", chl) ;
-    
 }
 
 //读文件

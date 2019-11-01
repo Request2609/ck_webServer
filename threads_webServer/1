@@ -8,9 +8,7 @@
 #include "Socket.h"
 #include "Buffer.h"
 #define SIZE 1024
-using namespace std ;
-class epOperation ;
-class channel ;
+
 using namespace std :: placeholders ;
 enum {
     READ = EPOLLIN,
@@ -23,8 +21,7 @@ enum {
 //事件分发
 class channel {
 public :
-    typedef std::function<void(channel* chl, map<int, shared_ptr<channel>>&)> callBack ;
-    typedef std::function<void(channel* chl)> wakeCall ;
+    typedef std::function<void(channel* chl)> callBack ;
 public:
     channel() ;
     ~channel() {}
@@ -36,15 +33,11 @@ public :
     int getFd() {
         return cliFd ;
     }
-    void setWakeCall(wakeCall cb) {
-        wakeCb = move(cb) ;
-    }
 
     void setFd(int& fd) { cliFd = fd ; }   
     void setReadCallBack(callBack& cb) {
         readCallBack = cb ;
     }
-    
     void setWriteCallBack(callBack& cb) {
         writeCallBack = cb ;
     }
@@ -56,13 +49,13 @@ public :
         timeoutCallBack = cb ;
     }
     void setSock(std::shared_ptr<socketFd>sock) { this->sock = sock; }
-    shared_ptr<epOperation> getEp() { return ep ; }
-    void setEp(shared_ptr<epOperation> epo){ ep = epo ;}
+    int getEpFd() { return epFd ; }
+    void setEpFd(int efd){epFd = efd ;}
     int updateChannel() ;
     //判断是否收到了一段消息完整的消息"\r\n"结束
-    int handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) ;
+    int handleEvent(int fd) ;
     int handleWrite() ;
-    int handleRead(map<int, shared_ptr<channel>>&tmp) ;
+    int handleRead() ;
     int handleAccept(int fd) ;
     //设置channel监听的事件类型
     void setEvents(int event) { events = event ;}
@@ -77,9 +70,7 @@ public :
     long getLen() { return len ; }
     Buffer* getReadBuffer() { return  &input ;}
     Buffer* getWriteBuffer() { return  &output ;}
-    static void delFd(int fd, map<int, shared_ptr<channel>>& tmp) ;
 private :
-    std ::shared_ptr<epOperation>ep ;
     long len ;
     //管理channel描述符对象的epoll句柄
     int epFd ;
@@ -90,7 +81,6 @@ private :
     //保存监听套接字信息
     std :: shared_ptr<socketFd> sock ;
     //读回调
-    wakeCall wakeCb ;
     callBack readCallBack ;
     //写
     callBack writeCallBack ;

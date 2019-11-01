@@ -47,22 +47,23 @@ bool channel :: operator==(channel& chl) {
     return 0 ;
 }
 
-int channel :: handleEvent(int fd) {
-    
+int channel :: handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) {
     //将唤醒描述符中的信号读出来
     if(fd == cliFd) {
         int ret ;
         read(fd, &ret, sizeof(ret)) ;
-        cout << "ret--------------------->" << ret << endl ;
         return 1;
     }
 
     if(events&EPOLLIN) { 
-        int n = handleRead() ;
+        int n = handleRead(tmp) ;
         if(n < 0) {
             return -1;
         }
         if(n == 0) {
+            ep->del(fd) ;
+            loopInfo :: delChl(fd, tmp) ;
+            close(fd) ;
             return 0 ;
         }
     }
@@ -70,25 +71,38 @@ int channel :: handleEvent(int fd) {
     if(events&EPOLLOUT) {
         //发送数据
         int ret = handleWrite() ;
-        if(ret < 1) {
-            std::cout << __FILE__ << "     " << __LINE__ << std::endl ;   
+        if(ret < 0) {
+            epOperation :: del(epFd, fd) ;
+            loopInfo :: delChl(fd, tmp) ;
+            close(fd) ;
             return -1 ;
         }
-        //返回０，将这个channel删除
         else {
-            return 0 ;
+            //从epoll中删除该套接字
+            ep->del(fd) ;
+            epOperation :: del(epFd, fd) ;
+            loopInfo::delChl(fd, tmp) ;
+            close(fd) ;
         }
     }
     return 1 ;
 }
 
+void channel :: delFd(int fd, map<int, shared_ptr<channel>>& tmp) {
+    auto ret = tmp.find(fd) ;
+    if(ret == tmp.end()) {
+        cout << "没找到套接字" << __LINE__ << "     " << __FILE__ << endl ;
+        return ;
+    }
+    tmp.erase(ret) ;
+}
 //执行写回调
 int channel :: handleWrite() {
     //写缓冲区
     char buf[SIZE] ;
     int j = 0 ;
     bzero(buf, sizeof(buf)) ;
-    int len = output.getWriteIndex() - output.getReadIndex() ;
+    int len = output.getSize() ;
     //文件长度小于4096
     int sum = 0 ;
     if(len < SIZE) {
@@ -104,9 +118,7 @@ int channel :: handleWrite() {
             return -1 ;
         }
         sum+= ret ;
-        //close(cliFd) ;
         input.bufferClear() ;
-        //返回１表示可以将连接关闭掉,同事将本channel从EventLoop中删除
         return  1;
     }
     int ret = 0 ;
@@ -141,8 +153,7 @@ int channel :: handleWrite() {
 }
 
 //执行读回调
-int channel :: handleRead() {
-    
+int channel :: handleRead(map<int, shared_ptr<channel>>&tmp) {
     //读数据
     int n = input.readBuffer(cliFd) ;
     if(n < 0) {
@@ -150,12 +161,16 @@ int channel :: handleRead() {
     }
     ///读到0字节数据表明对端已经关闭连接
     if(n == 0) {
+        cout << "该关闭了" << endl ;
         return 0 ;
     }
-
+    for(int i=0; i<input.getSize(); i++) {
+        cout << input[i] << "" ;
+    }
+    cout << endl ;
     //消息设置好后，调用用户回调函数处理    
     if(input.getCanProcess() == true) {  
-        readCallBack(this) ;
+        readCallBack(this, tmp) ;
     }
     return 1 ;
 }

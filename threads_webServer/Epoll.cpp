@@ -28,10 +28,17 @@ void epOperation :: change(int fd, int events) {
 
 void epOperation :: del(int fd) {
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
-        std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
+        std :: cout << __FILE__ << "   " << __LINE__ << "      " << strerror(errno)<< std :: endl ;
         return  ;
     }
     fds -- ;
+    cout << "删除成功！" << endl ;
+}
+void epOperation :: del(int epFd, int fd) {
+    if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
+        std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
+        return  ;
+    }
 }
 
 //将活跃的事件全加入到clList
@@ -72,9 +79,12 @@ int epOperation :: roundWait(loopInfo&loop, vector<shared_ptr<channel>>&actChl) 
     //同样收集活跃时间
     for(int i=0; i<ret; i++) {
         int fd = epFds[i].data.fd ;
-        shared_ptr<channel> chl = loop.search(fd) ;
+        auto ret = loop.search(fd) ;
+        if(ret == NULL) {
+            continue ;
+        }
+        shared_ptr<channel> chl = shared_ptr<channel>(new channel(*ret)) ;
         actChl.push_back(chl) ;
     }
-    loop.print() ;
     return ret ;
 }

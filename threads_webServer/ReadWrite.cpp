@@ -7,11 +7,13 @@ int readn(int fd, void *buf, int n) {
     int  nread = 0 ;
     while(nleft > 0){
         if((nread = read(fd, bufptr, nleft)) < 0){
-            if(errno == EINTR|errno == EWOULDBLOCK|errno==EAGAIN){ //遇到中断
+            if(errno == EWOULDBLOCK|errno==EAGAIN){ //遇到中断
+                std::cout <<"中断错误!" << std::endl ;
                 continue;
             }
-            else            // 其他错误
-                return -1;
+            else if(errno == EINTR)           // 其他错误
+                continue ;
+            else break ;
         }
         else if(nread == 0){ 
             break;
@@ -26,11 +28,16 @@ int writen(int fd, void *buf, int n){
     int nleft = n;
     char *bufptr = (char*)buf;
     int nwrite;
-
     while(nleft > 0){
         if((nwrite = write(fd, bufptr, nleft)) < 0){
-            if(errno == EINTR || errno == EAGAIN ||errno == EWOULDBLOCK)
-                continue;
+            //缓冲区写不了了
+            if(errno == EAGAIN ||errno == EWOULDBLOCK)
+                //返回已经写入的数据总数
+                return n-nleft ;
+            //屏蔽其他中断信号
+            if(errno == EINTR) {
+                continue ;
+            }
             else {
                 return -1;
             }

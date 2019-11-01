@@ -9,6 +9,7 @@
 #include"Channel.h"
 #include"ReadWrite.h"
 #include "Socket.h"
+#include "SendFile.h"
 #define DEFAULT_PATH "index.html"
 #define BUFLEN 65535 
 
@@ -44,7 +45,7 @@ public :
     int getRequest(channel* chl, string& tmp) ;
     int postRequest(string& tmp, channel* chl, string& bf) ;
     int isExist() ;
-    int requestHeader(channel* channel_) ;
+    int requestHeader(channel* channel_, map<int, shared_ptr<channel>>& mp) ;
     int requestBody(channel* channel_) ;
     int getMethod(string& line) ;
     int messageSend(const string& tmp, channel*chl) ;
@@ -74,5 +75,7 @@ private :
     //是get请求的话，就设置为1
     int flag ;
     string cgiArg ;
+    sendFile sss ;
+    int canDel ;
 };
 #endif

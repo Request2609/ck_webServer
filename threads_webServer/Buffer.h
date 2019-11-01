@@ -33,6 +33,7 @@ public :
     long getPostPos() { return contentLen ; }
     char operator[](int i) { return buffer[i] ;}
     int getSize() { return buffer.size(); }
+    void changeBuf(std::vector<char> s) { buffer = move(s); }
 private :
     //记录post请求的末尾数据长度
     long contentLen ;
