@@ -27,7 +27,8 @@ public :
     typedef std::function<void(channel* chl)> wakeCall ;
 public:
     channel() ;
-    ~channel() {}
+    ~channel() {
+    }
 public :
     bool operator==(channel& chl) ;
     int getWakeFd() { return wakeFd ; }
@@ -58,6 +59,7 @@ public :
     void setSock(std::shared_ptr<socketFd>sock) { this->sock = sock; }
     shared_ptr<epOperation> getEp() { return ep ; }
     void setEp(shared_ptr<epOperation> epo){ ep = epo ;}
+    void setEpFd(int efd) { epFd = efd ;}
     int updateChannel() ;
     //判断是否收到了一段消息完整的消息"\r\n"结束
     int handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) ;
@@ -71,6 +73,8 @@ public :
     void disableRead() { events &= ~EPOLLIN ; }
     void disableWrite() { events &= ~EPOLLOUT ; } 
     int getEvents() { return events ; }
+    void setId(int num) { id = num; }
+    int getId() { return id; }
     int sendMsg() ;
     int readMsg() ;
     void setLen(long len) { this->len= len ; }
@@ -79,6 +83,7 @@ public :
     Buffer* getWriteBuffer() { return  &output ;}
     static void delFd(int fd, map<int, shared_ptr<channel>>& tmp) ;
 private :
+    int id ;
     std ::shared_ptr<epOperation>ep ;
     long len ;
     //管理channel描述符对象的epoll句柄

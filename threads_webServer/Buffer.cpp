@@ -114,7 +114,6 @@ int Buffer :: readBuffer(int fd) {
         readIndex = 0;
         writeIndex = 0 ;
     }
-    
     return n ;
 }
 

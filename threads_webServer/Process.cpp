@@ -239,7 +239,6 @@ int process:: sendCgiResult(channel* chl, string res) {
 
 //获取请求头
 int process :: requestHeader(channel* chl, map<int, shared_ptr<channel>>& mp) {
-    cout <<"获取的数据" << endl ;
     canDel = 0 ;
     Buffer* bf =chl->getReadBuffer() ;
     //解析请求行

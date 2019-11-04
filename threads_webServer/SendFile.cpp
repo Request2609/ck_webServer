@@ -4,12 +4,12 @@ int sendFile :: sendInfo(channel* chl) {
     int ret = 0 ;
     int index= 0 ;
     string s = "" ;
-    char buf[4096] ;
+    char buf[SEND_SIZE] ;
     bzero(buf, sizeof(buf)) ;
     int cliFd = chl->getFd() ;
     Buffer* bf = chl->getWriteBuffer() ;
     int len = bf->getSize() ;
-    if(len < 4096) {
+    if(len <= SEND_SIZE) {
         for(int i=0; i<len; i++) {
             buf[index] = (*bf)[i] ;
             index ++ ;
@@ -25,20 +25,20 @@ int sendFile :: sendInfo(channel* chl) {
             bf->bufferClear() ;
             newBuffer(bf, index, s) ;
             setWrite(chl) ;
+            return 1 ;
         }
         if(ret < 0) {
             over(chl) ;
             cout << __LINE__ << "   " << __FILE__ << endl ;
             return -1 ;
         }
-        cout << "移除了fd" << cliFd<< endl ;
         over(chl) ;
         return 0 ;
     }
     int sum = 0 ;
     //数据长度大于4096字节
     for(int i=0; i<len; i++) {
-        if(index == 4096) {
+        if(index == SEND_SIZE) {
             buf[index]  = '\0' ;    
             //这里发送数据信息! 
             ret = writen(cliFd, buf, sizeof(buf)) ;
@@ -54,6 +54,7 @@ int sendFile :: sendInfo(channel* chl) {
             if(ret < 0) {
                 cout << __LINE__ << "    " << __FILE__ << endl ;
                 over(chl) ;
+                return -1 ;
             }
             sum+=index ;
             index = 0 ;
@@ -87,8 +88,9 @@ int sendFile :: sendInfo(channel* chl) {
 }
 
 void sendFile :: over(channel* chl) {
-   chl->getEp()->del(chl->getFd()) ;
-   cout << "从epollZhongqule " << endl ;
+   int fd = chl->getFd() ; 
+   chl->getEp()->del(fd) ;
+   close(fd) ;
 }
 
 void sendFile :: setWrite(channel* chl) {
@@ -109,7 +111,7 @@ int sendFile::newBuffer(Buffer* bf, long pos,  string& s) {
 }
 
 void sendFile::setBuf(Buffer* bf, const string& s) {
-    for(int i=0; i<s.size(); i++) {
+    for(int i=0; i<(int)s.size(); i++) {
         bf->append(s[i]) ;
     }
 }

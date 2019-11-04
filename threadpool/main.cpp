@@ -21,4 +21,5 @@ int main() {
     cin >> a ;
     //设置相应的int值
     prom.set_value(a) ;
-    t.join(
+    t.join() ;
+}

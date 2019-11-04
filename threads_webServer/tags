@@ -7,20 +7,20 @@
 ATOMIC	Channel.h	/^    ATOMIC= EPOLLONESHOT ,$/;"	e	enum:__anon1
 BACKLOG	Socket.h	14;"	d
 BUFFERSIZE	CgiConnect.h	/^const int BUFFERSIZE = 1024 ;$/;"	v
-BUFLEN	Process.h	13;"	d
+BUFLEN	Process.h	14;"	d
 Buffer	Buffer.cpp	/^Buffer :: Buffer():canProcess(0) {$/;"	f	class:Buffer
 Buffer	Buffer.cpp	/^Buffer :: Buffer(const char* buf) {$/;"	f	class:Buffer
 Buffer	Buffer.cpp	/^Buffer :: Buffer(std::string buf) {$/;"	f	class:Buffer
 Buffer	Buffer.h	/^class Buffer$/;"	c
 CC	Makefile	/^CC = g++$/;"	m
 CFLAGS	Makefile	/^CFLAGS = -lpthread -g -std=c++11 -w$/;"	m
-CGI	Process.h	16;"	d
+CGI	Process.h	17;"	d
 CONTENT_BUFF_LEN	Fcgi.h	/^        static const int CONTENT_BUFF_LEN = 1024;\/\/内容buffer的大小$/;"	m	class:FastCgi
 DEFAULT	Process.h	/^    GET = 1, POST, DEFAULT$/;"	e	enum:__anon9
-DEFAULT_PATH	Process.h	12;"	d
+DEFAULT_PATH	Process.h	13;"	d
 ERROR	Channel.h	/^    ERROR = EPOLLERR,$/;"	e	enum:__anon1
 ET	Channel.h	/^    ET = EPOLLET $/;"	e	enum:__anon1
-FASTCGI	Process.h	15;"	d
+FASTCGI	Process.h	16;"	d
 FASTCGI_H	FastCgi.h	2;"	d
 FCGI_	Fcgi.h	2;"	d
 FCGI_ABORT_REQUEST	FastCgi.h	31;"	d
@@ -70,9 +70,7 @@ PATH	Socket.h	15;"	d
 PORT	CgiConnect.h	9;"	d
 POST	Process.h	/^    GET = 1, POST, DEFAULT$/;"	e	enum:__anon9
 READ	Channel.h	/^    READ = EPOLLIN,$/;"	e	enum:__anon1
-SIZE	Channel.h	9;"	d
-SendFile	SendFile.h	/^    SendFile() {}$/;"	f	class:SendFile
-SendFile	SendFile.h	/^class SendFile {$/;"	c
+SIZE	Channel.h	10;"	d
 SrcFile	Makefile	/^SrcFile = $(wildcard *.cpp)$/;"	m
 TARGET	Makefile	/^TARGET = Server$/;"	m
 WRITE	Channel.h	/^    WRITE = EPOLLOUT,$/;"	e	enum:__anon1
@@ -87,10 +85,10 @@ _uREADWRITE_H_	ReadWrite.h	2;"	d
 acceptSocket	Socket.cpp	/^int socketFd :: acceptSocket() {$/;"	f	class:socketFd
 activeChannels	EventLoop.h	/^    std :: vector<channel> activeChannels;$/;"	m	class:eventLoop
 add	Epoll.cpp	/^void epOperation :: add(int fd, int events) {$/;"	f	class:epOperation
-add	EventLoop.h	/^    void add(int fd, shared_ptr<channel>chl) { $/;"	f	class:loopInfo
+add	EventLoop.h	/^    void add(int fd, shared_ptr<channel>chl) {$/;"	f	class:loopInfo
 addConnection	EventLoop.cpp	/^void eventLoop :: addConnection(connection* con) {$/;"	f	class:eventLoop
 addNewConnection	TcpServer.cpp	/^void tcpServer :: addNewConnection(connection* conn) {$/;"	f	class:tcpServer
-addQueue	EventLoop.cpp	/^void eventLoop :: addQueue(vector<pair<int, channel>>&ls, loopInfo&loop, shared_ptr<epOperation>ep) {$/;"	f	class:eventLoop
+addQueue	EventLoop.cpp	/^void eventLoop :: addQueue(vector<pair<int, channel>>&ls, $/;"	f	class:eventLoop
 addr	CgiConnect.cpp	/^struct sockaddr_in cgiConnect:: addr  ;$/;"	m	class:cgiConnect	typeref:struct:cgiConnect::	file:
 addr	CgiConnect.h	/^    static struct sockaddr_in addr ;$/;"	m	class:cgiConnect	typeref:struct:cgiConnect::sockaddr_in
 addr	TcpServer.h	/^    std::string addr ;$/;"	m	class:tcpServer
@@ -109,8 +107,9 @@ buffer	Buffer.h	/^    std::vector<char>buffer ;$/;"	m	class:Buffer
 buffer	Connection.h	/^    Buffer buffer ;$/;"	m	class:connection
 bufferClear	Buffer.cpp	/^void Buffer :: bufferClear() {$/;"	f	class:Buffer
 buildWakeFd	EventLoop.cpp	/^int loopInfo :: buildWakeFd() { $/;"	f	class:loopInfo
-callBack	Channel.h	/^    typedef std::function<void(channel* chl)> callBack ;$/;"	t	class:channel
-callBack	Connection.h	/^    typedef std :: function<void(channel* chl)> callBack ;$/;"	t	class:connection
+callBack	Channel.h	/^    typedef std::function<void(channel* chl, map<int, shared_ptr<channel>>&)> callBack ;$/;"	t	class:channel
+callBack	Connection.h	/^    typedef std :: function<void(channel*, std::map<int, std::shared_ptr<channel>>&)> callBack ;$/;"	t	class:connection
+canDel	Process.h	/^    int canDel ;$/;"	m	class:process
 canProcess	Buffer.h	/^    int canProcess = 0 ;$/;"	m	class:Buffer
 cgiArg	Process.h	/^    string cgiArg ;$/;"	m	class:process
 cgiConnect	CgiConnect.cpp	/^cgiConnect :: cgiConnect() {$/;"	f	class:cgiConnect
@@ -126,6 +125,7 @@ channel_	Connection.h	/^    std::shared_ptr<channel>channel_ ;$/;"	m	class:conne
 chl	EventLoop.h	/^    shared_ptr<channel>chl ;$/;"	m	class:loopInfo
 chlList	EventLoop.h	/^    map<int, shared_ptr<channel>>chlList ;$/;"	m	class:loopInfo
 clList	EventLoop.h	/^    channelMap clList ;$/;"	m	class:eventLoop
+clearChannel	EventLoop.cpp	/^void loopInfo::clearChannel(int fd) {$/;"	f	class:loopInfo
 clearCloseChannel	EventLoop.cpp	/^int eventLoop :: clearCloseChannel(std::vector<channel>&list_) {$/;"	f	class:eventLoop
 cliFd	Channel.h	/^    int cliFd ;$/;"	m	class:channel
 closeCallBack	Channel.h	/^    callBack closeCallBack ;$/;"	m	class:channel
@@ -151,8 +151,10 @@ createChannel	Connection.h	/^    void createChannel() {channel_ = std :: make_sh
 createListenFd	Connection.cpp	/^int connection :: createListenFd(int port) {$/;"	f	class:connection
 createListenFd	Connection.cpp	/^void connection :: createListenFd(socketFd* sock) {$/;"	f	class:connection
 createSock	Connection.h	/^    void createSock() { sock = std::make_shared<socketFd>(); }$/;"	f	class:connection
+del	Epoll.cpp	/^void epOperation :: del(int epFd, int fd) {$/;"	f	class:epOperation
 del	Epoll.cpp	/^void epOperation :: del(int fd) {$/;"	f	class:epOperation
-delChl	EventLoop.cpp	/^int loopInfo :: delChl(int fd) {$/;"	f	class:loopInfo
+delChl	EventLoop.cpp	/^int loopInfo :: delChl(int fd, map<int, shared_ptr<channel>>& tmp) {$/;"	f	class:loopInfo
+delFd	Channel.cpp	/^void channel :: delFd(int fd, map<int, shared_ptr<channel>>& tmp) {$/;"	f	class:channel
 disableRead	Channel.h	/^    void disableRead() { events &= ~EPOLLIN ; }$/;"	f	class:channel
 disableWrite	Channel.h	/^    void disableWrite() { events &= ~EPOLLOUT ; } $/;"	f	class:channel
 doAccept	Connection.cpp	/^int connection :: doAccept() {$/;"	f	class:connection
@@ -160,6 +162,7 @@ doPendingFunc	EventLoop.cpp	/^vector<pair<int, channel>> eventLoop :: doPendingF
 doPost	Process.cpp	/^int process :: doPost(string& info) {$/;"	f	class:process
 enableReading	Channel.h	/^    void enableReading() {  events|=EPOLLIN ;}$/;"	f	class:channel
 enableWriting	Channel.h	/^    void enableWriting() {  events|=EPOLLOUT ;}$/;"	f	class:channel
+ep	Channel.h	/^    std ::shared_ptr<epOperation>ep ;$/;"	m	class:channel
 ep	EventLoop.h	/^    shared_ptr<epOperation>ep ;$/;"	m	class:loopInfo
 epFd	Channel.h	/^    int epFd ;$/;"	m	class:channel
 epFd	Epoll.h	/^    int epFd ;$/;"	m	class:epOperation
@@ -183,17 +186,20 @@ future	ThreadPool.h	/^        auto commit(F&& f, Args&&... args)-> std :: future
 getAcceptSock	Socket.cpp	/^int socketFd :: getAcceptSock() {$/;"	f	class:socketFd
 getBindAddr	Socket.h	/^    int getBindAddr() { return isBindAddr ; }$/;"	f	class:socketFd
 getCanProcess	Buffer.h	/^    int getCanProcess() {return canProcess ;}$/;"	f	class:Buffer
+getChannel	Connection.cpp	/^void connection::getChannel(channel* chl) {$/;"	f	class:connection
 getChannel	Connection.h	/^    std::shared_ptr<channel>  getChannel() {$/;"	f	class:connection
 getChl	EventLoop.h	/^    shared_ptr<channel> getChl() { return chl ; }$/;"	f	class:loopInfo
 getContentLength	Process.cpp	/^int process :: getContentLength(string a, channel* chl) {$/;"	f	class:process
+getEp	Channel.h	/^    shared_ptr<epOperation> getEp() { return ep ; }$/;"	f	class:channel
 getEp	EventLoop.h	/^    shared_ptr<epOperation> getEp() { return ep ; }$/;"	f	class:loopInfo
-getEpFd	Channel.h	/^    int getEpFd() { return epFd ; }$/;"	f	class:channel
 getEpFd	Epoll.h	/^    int getEpFd() {return epFd ;}$/;"	f	class:epOperation
 getEvents	Channel.h	/^    int getEvents() { return events ; }$/;"	f	class:channel
 getFd	Channel.h	/^    int getFd() {$/;"	f	class:channel
 getFd	Socket.h	/^    int getFd() { return sockFd ; }$/;"	f	class:unixSocket
 getFileType	Process.cpp	/^string process :: getFileType() {$/;"	f	class:process
 getHtmlFromContent	Fcgi.cpp	/^void FastCgi::getHtmlFromContent(char *content)$/;"	f	class:FastCgi
+getId	Channel.h	/^    int getId() { return id; }$/;"	f	class:channel
+getId	EventLoop.h	/^    int getId() { return id ; }$/;"	f	class:loopInfo
 getLen	Channel.h	/^    long getLen() { return len ; }$/;"	f	class:channel
 getListenFd	EventLoop.h	/^    int getListenFd() { return servFd ; }$/;"	f	class:eventLoop
 getListenSock	Socket.cpp	/^int socketFd :: getListenSock() {$/;"	f	class:socketFd
@@ -216,8 +222,8 @@ getWriteFd	EventLoop.h	/^    int getWriteFd() { return wakeupFd[0]; }$/;"	f	clas
 getWriteIndex	Buffer.h	/^    int getWriteIndex() { return writeIndex ; }$/;"	f	class:Buffer
 handleAccept	Channel.cpp	/^int channel::handleAccept(int servFd) {$/;"	f	class:channel
 handleAccept	EventLoop.cpp	/^channel eventLoop :: handleAccept() {$/;"	f	class:eventLoop
-handleEvent	Channel.cpp	/^int channel :: handleEvent(int fd) {$/;"	f	class:channel
-handleRead	Channel.cpp	/^int channel :: handleRead() {$/;"	f	class:channel
+handleEvent	Channel.cpp	/^int channel :: handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) {    $/;"	f	class:channel
+handleRead	Channel.cpp	/^int channel :: handleRead(map<int, shared_ptr<channel>>&tmp) {$/;"	f	class:channel
 handleWrite	Channel.cpp	/^int channel :: handleWrite() {$/;"	f	class:channel
 hasData	Buffer.h	/^    int hasData ;$/;"	m	class:Buffer
 header	FastCgi.h	/^    FCGI_Header header;         \/\/webserver请求php-fpm的请求头$/;"	m	struct:__anon4
@@ -225,6 +231,9 @@ header	FastCgi.h	/^    FCGI_Header header;         \/\/结束头$/;"	m	struct:__
 header	FastCgi.h	/^    FCGI_Header header;$/;"	m	struct:__anon8
 http	Http.h	/^    http() {}$/;"	f	class:http
 http	Http.h	/^class http$/;"	c
+id	Channel.h	/^    int id ;$/;"	m	class:channel
+id	EventLoop.h	/^    int id ;$/;"	m	class:eventLoop
+id	EventLoop.h	/^    int id ;$/;"	m	class:loopInfo
 info	EventLoop.h	/^    vector<loopInfo> info ;$/;"	m	class:eventLoop
 input	Channel.h	/^    Buffer input ;$/;"	m	class:channel
 isBindAddr	Socket.h	/^    int isBindAddr = 0 ;$/;"	m	class:socketFd
@@ -237,6 +246,8 @@ loop	TcpServer.h	/^    eventLoop* loop ;$/;"	m	class:tcpServer
 loopInfo	EventLoop.h	/^    loopInfo() { $/;"	f	class:loopInfo
 loopInfo	EventLoop.h	/^class loopInfo {$/;"	c
 main	main.cpp	/^int main(int argc, char** argv) {$/;"	f
+main	test/1.cpp	/^int main() {$/;"	f
+main	test/22.cpp	/^int main()$/;"	f
 makeBeginRequestBody	Fcgi.cpp	/^FCGI_BeginRequestBody FastCgi::makeBeginRequestBody(int role,int keepConnection)$/;"	f	class:FastCgi
 makeHeader	Fcgi.cpp	/^FCGI_Header FastCgi::makeHeader(int type,int requestId,int contentLength,int paddingLength)$/;"	f	class:FastCgi
 makeNameValueBody	Fcgi.cpp	/^bool FastCgi::makeNameValueBody(std::string name,int nameLen,std::string value,int valueLen,$/;"	f	class:FastCgi
@@ -246,18 +257,20 @@ moveRead	Buffer.h	/^    void moveRead() { readIndex++ ; }$/;"	f	class:Buffer
 mute	EventLoop.h	/^    mutex mute ;$/;"	m	class:eventLoop
 muteLock	ThreadPool.h	/^    std :: mutex muteLock ;$/;"	m	class:threadPool
 name	Process.h	/^    char name[512] ;$/;"	m	struct:logBuf
-newBuffer	SendFile.cpp	/^int SendFile::newBuffer(Buffer* bf, long pos,  string& s) {$/;"	f	class:SendFile
+newBuffer	SendFile.cpp	/^int sendFile::newBuffer(Buffer* bf, long pos,  string& s) {$/;"	f	class:sendFile
 nfds	Epoll.h	/^    int nfds ;$/;"	m	class:epOperation
-onRead	main.cpp	/^void onRead(channel* chl) {$/;"	f
+onRead	main.cpp	/^void onRead(channel* chl, map<int, shared_ptr<channel>>&tmp) {$/;"	f
 operator ==	Channel.cpp	/^bool channel :: operator==(channel& chl) {$/;"	f	class:channel
 operator []	Buffer.h	/^    char operator[](int i) { return buffer[i] ;}$/;"	f	class:Buffer
 output	Channel.h	/^    Buffer output ;$/;"	m	class:channel
+over	SendFile.cpp	/^void sendFile :: over(channel* chl) {$/;"	f	class:sendFile
 paddingLength	FastCgi.h	/^    unsigned char paddingLength;        \/\/填充字节的长度$/;"	m	struct:__anon2
 password	Process.h	/^    char password[512] ;$/;"	m	struct:logBuf
 path_	Process.h	/^    char path_[1024] ;$/;"	m	struct:logBuf
 paths	Process.h	/^    string paths ;$/;"	m	class:process
 pool	EventLoop.h	/^    shared_ptr<threadPool>pool ;$/;"	m	class:eventLoop
 pool	TcpServer.h	/^    std :: shared_ptr<threadPool> pool ;$/;"	m	class:tcpServer
+pool1	EventLoop.h	/^    shared_ptr<threadPool>pool1 ;$/;"	m	class:eventLoop
 port	TcpServer.h	/^    int port ;$/;"	m	class:tcpServer
 post	Process.h	/^    string post ;$/;"	m	class:process
 postRequest	Process.cpp	/^int process :: postRequest(string& tmp, channel* chl, string& bf) {$/;"	f	class:process
@@ -265,9 +278,9 @@ print	Channel.h	/^    void print() { printf("hello world!\\n") ; }$/;"	f	class:c
 print	EventLoop.cpp	/^void loopInfo :: print() {$/;"	f	class:loopInfo
 print	TcpServer.h	/^    void print() {$/;"	f	class:tcpServer
 print	ThreadPool.h	/^    void print() { printf("hhhhh") ;}$/;"	f	class:threadPool
+pro	EventLoop.h	/^    vector<promise<int>>pro ;$/;"	m	class:eventLoop
 process	Process.h	/^    process():paths(""), method(-1), version(""), flag(0) {}$/;"	f	class:process
 process	Process.h	/^class process$/;"	c
-processArgGet	Process.cpp	/^int process :: processArgGet(string tmp, channel* chl) {$/;"	f	class:process
 processCgi	Process.cpp	/^string process :: processCgi() {$/;"	f	class:process
 protocolStatus	FastCgi.h	/^    unsigned char protocolStatus;   \/\/协议状态$/;"	m	struct:__anon5
 qChl	EventLoop.h	/^    map<int, channel> qChl ;$/;"	m	class:eventLoop
@@ -285,7 +298,7 @@ readMsg	Channel.cpp	/^int channel :: readMsg() {$/;"	f	class:channel
 readn	ReadWrite.cpp	/^int readn(int fd, void *buf, int n) {$/;"	f
 recvMsg	CgiConnect.cpp	/^string cgiConnect :: recvMsg() {$/;"	f	class:cgiConnect
 requestBody	Process.cpp	/^int process :: requestBody(channel* channel_) {$/;"	f	class:process
-requestHeader	Process.cpp	/^int process :: requestHeader(channel* chl) {$/;"	f	class:process
+requestHeader	Process.cpp	/^int process :: requestHeader(channel* chl, map<int, shared_ptr<channel>>& mp) {$/;"	f	class:process
 requestIdB0	FastCgi.h	/^    unsigned char requestIdB0;          $/;"	m	struct:__anon2
 requestIdB1	FastCgi.h	/^    unsigned char requestIdB1;          \/\/请求id$/;"	m	struct:__anon2
 requestId_	Fcgi.h	/^        int requestId_;  \/\/record里的请求ID$/;"	m	class:FastCgi
@@ -306,7 +319,9 @@ search	EventLoop.cpp	/^shared_ptr<channel> loopInfo :: search(int fd) { $/;"	f	c
 sendBuffer	Process.cpp	/^void process :: sendBuffer(channel* chl) {$/;"	f	class:process
 sendCgiResult	Process.cpp	/^int process:: sendCgiResult(channel* chl, string res) {$/;"	f	class:process
 sendEndRequestRecord	Fcgi.cpp	/^bool FastCgi::sendEndRequestRecord(void)$/;"	f	class:FastCgi
-sendInfo	SendFile.cpp	/^int SendFile :: sendInfo(channel* chl) {$/;"	f	class:SendFile
+sendFile	SendFile.h	/^    sendFile() {}$/;"	f	class:sendFile
+sendFile	SendFile.h	/^class sendFile {$/;"	c
+sendInfo	SendFile.cpp	/^int sendFile :: sendInfo(channel* chl) {$/;"	f	class:sendFile
 sendMsg	CgiConnect.cpp	/^int cgiConnect :: sendMsg(const char*  buffer) {$/;"	f	class:cgiConnect
 sendMsg	Channel.cpp	/^int channel :: sendMsg() {$/;"	f	class:channel
 sendNotFind	Process.cpp	/^void process :: sendNotFind(channel* chl) {$/;"	f	class:process
@@ -319,7 +334,7 @@ setAddr	Socket.cpp	/^int socketFd :: setAddr(const char* ip, const char* port) {
 setAddr	Socket.cpp	/^int socketFd :: setAddr(const char* port) {$/;"	f	class:socketFd
 setAddr	Socket.cpp	/^int socketFd :: setAddr(int port) {$/;"	f	class:socketFd
 setBindAddr	Socket.h	/^    void setBindAddr(int i) { isBindAddr = i; }$/;"	f	class:socketFd
-setBuf	SendFile.cpp	/^void SendFile::setBuf(Buffer* bf, const string& s) {$/;"	f	class:SendFile
+setBuf	SendFile.cpp	/^void sendFile::setBuf(Buffer* bf, const string& s) {$/;"	f	class:sendFile
 setCallBackToChannel	Connection.cpp	/^void connection :: setCallBackToChannel(channel* channel_) {$/;"	f	class:connection
 setCanProcess	Buffer.h	/^    void setCanProcess(int flag) { this->canProcess = flag ; }$/;"	f	class:Buffer
 setChannel	EventLoop.cpp	/^int loopInfo :: setChannel() {$/;"	f	class:loopInfo
@@ -327,9 +342,11 @@ setCloseCallBack	Channel.h	/^    void setCloseCallBack(callBack& cb) {$/;"	f	cla
 setCloseCallBack	Connection.cpp	/^void connection :: setCloseCallBack(callBack cb) {$/;"	f	class:connection
 setConf	Connection.cpp	/^void connection :: setConf(std::string ip, std::string port) {$/;"	f	class:connection
 setConnFd	Socket.h	/^    void setConnFd(int fd) { connFd = fd ; }$/;"	f	class:socketFd
-setEpFd	Channel.h	/^    void setEpFd(int efd){epFd = efd ;}$/;"	f	class:channel
+setEp	Channel.h	/^    void setEp(shared_ptr<epOperation> epo){ ep = epo ;}$/;"	f	class:channel
 setEvents	Channel.h	/^    void setEvents(int event) { events = event ;}$/;"	f	class:channel
 setFd	Channel.h	/^    void setFd(int& fd) { cliFd = fd ; }   $/;"	f	class:channel
+setId	Channel.h	/^    void setId(int num) { id = num; }$/;"	f	class:channel
+setId	EventLoop.h	/^    void setId(int num) { id = num; } $/;"	f	class:loopInfo
 setLen	Channel.h	/^    void setLen(long len) { this->len= len ; }$/;"	f	class:channel
 setLinger	Socket.cpp	/^int socketFd :: setLinger(int fd) {$/;"	f	class:socketFd
 setListenFd	Socket.h	/^    void setListenFd(int fd) { sockFd = fd ; }$/;"	f	class:socketFd
@@ -345,9 +362,11 @@ setSock	Channel.h	/^    void setSock(std::shared_ptr<socketFd>sock) { this->sock
 setThreadId	EventLoop.h	/^    void setThreadId(long id) { threadId = id ; }$/;"	f	class:loopInfo
 setTimeoutCallBack	Channel.h	/^    void setTimeoutCallBack(callBack& cb) {$/;"	f	class:channel
 setTimeoutCallBack	Connection.cpp	/^void connection :: setTimeoutCallBack(callBack cb) {$/;"	f	class:connection
-setWakeCb	Connection.h	/^    void setWakeCb(callBack cb) { wakeCb = move(cb) ; }$/;"	f	class:connection
+setWakeCall	Channel.h	/^    void setWakeCall(wakeCall cb) {$/;"	f	class:channel
+setWakeCb	Connection.h	/^    void setWakeCb(wakeCallBack cb) { wakeCb = move(cb) ; }$/;"	f	class:connection
 setWakeChlCall	Connection.cpp	/^void connection :: setWakeChlCall(shared_ptr<channel>&chl) { $/;"	f	class:connection
 setWakeFd	Channel.h	/^    void setWakeFd(int fd) { wakeFd = fd ; }$/;"	f	class:channel
+setWrite	SendFile.cpp	/^void sendFile :: setWrite(channel* chl) {$/;"	f	class:sendFile
 setWriteCallBack	Channel.h	/^    void setWriteCallBack(callBack& cb) {$/;"	f	class:channel
 setWriteCallBack	Connection.cpp	/^void connection :: setWriteCallBack(callBack cb) {$/;"	f	class:connection
 setnoBlocking	Connection.h	/^    void setnoBlocking(int fd_) {sock->setNoBlocking(fd_) ;}$/;"	f	class:connection
@@ -368,6 +387,7 @@ socketFd	Socket.cpp	/^socketFd :: socketFd(int port) {$/;"	f	class:socketFd
 socketFd	Socket.h	/^class socketFd$/;"	c
 sockfd_	Fcgi.h	/^        int sockfd_;     \/\/与php-fpm建立的sockfd$/;"	m	class:FastCgi
 spareThreadNums	ThreadPool.h	/^    std :: atomic<int> spareThreadNums ;$/;"	m	class:threadPool
+sss	Process.h	/^    sendFile sss ;$/;"	m	class:process
 start	TcpServer.cpp	/^void tcpServer :: start() {$/;"	f	class:tcpServer
 startConnect	Fcgi.cpp	/^void FastCgi::startConnect(void)$/;"	f	class:FastCgi
 startListen	Socket.cpp	/^int socketFd :: startListen() {$/;"	f	class:socketFd
@@ -396,7 +416,10 @@ version	FastCgi.h	/^    unsigned char version;              \/\/版本$/;"	m	str
 version	Process.h	/^    char version[1024] ;$/;"	m	struct:logBuf
 version	Process.h	/^    string version ;$/;"	m	class:process
 wait	Epoll.cpp	/^int epOperation :: wait(eventLoop* loop, int64_t timeout) {$/;"	f	class:epOperation
-wakeCb	Connection.h	/^    callBack wakeCb ;$/;"	m	class:connection
+wakeCall	Channel.h	/^    typedef std::function<void(channel* chl)> wakeCall ;$/;"	t	class:channel
+wakeCallBack	Connection.h	/^    typedef std :: function<void(channel*)> wakeCallBack ;$/;"	t	class:connection
+wakeCb	Channel.h	/^    wakeCall wakeCb ;$/;"	m	class:channel
+wakeCb	Connection.h	/^    wakeCallBack wakeCb ;$/;"	m	class:connection
 wakeCb	EventLoop.cpp	/^void loopInfo :: wakeCb(channel* chl) {$/;"	f	class:loopInfo
 wakeCb	main.cpp	/^void wakeCb(channel* chl) {$/;"	f
 wakeFd	Channel.h	/^    int wakeFd ;$/;"	m	class:channel
@@ -409,15 +432,15 @@ writeIndex	Buffer.h	/^    int writeIndex = 0;$/;"	m	class:Buffer
 writen	ReadWrite.cpp	/^int writen(int fd, void *buf, int n){$/;"	f
 ~Buffer	Buffer.h	/^    ~Buffer() {}$/;"	f	class:Buffer
 ~FastCgi	Fcgi.cpp	/^FastCgi::~FastCgi()$/;"	f	class:FastCgi
-~SendFile	SendFile.h	/^    ~SendFile() {}$/;"	f	class:SendFile
 ~cgiConnect	CgiConnect.h	/^    ~cgiConnect() {close(sockFd) ;}$/;"	f	class:cgiConnect
-~channel	Channel.h	/^    ~channel() {}$/;"	f	class:channel
+~channel	Channel.h	/^    ~channel() {$/;"	f	class:channel
 ~connection	Connection.cpp	/^connection :: ~connection() {$/;"	f	class:connection
 ~epOperation	Epoll.h	/^    ~epOperation() { close(epFd) ; }$/;"	f	class:epOperation
 ~eventLoop	EventLoop.cpp	/^eventLoop:: ~eventLoop() {$/;"	f	class:eventLoop
 ~http	Http.h	/^    ~http() {}$/;"	f	class:http
 ~loopInfo	EventLoop.h	/^    ~loopInfo() {$/;"	f	class:loopInfo
 ~process	Process.h	/^    ~process() {}$/;"	f	class:process
+~sendFile	SendFile.h	/^    ~sendFile() {}$/;"	f	class:sendFile
 ~socketFd	Socket.h	/^    ~socketFd() {$/;"	f	class:socketFd
 ~tcpServer	TcpServer.h	/^    ~tcpServer() {}$/;"	f	class:tcpServer
 ~threadPool	ThreadPool.cpp	/^threadPool :: ~threadPool() {$/;"	f	class:threadPool

@@ -4,7 +4,7 @@
 #include "Buffer.h"
 #include "Channel.h"
 #include "Epoll.h"
-
+#define SEND_SIZE 4096
 using namespace std ;
 
 class sendFile {

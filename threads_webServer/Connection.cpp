@@ -11,6 +11,9 @@ connection :: connection() {
     buffer.bufferClear() ;
 }
 
+void connection::getChannel(channel* chl) {
+    *chl = *channel_ ;
+}
 
 void connection :: setConf(std::string ip, std::string port) {
     readCallBack = nullptr ;
@@ -48,14 +51,26 @@ void connection :: setWakeChlCall(shared_ptr<channel>&chl) {
 
 //给channel设置回调
 void connection :: setCallBackToChannel(channel* channel_) {
-    if(readCallBack != nullptr)
-    channel_->setReadCallBack(readCallBack) ;
-    if(writeCallBack != nullptr)
-    channel_->setWriteCallBack(writeCallBack) ;
-    if(timeoutCallBack != nullptr)
-    channel_->setTimeoutCallBack(timeoutCallBack) ;
-    if(closeCallBack != nullptr)
-    channel_->setCloseCallBack(closeCallBack) ;
+    int flag = 0 ;
+    if(readCallBack != nullptr) {
+        flag = 1 ;
+        channel_->setReadCallBack(readCallBack) ;
+    }
+    if(writeCallBack != nullptr) {
+        flag = 2 ;
+        channel_->setWriteCallBack(writeCallBack) ;
+    }
+    if(timeoutCallBack != nullptr) {
+        flag = 3 ;
+        channel_->setTimeoutCallBack(timeoutCallBack) ;
+    }
+    if(closeCallBack != nullptr) {
+        flag = 4  ;
+        channel_->setCloseCallBack(closeCallBack) ;
+    }
+    if(flag != 0) {
+        cout << flag << endl ;
+    }
 }
 
 //关闭连接

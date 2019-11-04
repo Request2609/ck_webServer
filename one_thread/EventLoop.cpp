@@ -72,7 +72,6 @@ int eventLoop :: fillChannelList(channel* chl) {
 //值有监听套接字拥有connection
 //向loop中添加新的conn.将这个连接加入到epoll中
 void eventLoop :: addConnection(connection* con) {
-    
     conn = con ;
     std::shared_ptr<channel> channel_ = conn->getChannel() ;
     int fd = channel_->getFd() ;

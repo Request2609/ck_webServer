@@ -4,9 +4,9 @@
 using namespace std ;
 
 std :: promise<int>prom ;
-
+std :: future<int> fut ;
 void print() {
-    std :: future<int>fut = prom.get_future() ;
+    fut = prom.get_future() ;
     int x = fut.get() ;
     cout << "value:" << x<< endl ;
 }

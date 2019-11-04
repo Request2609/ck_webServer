@@ -15,6 +15,8 @@ int channel::handleAccept(int servFd) {
     sock->setListenFd(servFd) ;
     //获取新客户端连接
     cliFd = sock->acceptSocket() ;
+    sock->setNoBlocking(cliFd) ;
+    setEvents(READ) ;
     //设置用户回调
     return cliFd ;
 }
@@ -47,15 +49,14 @@ bool channel :: operator==(channel& chl) {
     return 0 ;
 }
 
-int channel :: handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) {
+int channel :: handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) {    
     //将唤醒描述符中的信号读出来
-    if(fd == cliFd) {
+    if(fd == wakeFd) {
         int ret ;
         read(fd, &ret, sizeof(ret)) ;
         return 1;
     }
-
-    if(events&EPOLLIN) { 
+    if(events&EPOLLIN) {
         int n = handleRead(tmp) ;
         if(n < 0) {
             return -1;
@@ -70,20 +71,8 @@ int channel :: handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) {
 
     if(events&EPOLLOUT) {
         //发送数据
-        int ret = handleWrite() ;
-        if(ret < 0) {
-            epOperation :: del(epFd, fd) ;
-            loopInfo :: delChl(fd, tmp) ;
-            close(fd) ;
-            return -1 ;
-        }
-        else {
-            //从epoll中删除该套接字
-            ep->del(fd) ;
-            epOperation :: del(epFd, fd) ;
-            loopInfo::delChl(fd, tmp) ;
-            close(fd) ;
-        }
+        handleWrite() ;
+        return 0 ;
     }
     return 1 ;
 }
@@ -149,7 +138,7 @@ int channel :: handleWrite() {
         sum+= ret ;
     }
     input.bufferClear() ;
-    return 1 ;
+    return 0 ;
 }
 
 //执行读回调
@@ -161,13 +150,8 @@ int channel :: handleRead(map<int, shared_ptr<channel>>&tmp) {
     }
     ///读到0字节数据表明对端已经关闭连接
     if(n == 0) {
-        cout << "该关闭了" << endl ;
         return 0 ;
     }
-    for(int i=0; i<input.getSize(); i++) {
-        cout << input[i] << "" ;
-    }
-    cout << endl ;
     //消息设置好后，调用用户回调函数处理    
     if(input.getCanProcess() == true) {  
         readCallBack(this, tmp) ;

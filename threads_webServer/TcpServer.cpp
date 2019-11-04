@@ -39,7 +39,7 @@ void tcpServer :: addNewConnection(connection* conn) {
 }
 //开始
 void tcpServer :: start() {
-    //将新连接加入到loop中，暂时单线程，可以开线程跑
-    loop->addConnection(conn) ;
+    //将新连接加入到loop中，暂时单线程，可以开线程
+    loop->addConnection(conn) ; 
 }
 

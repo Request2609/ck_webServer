@@ -34,6 +34,7 @@ public :
     }
     shared_ptr<channel> getChl() { return chl ; }
     int addConnect(channel* chl) ;
+    void setId(int num) { id = num; } 
     int setChannel() ;
     shared_ptr<channel>search(int fd) ;
     shared_ptr<epOperation> getEp() { return ep ; }
@@ -46,7 +47,9 @@ public :
     //返回线程id
     static int delChl(int fd, map<int, shared_ptr<channel>>& tmp) ;
     void setThreadId(long id) { threadId = id ; }
+    void clearChannel(int fd) ;
     int setNoBlock(int fd) ;
+    int getId() { return id ; }
 private :
     map<int, shared_ptr<channel>>chlList ;
     shared_ptr<channel>chl ;
@@ -56,6 +59,7 @@ private :
     int wakeupFd[2] ;
     //线程id
     long threadId ; 
+    int id ;
     //该loop管理的事件集合
 } ;
 
@@ -82,7 +86,9 @@ public :
     void addQueue(vector<pair<int, channel>>&ls, loopInfo&loop, shared_ptr<epOperation>ep) ;
     int getNum() ;
 private :
+    vector<promise<int>>pro ;
     shared_ptr<threadPool>pool ;
+    shared_ptr<threadPool>pool1 ;
     int threadNums ;
     mutex mute ;
     //线程
@@ -91,7 +97,6 @@ private :
     vector<loopInfo> info ;
     int servFd  = -1 ;
     connection* conn ;
-    //reactor in thread
     //一个eventLoop一个epoll
     std :: shared_ptr<epOperation> epPtr ;
     //活跃事件列表
@@ -102,5 +107,6 @@ private :
     bool quit ;
     //设置套接字channel键值对
     channelMap clList ;
+    int id ;
 };
 

@@ -5,7 +5,7 @@ void epOperation :: add(int fd, int events) {
     ev.data.fd = fd ;
     ev.events = events ;
     if(epoll_ctl(epFd, EPOLL_CTL_ADD, fd, &ev) < 0) {
-        std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
+        std :: cout << __FILE__ << "   " << __LINE__ << "   " << strerror(errno)<< std :: endl ;
         return ;
     }
 
@@ -32,7 +32,6 @@ void epOperation :: del(int fd) {
         return  ;
     }
     fds -- ;
-    cout << "删除成功！" << endl ;
 }
 void epOperation :: del(int epFd, int fd) {
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
@@ -62,6 +61,7 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout) {
         if(fd == listenFd) {
             //接收并注册该连接
             channel ch = loop->handleAccept() ;
+            //ch.setEvents(READ) ;
             loop->fillChannelList(ch) ;
         }
     }

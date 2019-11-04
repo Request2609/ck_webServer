@@ -21,6 +21,7 @@ public :
     typedef std :: function<void(channel*, std::map<int, std::shared_ptr<channel>>&)> callBack ;
     typedef std :: function<void(channel*)> wakeCallBack ;
 public :
+    void getChannel(channel* chl) ;
     void createListenFd(socketFd* sock) ;
     void createChannel() {channel_ = std :: make_shared<channel>() ;}
     void createSock() { sock = std::make_shared<socketFd>(); }
