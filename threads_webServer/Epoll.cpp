@@ -48,7 +48,6 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout) {
     try{
         eventNum = epoll_wait(epFd, epFd_, 200, timeout) ;
     }catch(exception e) {
-        cout << e.what() ;
     }
     if(eventNum < 0) {
         cout << eventNum << "           错误：" << strerror(errno) << endl ;

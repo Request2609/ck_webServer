@@ -85,10 +85,18 @@ public :
     int queueInLoop(channel chl, int& num) ;
     void addQueue(vector<pair<int, channel>>&ls, loopInfo&loop, shared_ptr<epOperation>ep) ;
     int getNum() ;
+    bool cas(int* p, const int old_, const int new_) {
+        if(*p != old_) {
+            return false ;
+        } 
+        *p = move(new_) ;
+        return true ;
+    }
+
 private :
-    vector<promise<int>>pro ;
+    int* p;
+    int flag ;
     shared_ptr<threadPool>pool ;
-    shared_ptr<threadPool>pool1 ;
     int threadNums ;
     mutex mute ;
     //线程
