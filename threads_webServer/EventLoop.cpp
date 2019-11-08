@@ -200,7 +200,8 @@ vector<pair<int, channel>> eventLoop :: doPendingFunc(shared_ptr<channel> chl) {
      //   future<int>fut = pro[chl->getId()].get_future() ;
       //  fut.get() ;
         //p.first为channel对应的ｆｄ
-        while(!cas(p, 1, 0)) ;
+        //while(!cas(p, 1, 0)) ;
+        lock_guard<mutex>lk(mute) ;
         for(pair<int, channel>p : qChl) {
             //当唤醒的fd与channel对应的fd相等的时候
             if(p.second.getWakeFd() == rFd) {
@@ -211,7 +212,7 @@ vector<pair<int, channel>> eventLoop :: doPendingFunc(shared_ptr<channel> chl) {
         for(pair<int, channel>p : ls) {
             qChl.erase(qChl.find(p.first)) ;
         }
-        while(!cas(p, 0, 1)) ;
+        //while(!cas(p, 0, 1)) ;
     }
     return ls ;
 }
@@ -285,8 +286,8 @@ int eventLoop :: queueInLoop(channel chl, int& num) {
     //向队列中插入元素
     //通知线程接收新连接
     {
-        //lock_guard<mutex>lk(mute) ;
-        while(!cas(p, 1, 0)) ;
+        lock_guard<mutex>lk(mute) ;
+        //while(!cas(p, 1, 0)) ;
         std::pair<std::map<int, channel>::iterator,bool > ret ;
         try{
         chl.setWakeFd(info[num].getReadFd()) ;
@@ -296,7 +297,7 @@ int eventLoop :: queueInLoop(channel chl, int& num) {
         }
     }
     wakeup(info[num].getWriteFd()) ;
-    while(!cas(p, 0, 1)) ;
+   // while(!cas(p, 0, 1)) ;
     //设置信号
     return 1 ;
 }   

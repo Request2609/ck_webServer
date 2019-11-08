@@ -10,7 +10,7 @@
 #include"ReadWrite.h"
 #include "Socket.h"
 #include "SendFile.h"
-#define DEFAULT_PATH "index.html"
+#define DEFAULT_PATH "Apache.html"
 #define BUFLEN 65535 
 
 #define FASTCGI 1
