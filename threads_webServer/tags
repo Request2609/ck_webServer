@@ -87,6 +87,7 @@ acceptSocket	Socket.cpp	/^int socketFd :: acceptSocket() {$/;"	f	class:socketFd
 activeChannels	EventLoop.h	/^    std :: vector<channel> activeChannels;$/;"	m	class:eventLoop
 add	Epoll.cpp	/^void epOperation :: add(int fd, int events) {$/;"	f	class:epOperation
 add	EventLoop.h	/^    void add(int fd, shared_ptr<channel>chl) {$/;"	f	class:loopInfo
+addClList	EventLoop.cpp	/^void eventLoop :: addClList(int fd, channel& channel_) {$/;"	f	class:eventLoop
 addConnection	EventLoop.cpp	/^void eventLoop :: addConnection(connection* con) {$/;"	f	class:eventLoop
 addNewConnection	TcpServer.cpp	/^void tcpServer :: addNewConnection(connection* conn) {$/;"	f	class:tcpServer
 addQueue	EventLoop.cpp	/^void eventLoop :: addQueue(vector<pair<int, channel>>&ls, $/;"	f	class:eventLoop
@@ -145,6 +146,7 @@ connection	Connection.h	/^class connection :$/;"	c
 contentLen	Buffer.h	/^    long contentLen ;$/;"	m	class:Buffer
 contentLengthB0	FastCgi.h	/^    unsigned char contentLengthB0;$/;"	m	struct:__anon2
 contentLengthB1	FastCgi.h	/^    unsigned char contentLengthB1;      \/\/内容长度$/;"	m	struct:__anon2
+copyClList	EventLoop.cpp	/^void eventLoop :: copyClList(map<int, shared_ptr<channel>>&ls) {$/;"	f	class:eventLoop
 count	ThreadPool.cpp	/^int threadPool :: count() {$/;"	f	class:threadPool
 create	TcpServer.cpp	/^void tcpServer :: create(eventLoop* loop) {$/;"	f	class:tcpServer
 create	TcpServer.cpp	/^void tcpServer :: create(eventLoop* loop, std::string  port) {$/;"	f	class:tcpServer
@@ -160,7 +162,7 @@ delFd	Channel.cpp	/^void channel :: delFd(int fd, map<int, shared_ptr<channel>>&
 disableRead	Channel.h	/^    void disableRead() { events &= ~EPOLLIN ; }$/;"	f	class:channel
 disableWrite	Channel.h	/^    void disableWrite() { events &= ~EPOLLOUT ; } $/;"	f	class:channel
 doAccept	Connection.cpp	/^int connection :: doAccept() {$/;"	f	class:connection
-doPendingFunc	EventLoop.cpp	/^vector<pair<int, channel>> eventLoop :: doPendingFunc(shared_ptr<channel> chl) {$/;"	f	class:eventLoop
+doPendingFunc	EventLoop.cpp	/^vector<pair<int, channel>> eventLoop :: doPendingFunc(int& num) {$/;"	f	class:eventLoop
 doPost	Process.cpp	/^int process :: doPost(string& info) {$/;"	f	class:process
 enableReading	Channel.h	/^    void enableReading() {  events|=EPOLLIN ;}$/;"	f	class:channel
 enableWriting	Channel.h	/^    void enableWriting() {  events|=EPOLLOUT ;}$/;"	f	class:channel
@@ -256,6 +258,7 @@ main	test/pro.cpp	/^int main()$/;"	f
 makeBeginRequestBody	Fcgi.cpp	/^FCGI_BeginRequestBody FastCgi::makeBeginRequestBody(int role,int keepConnection)$/;"	f	class:FastCgi
 makeHeader	Fcgi.cpp	/^FCGI_Header FastCgi::makeHeader(int type,int requestId,int contentLength,int paddingLength)$/;"	f	class:FastCgi
 makeNameValueBody	Fcgi.cpp	/^bool FastCgi::makeNameValueBody(std::string name,int nameLen,std::string value,int valueLen,$/;"	f	class:FastCgi
+many	EventLoop.h	/^    int many ;$/;"	m	class:eventLoop
 messageSend	Process.cpp	/^int process :: messageSend(const string& tmp, channel* chl) {$/;"	f	class:process
 method	Process.h	/^    int method ;$/;"	m	class:process
 moveRead	Buffer.h	/^    void moveRead() { readIndex++ ; }$/;"	f	class:Buffer
@@ -290,6 +293,7 @@ processCgi	Process.cpp	/^string process :: processCgi() {$/;"	f	class:process
 protocolStatus	FastCgi.h	/^    unsigned char protocolStatus;   \/\/协议状态$/;"	m	struct:__anon5
 qChl	EventLoop.h	/^    map<int, channel> qChl ;$/;"	m	class:eventLoop
 queueInLoop	EventLoop.cpp	/^int eventLoop :: queueInLoop(channel chl, int& num) {$/;"	f	class:eventLoop
+queues	EventLoop.h	/^    vector<queue<channel>> queues ;$/;"	m	class:eventLoop
 quit	EventLoop.h	/^    bool quit ;$/;"	m	class:eventLoop
 readBuffer	Buffer.cpp	/^int Buffer :: readBuffer(int fd) {$/;"	f	class:Buffer
 readBuffer	Buffer.cpp	/^std :: string Buffer :: readBuffer(int start, int end) {$/;"	f	class:Buffer
@@ -421,7 +425,7 @@ updateChannel	Channel.cpp	/^int channel :: updateChannel() {$/;"	f	class:channel
 version	FastCgi.h	/^    unsigned char version;              \/\/版本$/;"	m	struct:__anon2
 version	Process.h	/^    char version[1024] ;$/;"	m	struct:logBuf
 version	Process.h	/^    string version ;$/;"	m	class:process
-wait	Epoll.cpp	/^int epOperation :: wait(eventLoop* loop, int64_t timeout) {$/;"	f	class:epOperation
+wait	Epoll.cpp	/^int epOperation :: wait(eventLoop* loop, const int& st) {$/;"	f	class:epOperation
 wakeCall	Channel.h	/^    typedef std::function<void(channel* chl)> wakeCall ;$/;"	t	class:channel
 wakeCallBack	Connection.h	/^    typedef std :: function<void(channel*)> wakeCallBack ;$/;"	t	class:connection
 wakeCb	Channel.h	/^    wakeCall wakeCb ;$/;"	m	class:channel

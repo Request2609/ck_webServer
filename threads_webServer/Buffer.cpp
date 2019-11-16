@@ -77,6 +77,7 @@ int Buffer :: readBuffer(int fd) {
     char buffer_[1024] ;
     //接收消息
     int n ;
+    std::cout <<"读取描述符中的数据:" <<  fd << std :: endl ;
     if(((n = read(fd, buffer_, sizeof(buffer_))) < 0) && errno != EINTR && errno != 104) {
         std :: cout << __FILE__ << "    " << __LINE__ << "   "<< strerror(errno)<< std :: endl ;
         return -1 ;

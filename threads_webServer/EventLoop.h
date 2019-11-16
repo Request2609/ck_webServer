@@ -71,11 +71,13 @@ public:
     ~eventLoop() ;
 public :
     int wakeup(int fd) ;
-    vector<pair<int, channel>> doPendingFunc(shared_ptr<channel>chl) ;
+    vector<pair<int, channel>> doPendingFunc(int& num) ;
     void runThread() ;
     channel* search(int fd) ;
     int getListenFd() { return servFd ; }
     void loop() ;
+    void closeConnect(vector<channel>&chl, loopInfo& loop) ;
+    int readQueue(vector<pair<int, channel>>&, loopInfo& loop) ;
     void addConnection(connection* con) ;
     void addClList(int fd, channel& channel_) ;
     int fillChannelList(channel chl) ;
@@ -85,15 +87,19 @@ public :
     int queueInLoop(channel chl, int& num) ;
     void addQueue(vector<pair<int, channel>>&ls, loopInfo&loop, shared_ptr<epOperation>ep) ;
     int getNum() ;
+
+    void copyClList(map<int, shared_ptr<channel>>&) ;
+
     bool cas(int* p, const int old_, const int new_) {
         if(*p != old_) {
             return false ;
-        } 
+        }
         *p = move(new_) ;
         return true ;
     }
 
 private :
+    int many ;
     int* p;
     int flag ;
     shared_ptr<threadPool>pool ;
@@ -110,6 +116,8 @@ private :
     //活跃事件列表
     std :: vector<channel> activeChannels;
     map<int, channel> qChl ;
+
+    vector<queue<channel>> queues ;
     //该eventLoop对应的监听套接字封装
     //退出标志
     bool quit ;

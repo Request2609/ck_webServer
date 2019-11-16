@@ -68,9 +68,6 @@ void connection :: setCallBackToChannel(channel* channel_) {
         flag = 4  ;
         channel_->setCloseCallBack(closeCallBack) ;
     }
-    if(flag != 0) {
-        cout << flag << endl ;
-    }
 }
 
 //关闭连接
