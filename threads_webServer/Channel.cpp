@@ -62,7 +62,6 @@ int channel :: handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) {
             return -1;
         }
         if(n == 0) {
-            cout << "关闭链接,,,,,,,," << endl ;
             return 0 ;
         }
     }
@@ -154,5 +153,5 @@ int channel :: handleRead(map<int, shared_ptr<channel>>&tmp) {
     if(input.getCanProcess() == true) {  
         readCallBack(this, tmp) ;
     }
-    return 0 ;
+    return 1;
 }

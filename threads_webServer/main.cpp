@@ -21,7 +21,6 @@ void wakeCb(channel* chl) {
 
 
 void onRead(channel* chl, map<int, shared_ptr<channel>>&tmp) {
-    cout << "事件" << endl ;
     //将信息获取完成，再解析
     //解析请求头
     process pro ;

@@ -15,6 +15,10 @@ eventLoop :: eventLoop() {
         queue<channel>ls ;
         queues.push_back(ls) ;
     }
+
+    for(int i=0; i<threadNums; i++) {
+        muteLst.push_back(shared_ptr<mutex>(new mutex)) ;
+    }
 }
 
 eventLoop:: ~eventLoop() {
@@ -65,7 +69,6 @@ void eventLoop :: runThread() {
         }
         pool->commit(func, infos, infos.getChl(), infos.getEp()) ;
     }
-    
 }
 
 //唤醒某个线程
@@ -150,11 +153,11 @@ void eventLoop :: round(loopInfo loop, shared_ptr<channel>chl, shared_ptr<epOper
     vector<shared_ptr<channel>> closeLst ;
     //将wakeFd加入到epoll中
     while(!stop) {
+    
         int ret = ep->roundWait(loop, actChl) ;    
         if(ret < 0) {
             stop = true  ;
         }
-        cout << actChl.size() << endl ;
         for(shared_ptr<channel> chl : actChl) {
             if(chl == nullptr) {
                 break ;
@@ -172,7 +175,6 @@ void eventLoop :: round(loopInfo loop, shared_ptr<channel>chl, shared_ptr<epOper
                 }/*
                 int len = ls.size() ;
                 for(int i=0; i<len; i++) {
-                    cout << "处理队列的事件" << endl ;
                     int ret = ls[i].second.handleEvent(fd, loop.chlList) ;
                     if(ret == 0) {
                         closeLst.push_back(chl) ;
@@ -180,20 +182,18 @@ void eventLoop :: round(loopInfo loop, shared_ptr<channel>chl, shared_ptr<epOper
                 }*/
                 continue ;
             }
-            if(chl != nullptr) {
-                //设置当前epoll句柄
-                ret = chl->handleEvent(fd, loop.chlList) ;
-                if(ret == 0) {
-                    closeLst.push_back(chl) ;
-                }    
-            }
+            //设置当前epoll句柄
+            ret = chl->handleEvent(fd, loop.chlList) ;
+            if(ret == 0) {
+                closeLst.push_back(chl) ;
+            }    
         }
         //清空关闭连接
         for(auto s : closeLst) {
             int fd = s->getFd() ;
-           // ep->del(fd) ;
+            ep->del(fd) ;
             loop.clearChannel(fd) ;
-           // close(fd) ;
+            close(fd) ;
         }
         closeLst.clear() ;
         //处理完成，清空队
@@ -223,17 +223,22 @@ vector<pair<int, channel>> eventLoop :: doPendingFunc(int& num) {
         return tmp ;
     }
     else {
+        lock_guard<mutex> lk(*muteLst[num]) ;
         //计算当前队列中的要取的事件数量
-        int size =queues[num].size() ; 
-        //int s = size ;
-        while(size--) {
+       // int size = queues[num].size() ;
+        /*while(!queues[num].empty()&&size--) {
+            channel chl = queues[num].front() ;
+            tmp.push_back({chl.getFd(), chl}) ;
+            queues[num].pop() ;
+        }*/
+        
+        while(!queues[num].empty()) {
             channel chl = queues[num].front() ;
             tmp.push_back({chl.getFd(), chl}) ;
             queues[num].pop() ;
         }
-        //cout << s<< "     ++++++++++++++++++++++++++    " << queues[num].size() << endl ;
-        return tmp ;
     }
+    return tmp ;
 }   
 
 
@@ -244,6 +249,7 @@ void eventLoop :: addQueue(vector<pair<int, channel>>&ls,
     for(pair<int, channel>p:ls) {
         //设置可读事件并加入到epoll中
         p.second.setEp(ep) ;
+        
         ep->add(p.first, READ) ;
         p.second.setWakeFd(loop.getReadFd()) ;
         //将fd加入到事件表中
@@ -303,6 +309,7 @@ void eventLoop :: loop() {
                     queueInLoop(chl, num) ;
                 }
             }
+            activeChannels.clear() ;
             if(many != 0 && closeList.empty()) continue ;
             for(auto s : closeList) {
                 auto ret = cpList.find(s.getFd());
@@ -335,7 +342,10 @@ int eventLoop :: queueInLoop(channel chl, int& num) {
     //通知线程接收新连接
     int fd = info[num].getWriteFd() ;
     chl.setWakeFd(info[num].getReadFd()) ;
-    queues[num].push(chl) ;
+    {
+        lock_guard<mutex> lk(*muteLst[num]) ;
+        queues[num].push(chl) ;
+    }
     wakeup(fd) ;
     return 1 ;
 }   

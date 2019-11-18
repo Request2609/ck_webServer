@@ -5,7 +5,7 @@ void epOperation :: add(int fd, int events) {
     ev.data.fd = fd ;
     ev.events = events ;
     if(epoll_ctl(epFd, EPOLL_CTL_ADD, fd, &ev) < 0) {
-    //    std :: cout << __FILE__ << "   " << __LINE__ << "   " << strerror(errno)<< std :: endl ;
+       std :: cout << __FILE__ << "   " << __LINE__ << "   " << strerror(errno)<< std :: endl ;
         return ;
     }
 
@@ -21,14 +21,15 @@ void epOperation :: change(int fd, int events) {
     ev.data.fd = fd ;
     ev.events = events ;
     if(epoll_ctl(epFd, EPOLL_CTL_MOD, fd, &ev) < 0) {
-      //  std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
+        std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
         return ;
     }
 }
 
 void epOperation :: del(int fd) {
+    cout << "删除事件---------------------->" << fd << endl ;
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
-        std :: cout << __FILE__ << "   " << __LINE__ << "      " << strerror(errno)<< std :: endl ;
+      //  std :: cout << __FILE__ << "   " << __LINE__ << "      " << strerror(errno)<< std :: endl ;
         return  ;
     }
     fds -- ;
@@ -36,7 +37,7 @@ void epOperation :: del(int fd) {
 
 void epOperation :: del(int epFd, int fd) {
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
-        //std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
+        std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
         return  ;
     }
 }

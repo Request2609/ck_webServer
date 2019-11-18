@@ -2,7 +2,10 @@
 #include <memory>
 #include <atomic>
 #include <iostream>
-#include <queue> 
+#include <boost/thread/thread.hpp>
+#include <boost/lockfree/queue.hpp>
+#include <iostream>
+#include <boost/atomic.hpp>
 #include <thread>
 #include <mutex> 
 #include <map>
@@ -116,6 +119,8 @@ private :
     //活跃事件列表
     std :: vector<channel> activeChannels;
     map<int, channel> qChl ;
+
+    vector<shared_ptr<mutex>>muteLst ;
 
     vector<queue<channel>> queues ;
     //该eventLoop对应的监听套接字封装

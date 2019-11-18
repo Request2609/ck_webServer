@@ -137,7 +137,7 @@ int socketFd :: bindAddress() {
 
 int socketFd :: acceptSocket() {
 
-    assert(sockFd != -1) ;
+    //assert(sockFd != -1) ;
     int connFd = accept(sockFd, NULL, NULL) ;
     if(connFd < 0) {
         std::cout<<__FILE__<<__LINE__<<std::endl; ;
@@ -148,6 +148,9 @@ int socketFd :: acceptSocket() {
 }
 
 int socketFd :: startListen() {
+    if(sockFd == -1) {
+        std :: cout << strerror(errno) <<  "    " << __LINE__ <<  "       " << __FILE__ << std::endl ;
+    }
     assert(sockFd != -1) ;
     if(listen(sockFd, BACKLOG) < 0) {
         std::cout<<__FILE__<<__LINE__<<std::endl; ;
@@ -158,6 +161,9 @@ int socketFd :: startListen() {
 
 int socketFd :: setNoBlocking(int fd) {
     int old = fcntl(fd, F_GETFL, 0) ;
+    if(old == -1) {
+        std::cout << strerror(errno) << "    " << __LINE__ << "     " << __FILE__ << std::endl ; 
+    }
     assert(old != -1) ;
     int newA = old|O_NONBLOCK ;
     int ret = fcntl(fd, F_SETFL, newA) ;

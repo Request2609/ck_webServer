@@ -3,7 +3,7 @@
 #
 CC = g++
 
-CFLAGS = -lpthread -g -std=c++11 -w
+CFLAGS = -lboost_thread -lboost_system -lpthread -g -std=c++11 -w
 
 TARGET = Server
 
