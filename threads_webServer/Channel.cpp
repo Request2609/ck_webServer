@@ -10,7 +10,7 @@ channel :: channel() {
 
 //接收新连接
 int channel::handleAccept(int servFd) {
-
+    
     //设置监听套接字
     sock->setListenFd(servFd) ;
     //获取新客户端连接
@@ -62,9 +62,6 @@ int channel :: handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) {
             return -1;
         }
         if(n == 0) {
-            ep->del(fd) ;
-            loopInfo :: delChl(fd, tmp) ;
-            close(fd) ;
             return 0 ;
         }
     }
@@ -156,5 +153,5 @@ int channel :: handleRead(map<int, shared_ptr<channel>>&tmp) {
     if(input.getCanProcess() == true) {  
         readCallBack(this, tmp) ;
     }
-    return 1 ;
+    return 1;
 }

@@ -5,7 +5,7 @@ void epOperation :: add(int fd, int events) {
     ev.data.fd = fd ;
     ev.events = events ;
     if(epoll_ctl(epFd, EPOLL_CTL_ADD, fd, &ev) < 0) {
-        std :: cout << __FILE__ << "   " << __LINE__ << "   " << strerror(errno)<< std :: endl ;
+       std :: cout << __FILE__ << "   " << __LINE__ << "   " << strerror(errno)<< std :: endl ;
         return ;
     }
 
@@ -27,11 +27,17 @@ void epOperation :: change(int fd, int events) {
 }
 
 void epOperation :: del(int fd) {
+    cout << "删除事件---------------------->" << fd << endl ;
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
+<<<<<<< HEAD
+=======
+      //  std :: cout << __FILE__ << "   " << __LINE__ << "      " << strerror(errno)<< std :: endl ;
+>>>>>>> 2b38545211b53d57958e30cfe6d062326d00ec5a
         return  ;
     }
     fds -- ;
 }
+
 void epOperation :: del(int epFd, int fd) {
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
         return  ;
@@ -39,14 +45,13 @@ void epOperation :: del(int epFd, int fd) {
 }
 
 //将活跃的事件全加入到clList
-int epOperation :: wait(eventLoop* loop, int64_t timeout) {
+int epOperation :: wait(eventLoop* loop, const int& st) {
     int eventNum ;
     struct epoll_event epFd_[200] ;
     int listenFd = loop->getListenFd() ; 
     try{
-        eventNum = epoll_wait(epFd, epFd_, 200, timeout) ;
+        eventNum = epoll_wait(epFd, epFd_, 200, -1) ;
     }catch(exception e) {
-        cout << e.what() ;
     }
     if(eventNum < 0) {
         cout << eventNum << "           错误：" << strerror(errno) << endl ;
@@ -59,7 +64,12 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout) {
         if(fd == listenFd) {
             //接收并注册该连接
             channel ch = loop->handleAccept() ;
-            //ch.setEvents(READ) ;
+            //判断是一个线程的话，将其加入到当前想成事件集合中
+            if(st == 0) {
+                //加入到队列
+                loop->addClList(ch.getFd(), ch) ;
+                continue ;
+            }
             loop->fillChannelList(ch) ;
         }
     }
