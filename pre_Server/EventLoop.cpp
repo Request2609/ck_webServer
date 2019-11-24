@@ -158,7 +158,6 @@ void eventLoop :: round(loopInfo loop, shared_ptr<channel>chl, shared_ptr<epOper
                 ls.clear() ;
                 continue ;
             }
-
             //设置当前epoll句柄
             chl->setEp(ep) ;
             ret = chl->handleEvent(fd, loop.chlList) ;
