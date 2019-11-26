@@ -133,6 +133,7 @@ void buddy :: range_block(map<int, allocated_block>::iterator res) {
             //合并操作
             tmp->size *= 2 ;
             tmp->start_addr = res->second.start_addr ;
+            range_mem_by_addr() ;
             check_block() ;
             return ; 
         }
@@ -246,6 +247,10 @@ void buddy :: resize_mem() {
     mem_list.push_back(fbt) ;
     //重新按照地址进行排序
     range_mem_by_addr() ;
+}
+
+void buddy :: do_exit() {
+       
 }
 
 int buddy :: get_near_bigger_block(int tmp) {

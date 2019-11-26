@@ -52,8 +52,8 @@ public :
     static void print_mem_used_rate() ;
     static void merge_block(int& a) ;
     static void swap(int& a, int& b) ;
+    static void do_exit() ;
 private :   
-    
     //内存管理链表
     static int id ;
     static vector<free_block_type>mem_list ;
