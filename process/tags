@@ -1,0 +1,106 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+DEFAULT_MEM_SIZE	mem.h	8;"	d
+DEFAULT_MEM_START	mem.h	9;"	d
+LOOP_TIMES	mutex.cpp	14;"	d	file:
+MAX	thread.cpp	7;"	d	file:
+MAX_CHILD_NUMBER	pro.cpp	12;"	d	file:
+MA_BF	mem.h	13;"	d
+MA_FF	mem.h	12;"	d
+MA_WF	mem.h	14;"	d
+MIN_SLICE	mem.h	7;"	d
+PROCESS_NAME_LEN	mem.h	6;"	d
+SLEEP_INTERVAL	pro.cpp	13;"	d	file:
+allocate_mem	mem.cpp	/^int allocate_mem(struct allocated_block *ab){$/;"	f
+allocated_block	buddy.h	/^struct allocated_block{$/;"	s
+allocated_block	mem.h	/^struct allocated_block{$/;"	s
+allocated_block_head	mem.h	/^struct allocated_block* allocated_block_head ;$/;"	v	typeref:struct:allocated_block
+buddy	buddy.h	/^    buddy() {}$/;"	f	class:buddy
+buddy	buddy.h	/^class buddy {$/;"	c
+buddy_list	buddy.cpp	/^map<int, list<free_block_type>>buddy :: buddy_list ;$/;"	m	class:buddy	file:
+buddy_list	buddy.h	/^    static map<int, list<free_block_type>>buddy_list ;$/;"	m	class:buddy
+cancer_process	buddy.cpp	/^void buddy :: cancer_process() {$/;"	f	class:buddy
+counter	thread.cpp	/^unsigned long long main_counter, counter[MAX] ;$/;"	v
+critical_section	mutex.cpp	/^void critical_section(int thread_num, int i)$/;"	f
+default_max_list_block_size	buddy.cpp	/^int default_max_list_block_size = 1024 ;$/;"	v
+default_size	buddy.cpp	/^int default_size = 4096 ;$/;"	v
+display_mem_usage	mem.cpp	/^int display_mem_usage(){$/;"	f
+display_menu	mem.cpp	/^void display_menu(){$/;"	f
+dispose	mem.cpp	/^int dispose(struct allocated_block *free_ab){$/;"	f
+do_exit	mem.cpp	/^void do_exit() {$/;"	f
+do_something	pro.cpp	/^void do_something(int num) {$/;"	f
+find_process	mem.cpp	/^struct allocated_block* find_process(pid_t pid) {$/;"	f
+flag	mem.h	/^int flag = 0;                         \/*设置内存大小标志*\/$/;"	v
+free_block	mem.h	/^struct free_block_type* free_block ;$/;"	v	typeref:struct:free_block_type
+free_block_type	buddy.h	/^struct free_block_type {$/;"	s
+free_block_type	mem.h	/^struct free_block_type {$/;"	s
+free_mem	mem.cpp	/^int free_mem(struct allocated_block *ab){$/;"	f
+get_block_size	buddy.cpp	/^int buddy :: get_block_size(int size) {$/;"	f	class:buddy
+get_near_bigger_block	buddy.cpp	/^int buddy :: get_near_bigger_block(int tmp) {$/;"	f	class:buddy
+get_pid	buddy.cpp	/^int buddy :: get_pid() {$/;"	f	class:buddy
+id	buddy.cpp	/^int buddy :: id = 0 ;$/;"	m	class:buddy	file:
+id	buddy.h	/^    static int id ;$/;"	m	class:buddy
+init	buddy.cpp	/^void buddy :: init() {$/;"	f	class:buddy
+init_free_block	mem.cpp	/^struct free_block_type* init_free_block(int mem_size){$/;"	f
+is_ci_mi	buddy.cpp	/^int buddy :: is_ci_mi(int size) {$/;"	f	class:buddy
+kill_process	mem.cpp	/^void kill_process(){$/;"	f
+ma_algorithm	mem.h	/^int ma_algorithm = MA_FF;            \/*当前分配算法*\/$/;"	v
+main	main.cpp	/^int main() { $/;"	f
+main	mem.cpp	/^int main(){$/;"	f
+main	mutex.cpp	/^int main(void)$/;"	f
+main	pro.cpp	/^int main(int argc, char** argv) {$/;"	f
+main	sisuo.cpp	/^int main() {$/;"	f
+main	test.cpp	/^int main()$/;"	f
+main	thread.cpp	/^int main() {$/;"	f
+main_counter	thread.cpp	/^unsigned long long main_counter, counter[MAX] ;$/;"	v
+mem_list	buddy.cpp	/^list<free_block_type> buddy :: mem_list ;$/;"	m	class:buddy	file:
+mem_list	buddy.h	/^    static list<free_block_type>mem_list ;$/;"	m	class:buddy
+mem_size	mem.h	/^int mem_size=DEFAULT_MEM_SIZE;        \/*内存大小*\/$/;"	v
+merge_block	buddy.cpp	/^void buddy :: merge_block(int& a) {$/;"	f	class:buddy
+mutex1	mutex.cpp	/^pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;$/;"	v
+mutex2	mutex.cpp	/^pthread_mutex_t mutex2 = PTHREAD_MUTEX_INITIALIZER;$/;"	v
+new_process	buddy.cpp	/^void buddy :: new_process() {$/;"	f	class:buddy
+new_process	mem.cpp	/^int new_process(){$/;"	f
+next	mem.h	/^    struct allocated_block *next;$/;"	m	struct:allocated_block	typeref:struct:allocated_block::allocated_block
+next	mem.h	/^    struct free_block_type* next ;$/;"	m	struct:free_block_type	typeref:struct:free_block_type::free_block_type
+pid	buddy.h	/^    int pid;$/;"	m	struct:allocated_block
+pid	mem.h	/^    int pid;$/;"	m	struct:allocated_block
+pid	mem.h	/^static int pid = 0;                    \/*初始pid*\/$/;"	v
+print	main.cpp	/^void print() {$/;"	f
+print_mem_used_rate	buddy.cpp	/^void buddy :: print_mem_used_rate() {$/;"	f	class:buddy
+proc_number	pro.cpp	/^int proc_number = 0 ;$/;"	v
+process_list	buddy.cpp	/^map<int, allocated_block>buddy :: process_list ;$/;"	m	class:buddy	file:
+process_list	buddy.h	/^    static map<int, allocated_block> process_list ;$/;"	m	class:buddy
+process_name	buddy.h	/^    char process_name[process_name_len];$/;"	m	struct:allocated_block
+process_name	mem.h	/^    char process_name[PROCESS_NAME_LEN];$/;"	m	struct:allocated_block
+process_name_len	buddy.h	/^const int process_name_len = 50 ;$/;"	v
+range_block	buddy.cpp	/^void buddy :: range_block(map<int, allocated_block>::iterator res) {$/;"	f	class:buddy
+range_mem_by_addr	buddy.cpp	/^void buddy :: range_mem_by_addr() {$/;"	f	class:buddy
+range_mem_by_size	buddy.cpp	/^void buddy :: range_mem_by_size() {$/;"	f	class:buddy
+rearrange	mem.cpp	/^void rearrange(int algorithm){$/;"	f
+rearrange_BF	mem.cpp	/^void rearrange_BF(){$/;"	f
+rearrange_FF	mem.cpp	/^void rearrange_FF(){$/;"	f
+rearrange_WF	mem.cpp	/^void rearrange_WF(){$/;"	f
+rerange_block	mem.cpp	/^void rerange_block() {$/;"	f
+resize_mem	buddy.cpp	/^void buddy :: resize_mem() {$/;"	f	class:buddy
+set_algorithm	mem.cpp	/^void set_algorithm(){$/;"	f
+set_default_size	buddy.cpp	/^void buddy :: set_default_size(int size) {$/;"	f	class:buddy
+set_free_block_size	buddy.cpp	/^void buddy :: set_free_block_size() {$/;"	f	class:buddy
+set_mem_size	mem.cpp	/^int set_mem_size(){$/;"	f
+size	buddy.h	/^    int size ;$/;"	m	struct:free_block_type
+size	buddy.h	/^    int size;$/;"	m	struct:allocated_block
+size	mem.h	/^    int size ;$/;"	m	struct:free_block_type
+size	mem.h	/^    int size;$/;"	m	struct:allocated_block
+start_addr	buddy.h	/^    int start_addr ;$/;"	m	struct:free_block_type
+start_addr	buddy.h	/^    int start_addr;$/;"	m	struct:allocated_block
+start_addr	mem.h	/^    int start_addr ;$/;"	m	struct:free_block_type
+start_addr	mem.h	/^    int start_addr;$/;"	m	struct:allocated_block
+status	buddy.h	/^    int status ;$/;"	m	struct:free_block_type
+swap	mem.cpp	/^void swap(int* src, int* dst) {$/;"	f
+thread_worker	mutex.cpp	/^void* thread_worker(void* p)$/;"	f
+thread_worker	thread.cpp	/^void* thread_worker(void*p) {$/;"	f
+~buddy	buddy.h	/^    ~buddy() {}$/;"	f	class:buddy
