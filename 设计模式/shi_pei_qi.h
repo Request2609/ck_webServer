@@ -35,3 +35,4 @@ public :
 private :
     shared_ptr<adaptee> adt ;
 };
+

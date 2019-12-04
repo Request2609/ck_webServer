@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+using namespace std ;
+
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        if(matrix.size() == 1) {
+            return matrix[0] ;
+        }
+        vector<int>ls ;
+        if(matrix.size() == 0) return ls ;
+        int i = 0 ;
+        int j = 0 ;
+        int n = 0 ;
+        int row = matrix.size() ;
+        int col = matrix[0].size() ;
+        int m = 0;
+        int count = (row%10==0?(row/2):(row/2+1)) ;
+
+        for(int k=0; k < count ; k++) {
+            
+            for(i = n; i < col-k; i++) {
+                ls.push_back(matrix[k][i]) ;
+                cout << matrix[k][i] << endl ;
+            }
+            
+            for(j = k+1; j < row-k ; j++) {
+                ls.push_back(matrix[j][i-1]) ;
+                cout << matrix[j][i-1] << endl ;
+            }
+
+            cout << "m=" << i-1 << "      j-1=" << j-1 <<"    " << n<< endl ;
+            for(m = i-1; m >= n; m--) {
+                ls.push_back(matrix[j-1][m]) ;
+                cout << matrix[j-1][m] << endl ;
+            }
+
+            for(n = j-1; n > k; n--) {
+                ls.push_back(matrix[m][n]) ;
+                cout << matrix[m][n] << endl ;
+            }
+        }
+        int len = ls.size() ;
+        for(int w=0; w<len; w++) {
+            cout << ls[w] << endl ;
+        }
+        return ls ;
+    }
+};
+
+int main()
+{
+    Solution ss ;   
+    vector<vector<int>>ls ;
+    for(int i=0; i<3; i++) {
+        vector<int>s ;
+        for(int j=0; j<3; j++) {
+            int a ;
+            cin >>a ;
+            s.push_back(a) ;
+        }
+        ls.push_back(s) ;
+    }
+    ss.spiralOrder(ls) ;
+    return 0;
+}
+

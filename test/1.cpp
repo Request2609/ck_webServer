@@ -3,11 +3,20 @@
 #include <thread>
 using namespace std ;
 
-int main() {
-    packaged_task<int()>task([](){cout << "hello world!"<< endl ; return 666 ;}) ;
-    future<int> f1 = task.get_future() ;
-    thread t1(ref(task)) ;
-    cout << f1.get() << endl ;
+class A {
+public :
+    void print() {
+        cout << "hello " << endl ;
+    }
+} ;
+void print(shared_ptr<A>a) {
+    a->print() ;
+}
+    
+int main() {  
+    shared_ptr<A>a = make_shared<A>() ;
+    thread t1(print, a) ;
+    cout << "world" << endl ;
     t1.join() ;
 }
 

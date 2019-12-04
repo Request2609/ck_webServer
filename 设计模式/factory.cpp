@@ -3,55 +3,55 @@
 using namespace std  ;
 //简单工厂模式
 
-class person {
+class fruit {
 public :
-    person() {
+    fruit() {
     }
-    virtual ~person() {};
+    virtual ~fruit() {};
     virtual void operation() = 0;
 } ;
 
-class employee : public person{
+class apple : public fruit{
 public :
-    employee() {}
-    ~employee() {}
+    apple() {}
+    ~apple() {}
     void operation() {
-        cout << "my ability is do something!" << endl ;
+        cout << "我是一个苹果！" << endl ;
     }
 } ;
 
-class boss : public person {
+class grape : public fruit {
 public :
-    boss() {
+    grape() {
     }
-    ~boss() {        
+    ~grape() {        
     }
     void operation() {
-        cout << "my ability is admin employee!" << endl ;
+        cout << "我是一个葡萄！" << endl ;
     }
 } ;
 
 class factory {
 public :
-    static shared_ptr<person> getPerson(int permission) {
+    static shared_ptr<fruit> getPerson(int permission) {
         if(permission == 0) {
             //此处不能是实例化一个对象并返回，意思是例如 返回值改成person 这里boss bos; return bos
             //只能以引用的形式返回
-            shared_ptr<boss>per =shared_ptr<boss>(new boss);
+            shared_ptr<apple>per =shared_ptr<apple>(new apple);
             return per ;
         }       
         else {
-            shared_ptr<employee>per =shared_ptr<employee>(new employee);
+            shared_ptr<grape>per =shared_ptr<grape>(new grape);
             return per ;
         }
     }
 } ;
 
 int main() {
-    cout << "创建不同角色...." << endl ;
-    shared_ptr<person> bos = factory :: getPerson(0) ;
+    cout << "生产水果...." << endl ;
+    shared_ptr<fruit> bos = factory :: getPerson(0) ;
     bos->operation() ;
-    shared_ptr<person> emp = factory :: getPerson(1) ;
+    shared_ptr<fruit> emp = factory :: getPerson(1) ;
     emp->operation() ;
     return 0;
 }
