@@ -31,7 +31,6 @@ void rearrange_BF(){
     tmp = (struct free_block_type*)malloc(sizeof(struct free_block_type)) ;
     tmp->start_addr = -1 ;
     tmp->size = 0 ;
-    printf("Rearrange free blocks for FF \n");
     tmp = free_block ;
     while(tmp!=NULL)
     { 
@@ -59,7 +58,6 @@ void rearrange_WF(){
     tmp = (struct free_block_type*)malloc(sizeof(struct free_block_type)) ;
     tmp->start_addr = -1 ;
     tmp->size = 0 ;
-    printf("Rearrange free blocks for FF \n");
     tmp = free_block ;
     while(tmp!=NULL)
     { 
@@ -74,7 +72,7 @@ void rearrange_WF(){
             }
             else            work=work->next;            
         }
-        if(flag == 1) break ;
+        if(flag == 0) break ;
         tmp=tmp->next;
     }    
 }
@@ -181,10 +179,11 @@ int free_mem(struct allocated_block *ab){
     if(!fbt) return -1;
     fbt->size = ab->size;
     fbt->start_addr = ab->start_addr;
+    dispose(ab) ;
     /*插入到空闲区链表的头部并将空闲区按地址递增的次序排列*/
     fbt->next = free_block;
     free_block=fbt;
-    rearrange(MA_FF);
+    rearrange(ma_algorithm);
     fbt=free_block;
     while(fbt!=NULL){
         work = fbt->next;
@@ -206,7 +205,7 @@ int free_mem(struct allocated_block *ab){
 /*释放ab数据结构节点*/
 int dispose(struct allocated_block *free_ab){
     struct allocated_block *pre, *ab;
-
+    
     if(free_ab == allocated_block_head) { /*如果要释放第一个节点*/
         allocated_block_head = allocated_block_head->next;
         free(free_ab);
@@ -229,13 +228,16 @@ int dispose(struct allocated_block *free_ab){
 int display_mem_usage(){
     struct free_block_type *fbt=free_block;
     struct allocated_block *ab=allocated_block_head;
-    if(fbt==NULL) return(-1);
+    int flag = 1 ;
+    if(fbt==NULL) {
+        flag = 0 ;
+    }
     printf("----------------------------------------------------------\n");
 
     /* 显示空闲区 */
     printf("Free Memory:\n");
     printf("%20s %20s\n", "      start_addr", "       size");
-    while(fbt!=NULL){
+    while(flag == 1 && fbt!=NULL){
         printf("%20d %20d\n", fbt->start_addr, fbt->size);
         fbt=fbt->next;
     }    
@@ -269,6 +271,7 @@ void rerange_block() {
             rearrange_BF() ;
             break ;
         case 3 :
+            rearrange_WF() ;
             break ;
     }
 }
@@ -282,8 +285,9 @@ int allocate_mem(struct allocated_block *ab){
         if(fbt->size>=request_size){/*分配后空闲空间足够大，则分割*/
             ab->start_addr = fbt->start_addr ;
             fbt->start_addr += request_size ;
+            fbt->size -= request_size ;
             //如果该节点分配后空闲块是0，那就释放掉该节点
-            if(fbt->start_addr == 0) {
+            if(fbt->size == 0) {
                 if(fbt == free_block) {
                     free_block = fbt->next ;
                     free(fbt) ;
@@ -360,20 +364,19 @@ void do_exit() {
 }
 
 int main(){
-    char choice;
+    int choice;
     pid=0;
     free_block = init_free_block(mem_size); //初始化空闲区
     for(;;){
         display_menu();	//显示菜单
-        choice=getchar();	//获取用户输入
-        while(getchar() != '\n') ;
+        cin >> choice;	//获取用户输入
         switch(choice){
-        case '1': set_mem_size(); break; 	//设置内存大小
-        case '2': set_algorithm();flag=1;  break;	//设置分配算法
-        case '3': new_process(); flag=1; break;	//创建新进程
-        case '4': kill_process(); flag=1;  break;	//删除进程
-        case '5': display_mem_usage(); flag=1;  break;	//显示内存使用
-        case '0': do_exit(); exit(0);		//释放链表并退出
+        case 1: set_mem_size(); break; 	//设置内存大小
+        case 2: set_algorithm();flag=1;  break;	//设置分配算法
+        case 3: new_process(); flag=1; break;	//创建新进程
+        case 4: kill_process(); flag=1;  break;	//删除进程
+        case 5: display_mem_usage(); flag=1;  break;	//显示内存使用
+        case 0: do_exit(); exit(0);		//释放链表并退出
         default: break;
         }
     }
