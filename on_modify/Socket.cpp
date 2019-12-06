@@ -161,6 +161,7 @@ int socketFd :: bindAddress() {
 int socketFd :: acceptSocket() {
 
     assert(sockFd != -1) ;
+   //cout << "接受连接----------------------------------------->" << sockFd << endl ;
     int connFd = accept(sockFd, NULL, NULL) ;
     if(connFd < 0) {
         std::cout<<__FILE__<<"       " << __LINE__ << "      " << strerror(errno)<<std::endl; ;

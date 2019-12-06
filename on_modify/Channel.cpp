@@ -17,7 +17,6 @@ int channel::handleAccept(int servFd) {
     cliFd = sock->acceptSocket() ;
     sock->setNoBlocking(cliFd) ;
     setEvents(READ) ;
-    //设置用户回调
     return cliFd ;
 }
 
@@ -161,5 +160,6 @@ int channel :: handleRead(vector<pair<int, shared_ptr<channel>>>&tmp) {
     if(input.getCanProcess() == true) {  
         readCallBack(this, tmp) ;
     }
+    //cout <<"发送完成" << endl ;
     return 1 ;
 }

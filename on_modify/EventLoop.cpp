@@ -4,7 +4,7 @@
 eventLoop :: eventLoop() {
     //开8线程
     //创建一个epoll
-    threadNums = 8 ;
+    threadNums = 0 ;
     quit = false ;
     epPtr = std::make_shared<epOperation>() ;
     for(int i=0; i<=threadNums; i++) {
@@ -222,6 +222,7 @@ shared_ptr<channel> eventLoop :: handleAccept(int index, int listenFd) {
     tmp->setEp(epSet[index]) ;
     tmp->setEpFd(epSet[index]->getEpFd()) ;
     epSet[index]->add(conFd, READ) ;
+    //cout << "添加成功!     " << conFd << endl ;
     //给channel设置回调函数
     conn->setCallBackToChannel(tmp) ; 
     clList[index].push_back({conFd, tmp}) ;

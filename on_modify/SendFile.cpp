@@ -9,6 +9,7 @@ int sendFile :: sendInfo(channel* chl) {
     int cliFd = chl->getFd() ;
     Buffer* bf = chl->getWriteBuffer() ;
     int len = bf->getSize() ;
+    //cout << "发送消息" <<"      长度:" << len << endl ;
     if(len <= SEND_SIZE) {
         for(int i=0; i<len; i++) {
             buf[index] = (*bf)[i] ;
@@ -16,6 +17,7 @@ int sendFile :: sendInfo(channel* chl) {
         }
         buf[index] = '\0' ;
         ret = writen(cliFd, buf, sizeof(buf)) ;
+       // cout <<"已经发送的长度:"<< ret << endl ;
         //有数据没有被发送
         if(errno == EAGAIN || ret < len) {
             s = buf ;
@@ -32,6 +34,7 @@ int sendFile :: sendInfo(channel* chl) {
             cout << __LINE__ << "   " << __FILE__ << endl ;
             return -1 ;
         }
+     //   cout << "发送完成"<< endl ;
         over(chl) ;
         return 0 ;
     }
@@ -94,6 +97,7 @@ void sendFile :: over(channel* chl) {
    int fd = chl->getFd() ; 
    chl->getEp()->del(fd) ;
    close(fd) ;
+   //cout << "close完成" << endl ;
 }
 
 void sendFile :: setWrite(channel* chl) {

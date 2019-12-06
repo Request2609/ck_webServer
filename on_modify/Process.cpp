@@ -245,7 +245,6 @@ int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>
     int readIndex = bf->getReadIndex() ;
     int writeIndex = bf->getWriteIndex() ;
     string a = bf->readBuffer(readIndex, writeIndex) ;
-    //将信息获取完成，再解析
     //解析请求头
     int index = 0 ;
     string tmp ;
@@ -413,6 +412,7 @@ int process :: messageSend(const string& tmp, channel* chl) {
         paths = DEFAULT_PATH ;
         string type = getFileType() ;
         responseHead(chl, type, len, 200, "OK") ;
+
         //将文件信息全部写入读缓冲区
         readFile(DEFAULT_PATH, chl) ;
         //设置发送文件的对象!
