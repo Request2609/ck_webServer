@@ -73,7 +73,7 @@ void Buffer :: append(char c) {
     writeIndex ++ ;
 }
 
-int Buffer :: readBuffer(int fd, const shared_ptr<epOperation>&ep) {
+int Buffer :: readBuffer(int fd) {
 
     char buffer_[1024] ;
     //接收消息
@@ -81,14 +81,11 @@ int Buffer :: readBuffer(int fd, const shared_ptr<epOperation>&ep) {
     std::cout << "fd:" << fd << std::endl ;
     n = read(fd, buffer_, sizeof(buffer_)) ;
     if(n < 0 && errno == EAGAIN) {
-        ep->change(fd, EPOLLONESHOT) ;
-        return -1 ;
+        return 1 ;
     }
- //   cout << "读到"<<n<<"字节     "<<"数据信息:\n" << buffer_ << endl ;
-    
-    /*if(errno == 87) {
+    if(errno == 87) {
         return 2 ;
-    }*/
+    }
     if(errno != EINTR && n < 0) {
         std :: cout << __FILE__ << "    " << __LINE__ << strerror(errno)<< std :: endl ;
         return -1 ;

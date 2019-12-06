@@ -8,8 +8,7 @@ connection :: connection() {
     writeCallBack = nullptr ;
     timeoutCallBack = nullptr ;
     //创建一个套接字新连接
-    buffer = make_shared<Buffer>("") ;
-    buffer->bufferClear() ;
+    buffer.bufferClear() ;
 }
 
 
@@ -25,7 +24,7 @@ void connection :: setConf(std::string ip, std::string port) {
     sock = std :: make_shared<socketFd>(ip, port) ;   
     //设置号连接套接字的端口和IP
     sock->setBindAddr(1) ;
-    buffer->bufferClear() ;
+    buffer.bufferClear() ;
 }
 
 //创建指定ip和端口的套接字
@@ -37,7 +36,7 @@ connection :: connection(std::string ip, std::string port) {
     //创建一个套接字新连接
     channel_ = std :: make_shared<channel>() ;
     sock = std :: make_shared<socketFd>(ip.c_str(), port.c_str()) ;   
-    buffer->bufferClear() ;
+    buffer.bufferClear() ;
 }
 
 connection :: ~connection() {
@@ -104,9 +103,6 @@ int connection :: createListenFd(int port) {
     return 1 ;
 } ;
 
-void connection :: createChannel() {
-    channel_ = std :: make_shared<channel>() ;
-}
 //接收tcp新连接，先判断新连接的监听套接字存不存在
 int connection :: doAccept() {
     int servFd = sock->getListenSock() ;

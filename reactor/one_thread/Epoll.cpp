@@ -1,7 +1,6 @@
 #include "Epoll.h"
 
 void epOperation :: add(int fd, int events) {
-
     struct epoll_event ev ;
     ev.data.fd = fd ;
     ev.events = events ;
@@ -25,10 +24,11 @@ void epOperation :: change(int fd, int events) {
         std :: cout <<strerror(errno) <<"      " << __FILE__ << "   " << __LINE__ << std :: endl ;
         return ;
     }
+    cout << "重置成功!"<< endl ;
 }
 
 void epOperation :: del(int fd) {
-   // lock_guard<mutex>mutex(mute) ;
+
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
         std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
         return  ;
@@ -52,12 +52,13 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout) {
         }
         //无论那种事件，否加入到活跃列表
         if(fd != listenFd) {
+            cout << "事件数量："<< eventNum << "线程ID:" << this_thread::get_id()<< endl ;
             channel* ch = loop->search(fd) ;
             if(ch == NULL) {
                 continue ;
             }
             else {
-                cout << "触发事件" << endl ;
+                cout << "触发事件:--------->" << ch->getFd() << endl ;
                 loop->fillChannelList(ch) ;   
             }
         }

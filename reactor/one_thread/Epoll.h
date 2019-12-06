@@ -3,8 +3,6 @@
 #include <sys/epoll.h>
 #include <vector>
 #include <unistd.h>
-#include <mutex>
-using namespace std ;
 #include "EventLoop.h"
 class eventLoop ;
 class epOperation {
@@ -22,7 +20,6 @@ public :
     void change(int fd, int events) ;
     void del(int fd) ;
 private :
-    mutex mute ;
     int epFd ;
     //帮助更新epoll中的事件数量
     int fds ;

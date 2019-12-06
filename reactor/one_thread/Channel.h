@@ -3,18 +3,12 @@
 #include <functional>
 #include <sys/epoll.h>
 #include <memory>
+
 #include "Socket.h"
 #include "Buffer.h"
-#include "EventLoop.h"
-#include "Epoll.h"
-
 #define SIZE 1024
-using namespace std ;
 using namespace std :: placeholders ;
 class Buffer ;
-class eventLoop ;
-class epOperation ;
-
 enum {
     READ = EPOLLIN,
     WRITE = EPOLLOUT,
@@ -52,9 +46,9 @@ public :
     void setEpFd(int efd){epFd = efd ;}
     int updateChannel() ;
     //判断是否收到了一段消息完整的消息"\r\n"结束
-    int handleEvent(eventLoop* ev, channel& chl) ;
+    int handleEvent() ;
     int handleWrite() ;
-    int handleRead(const shared_ptr<epOperation>& ep) ;
+    int handleRead() ;
     int handleAccept(int fd) ;
     //设置channel监听的事件类型
     void setEvents(int event) { events = event ;}
@@ -67,8 +61,8 @@ public :
     int readMsg() ;
     void setLen(long len) { this->len= len ; }
     long getLen() { return len ; }
-    shared_ptr<Buffer> getReadBuffer() { return  input ;}
-    shared_ptr<Buffer> getWriteBuffer() { return  output ;}
+    Buffer* getReadBuffer() { return  &input ;}
+    Buffer* getWriteBuffer() { return  &output ;}
 private :
     long len ;
     //管理channel描述符对象的epoll句柄
@@ -90,9 +84,9 @@ private :
     //写完成关闭连接
     callBack writeCompleteCallBack ;
     //写缓冲区
-    shared_ptr<Buffer> input ;
+    Buffer input ;
     //度缓冲区
-    shared_ptr<Buffer> output ;
+    Buffer output ;
     //要是监听套接字的话，就是监听套接字的文件描述符
     //否则就是目标客户端的fd
     int cliFd ;

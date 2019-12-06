@@ -2,10 +2,8 @@
 
 channel :: channel() {
     events = 0 ;
-    input = make_shared<Buffer>("") ;
-    output = make_shared<Buffer>("") ;
-  //  input->bufferClear() ;
-   // output->bufferClear() ;
+    input.bufferClear() ;
+    output.bufferClear() ;
     cliFd = -1 ;
     len = 0 ;
 }
@@ -46,9 +44,10 @@ int channel :: readMsg() {
     return 1 ;
 }
 
-int channel :: handleEvent(eventLoop* ev, channel& chl) {
+int channel :: handleEvent() {
     if(events&EPOLLIN) { 
-        int n = handleRead(ev->getEp()) ;
+        cout << "读事件" << endl ;
+        int n = handleRead() ;
         if(n < 0) {
             return -1;
         }
@@ -58,6 +57,7 @@ int channel :: handleEvent(eventLoop* ev, channel& chl) {
     }
     if(events&EPOLLOUT) {
         //发送数据
+        cout << "写事件" <<endl ;
         int ret = handleWrite() ;
         if(ret < 0) {
             std::cout << __FILE__ << "     " << __LINE__ << std::endl ;   
@@ -65,7 +65,6 @@ int channel :: handleEvent(eventLoop* ev, channel& chl) {
         }
         //返回０，将这个channel删除
         else if(ret == 0){
-            ev->closeConnect(chl) ;
             return 0 ;
         }
     }
@@ -78,12 +77,12 @@ int channel :: handleWrite() {
     char buf[SIZE] ;
     int j = 0 ;
     bzero(buf, sizeof(buf)) ;
-    int len = output->getWriteIndex() - output->getReadIndex() ;
+    int len = output.getWriteIndex() - output.getReadIndex() ;
     //文件长度小于4096
     int sum = 0 ;
     if(len < SIZE) {
         for(int i=0; i< len; i++) {
-            buf[j] = (*output)[i] ;
+            buf[j] = output[i] ;
             j++ ;
         }
 
@@ -96,7 +95,7 @@ int channel :: handleWrite() {
         }
         sum+= ret ;
         //close(cliFd) ;
-        input->bufferClear() ;
+        input.bufferClear() ;
         //返回１表示可以将连接关闭掉,同事将本channel从EventLoop中删除
         return  0;
     }
@@ -114,8 +113,8 @@ int channel :: handleWrite() {
             bzero(buf, sizeof(buf)) ;
             j = 0 ;
         }
-        buf[j] = (*output)[i] ;
-        output->moveRead() ;
+        buf[j] = output[i] ;
+        output.moveRead() ;
         j++ ;
     }
     
@@ -127,15 +126,15 @@ int channel :: handleWrite() {
         }
         sum+= ret ;
     }
-    input->bufferClear() ;
+    input.bufferClear() ;
     return 0 ;
 }
 
 //执行读回调
-int channel :: handleRead(const shared_ptr<epOperation>& ep) {
+int channel :: handleRead() {
     
     //读数据
-    int n = input->readBuffer(cliFd, ep) ;
+    int n = input.readBuffer(cliFd) ;
     if(n < 0) {
         return -1 ;
     }
@@ -144,7 +143,7 @@ int channel :: handleRead(const shared_ptr<epOperation>& ep) {
         return 0 ;
     }
     //消息设置好后，调用用户回调函数处理    
-    if(input->getCanProcess() == true) {  
+    if(input.getCanProcess() == true) {  
         readCallBack(this) ;
     }
     return n ;

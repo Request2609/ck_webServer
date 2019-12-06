@@ -32,7 +32,6 @@ public :
     void processConnect() ;
     void threadTask(channel chl) ;
     void closeConnect(channel& chl) ;
-    shared_ptr<epOperation>  getEp() { return epPtr ; }
 private:
     int servFd  = -1 ;
     connection* conn ;

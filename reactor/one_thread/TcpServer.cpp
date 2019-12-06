@@ -33,7 +33,7 @@ void tcpServer :: addNewConnection(connection* conn) {
     this->conn = conn ;
     std::shared_ptr<socketFd> sock = this->conn->getSock() ;
     //创建监听套接字，并设置好内部channel类
-    if(sock!= nullptr &&sock->getBindAddr() == 1) {
+    if(sock->getBindAddr() == 1) {
         this->conn->createListenFd(&(*sock)) ;
         return ;
     }

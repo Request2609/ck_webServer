@@ -152,7 +152,7 @@ int process :: getRequest(channel* chl, string& tmp) {
 }
 
 int process:: sendCgiResult(channel* chl, string res) {
-            shared_ptr<Buffer> bf =  chl->getWriteBuffer() ;
+            Buffer* bf =  chl->getWriteBuffer() ;
             long len = res.size() ;
             responseHead(chl, "text/html", len, OK, "OK") ;
             for(int i=0; i<len; i++) {
@@ -169,7 +169,7 @@ int process:: sendCgiResult(channel* chl, string res) {
 
 //获取请求头
 int process :: requestHeader(channel* chl) {
-    shared_ptr<Buffer>bf =chl->getReadBuffer() ;
+    Buffer* bf =chl->getReadBuffer() ;
     //解析请求行
     int readIndex = bf->getReadIndex() ;
     int writeIndex = bf->getWriteIndex() ;
@@ -307,7 +307,7 @@ void  process :: responseHead(channel* chl, string type, long len, int statusCod
     //将信息存入输入缓冲区中    
     int l = strlen(buf) ;
     //构造用户态缓冲区
-    shared_ptr<Buffer> input = chl->getWriteBuffer() ;
+    Buffer* input = chl->getWriteBuffer() ;
     for(int i=0; i<l; i++) {      
         input->append(buf[i]) ;
     }
@@ -459,7 +459,7 @@ void process :: readFile(const char* file, channel* chl) {
     }
     int len ;
     char buf[1024] ;
-    shared_ptr<Buffer> bf = chl->getWriteBuffer() ;
+    Buffer* bf = chl->getWriteBuffer() ;
     //读文件
     int sum = 0 ;
     while(1) {

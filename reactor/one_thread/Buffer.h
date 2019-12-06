@@ -7,11 +7,7 @@
 #include<errno.h>
 #include<string.h>
 #include <memory>
-#include "Epoll.h"
 #include"ReadWrite.h"
-
-class epOperation ;
-
 using namespace std ;
 class Buffer
 {
@@ -31,7 +27,7 @@ public :
     int retreiveBuffer(int n) ;
     void bufferClear() ;
     //传入目标的描述符，读取数据
-    int readBuffer(int fd, const shared_ptr<epOperation>& ep) ;
+    int readBuffer(int fd) ;
     int getReadIndex() { return readIndex ; }
     void setReadIndex(int index) { readIndex = index ;}
     int getWriteIndex() { return writeIndex ; }

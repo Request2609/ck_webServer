@@ -59,7 +59,6 @@ int socketFd :: setAddr(int port) {
     sockAddr.sin_family = AF_INET ;
     sockAddr.sin_port = htons(port) ;
     sockAddr.sin_addr.s_addr = htonl(INADDR_ANY) ;
-    std::cout << "设置完成" << std::endl ;
     return 1 ;
 }
 

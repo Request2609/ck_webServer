@@ -3,16 +3,12 @@
 #include <memory>
 #include <map>
 #include <functional>
-#include "Buffer.h"
 #include "Socket.h"
+#include "Buffer.h"
 #include "EventLoop.h"
 #include "Channel.h"
 
-using namespace std ;
-
-class Buffer ;
 class channel ;
-
 //封装TCP连接
 class connection :
     public std::enable_shared_from_this<connection> {
@@ -25,7 +21,7 @@ public :
     typedef std :: function<void(channel* chl)> callBack ;
 public :
     void createListenFd(socketFd* sock) ;
-    void createChannel() ;
+    void createChannel() {channel_ = std :: make_shared<channel>() ;}
     void createSock() { sock = std::make_shared<socketFd>(); }
     void setConf(std::string ip, std::string port) ;
     std::shared_ptr<socketFd> getSock() { return sock ; }
@@ -58,7 +54,7 @@ private :
     callBack closeCallBack ;
     callBack timeoutCallBack ;
     //属于本套接字的buffer
-    shared_ptr<Buffer> buffer ;
+    Buffer buffer ;
     std::shared_ptr<channel>channel_ ;
     //socketFd和事件处理器channel绑定
     //封装监听套接字或者连接套接字类和channel对象的类

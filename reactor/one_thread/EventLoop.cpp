@@ -65,23 +65,31 @@ void eventLoop :: loop() {
 
 
 void eventLoop :: threadTask(channel chl) {
-    int n = chl.handleEvent(this, chl) ;
-    cout << n << endl ;
-    if(n == -1) {
-        return ;
-    }
+    cout << "开始执行任务!=---------------------->" << this_thread::get_id()<< endl ;
+    int n = chl.handleEvent() ;
     //n==0就关掉该链接
+    if(n == 0) {
+        closeConnect(chl) ;
+        int i=0 ;
+        chl.setFd(i) ;
+    }
+    else if((errno == EAGAIN && n == -1) || (n != -1 && n !=0)){
+        //重新加到Epoll中
+        epPtr->change(chl.getFd(), READ|EPOLLONESHOT) ;
+    }
+    
 }
 
 void eventLoop::processConnect() {
     static auto task = bind(&eventLoop::threadTask, this, placeholders::_1) ;
+    cout << "当前活跃列表数量:" << activeChannels.size() << endl ;
     int len = activeChannels.size() ;
     for(int i=0; i<len ;i++) {
+        cout << "分发fd:" << activeChannels[i].getFd() << endl ;
         pool->commit(task, activeChannels[i]) ;
     }
     activeChannels.clear() ;
 }   
-
 //将活跃的事件加入到活跃事件表中
 int eventLoop :: fillChannelList(channel* chl) {
    activeChannels.push_back(*chl) ;
@@ -96,7 +104,6 @@ void eventLoop :: addConnection(connection* con) {
     std::shared_ptr<channel> channel_ = conn->getChannel() ;
     int fd = channel_->getFd() ;
     servFd = fd ;
-    cout << "事件:" << epPtr->getEpFd() << endl ;
     channel_->setEpFd(epPtr->getEpFd()) ;
     //将这个服务器监听套接字加入到epoll中，只负责监听可读事件，LT模式
     channel_->setEvents(READ) ;
@@ -120,7 +127,6 @@ channel* eventLoop :: search(int fd) {
 //接收连接并添加channel
 void eventLoop :: handleAccept() {
 
-cout << "接收链接" << endl ;
     channel tmp;
     tmp.setSock(conn->getSock()) ;
     //创建新连接

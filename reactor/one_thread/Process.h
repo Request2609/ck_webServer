@@ -8,7 +8,7 @@
 #include"Channel.h"
 #include"ReadWrite.h"
 #include "Socket.h"
-#define DEFAULT_PATH "index.html"
+#define DEFAULT_PATH "hello.html"
 #define BUFLEN 65535 
 
 using namespace std ;

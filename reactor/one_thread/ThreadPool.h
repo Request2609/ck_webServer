@@ -62,7 +62,6 @@ auto threadPool :: commit(F&& f, Args&&... args)-> std :: future<decltype(f(args
                           (*task)() ;
                           }
                           ) ;
-        
     }
     cond.notify_one() ;
     return future ;
