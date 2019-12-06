@@ -100,9 +100,9 @@ void connection :: setTimeoutCallBack(callBack cb) {
 
 //与下面的函数少了一步绑定地址
 void connection :: createListenFd(socketFd* sock) {
-    sock->setNoBlocking(sock->getListenSock());
+   // sock->setNoBlocking(sock->getListenSock());
+    //sock->setReuseAddr() ;
     sock->startListen() ;
-    sock->setReuseAddr() ;
     int fd = sock->getListenSock() ;
     channel_->setFd(fd) ;
 }
@@ -111,7 +111,7 @@ void connection :: createListenFd(socketFd* sock) {
 int connection :: createListenFd(int port) {
     sock->setAddr(port) ;   
     sock->setNoBlocking(sock->getListenSock()) ;
-    sock->setReuseAddr() ;
+    //sock->setReuseAddr() ;
     sock->setReusePort() ;
     sock->bindAddress() ;
     sock->startListen() ;

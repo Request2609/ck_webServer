@@ -6,9 +6,22 @@ eventLoop :: eventLoop() {
     //创建一个epoll
     threadNums = 8 ;
     quit = false ;
-    pro.reserve(threadNums) ;
     epPtr = std::make_shared<epOperation>() ;
+    for(int i=0; i<=threadNums; i++) {
+        vector<pair<int, shared_ptr<channel>>>ls ;
+        clList.push_back(ls) ;
+    }
+    //初始化epoll事件集合
+    for(int i=0; i<=threadNums; i++) {
+        vector<shared_ptr<channel>> ls ;
+        activeChannels.push_back(ls) ;
+    }
     epSet[0] = epPtr ;
+}
+
+void eventLoop :: initEventSet() {
+    ///初始化所有事件集合
+
 }
 
 eventLoop:: ~eventLoop() {
@@ -16,11 +29,13 @@ eventLoop:: ~eventLoop() {
 
 int eventLoop :: clearCloseChannel(int index, int fd) {
     //从epoll中删除套接字
-    auto ret = clList[index].find(fd) ;
-    if(ret == clList[index].end()) {
-        return 0;
+    auto ret = clList[index] ;
+    for(auto s=ret.begin(); s!=ret.end(); s++) {
+        if(s->first == fd) {
+            ret.erase(s) ;
+            break ;
+        }
     }
-    clList[index].erase(ret) ;
     epSet[index]->del(fd) ;
     close(fd) ;
     return 1 ;
@@ -44,6 +59,8 @@ void eventLoop :: runThread() {
         int fd = sfd->getListenFd() ;
         chan->setId(i+1) ;
         epSet[i+1] = ep ;
+        //开始监听
+        sfd->startListen() ;
         auto func = bind(&eventLoop::round, this, placeholders::_1, placeholders::_2, placeholders::_3) ;
         pool->commit(func, chan, ep, fd) ;
     }
@@ -77,10 +94,10 @@ void eventLoop :: round(shared_ptr<channel>chl, shared_ptr<epOperation> ep, int 
     chl->setId(chl->getId()) ;
     //将当前唤醒的channel加入到list中
     vector<shared_ptr<channel>> closeLst ;
-    clList[id][fd] = chl ;
+    clList[id].push_back({fd, chl}); 
     //将wakeFd加入到epoll中
     while(!stop) {
-        int ret = ep->wait(this, -1, id) ;    
+        int ret = ep->wait(this, -1, id, fd) ;    
         if(ret < 0) {
             stop = true  ;
         }
@@ -115,15 +132,17 @@ void eventLoop :: loop() {
     //创建线程0的epoll
     //创建线程池
     pool = make_shared<threadPool>(threadNums);
+    //初始化时间列表
+    //开始跑线程
     runThread() ;
     //将conn加入到epoll中 
-    int events = clList[0][servFd]->getEvents() ;
+    int events = clList[0][0].second->getEvents() ;
     //将当前的服务加入到epoll中
     epPtr->add(servFd, events) ;
     vector<shared_ptr<channel>>closeLst ;
     while(!quit) {
         //等待事件
-        int ret = epPtr->wait(this, -1, 0) ;
+        int ret = epPtr->wait(this, -1, 0, servFd) ;
         if(ret < 0) {
             quit = true ;
         }
@@ -169,43 +188,43 @@ void eventLoop :: addConnection(connection* con) {
     //将这个服务器监听套接字加入到epoll中，只负责监听可读事件，LT模式
     chl->setFd(fd) ;
     chl->setEp(epPtr) ;
-   // epPtr->add(fd, READ) ;
     chl->setEpFd(epPtr->getEpFd()) ;
     chl->setEvents(READ) ;
-    clList[0][fd] = chl ;
+    clList[0].push_back({fd, chl}) ;
     //将fd和channel作为键值存入channelMap中
     //将这个服务器监听套接字加入到epoll中，只负责监听可读事件，LT模式
 }
 
 shared_ptr<channel> eventLoop :: search(int index, int fd) {
     
-    auto it = clList[index].find(fd) ;
-    if(it == clList[index].end()) {
-        return NULL ;
+    auto it = clList[index] ;
+    for(auto s=it.begin(); s!=it.end(); s++) {
+        if(fd == s->first) {
+            return s->second ; 
+        }
     }
-    else {
-        return it->second ;
-    }
+    return nullptr ;
 } 
 
 //接收连接并添加channel
-shared_ptr<channel> eventLoop :: handleAccept(int index) {
+shared_ptr<channel> eventLoop :: handleAccept(int index, int listenFd) {
     shared_ptr<channel> tmp = make_shared<channel>() ;
     tmp->setSock(conn->getSock()) ;
     //创建新连接
-    int conFd = tmp->handleAccept(servFd) ;
+    int conFd = tmp->handleAccept(listenFd) ;
     tmp->setFd(conFd) ;
     //为channel设置回调
     //设置套接字非阻塞
     conn->setnoBlocking(conFd) ;
     //设置监听事件类型
     tmp->setEvents(READ) ;
+    tmp->setId(index) ;
     tmp->setEp(epSet[index]) ;
     tmp->setEpFd(epSet[index]->getEpFd()) ;
-    epPtr->add(conFd, READ) ;
+    epSet[index]->add(conFd, READ) ;
     //给channel设置回调函数
     conn->setCallBackToChannel(tmp) ; 
-    clList[index][conFd] = tmp ;
+    clList[index].push_back({conFd, tmp}) ;
     //将channel加入到当前loop的列表中
     return tmp ;
 }

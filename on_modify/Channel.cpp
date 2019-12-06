@@ -49,7 +49,7 @@ bool channel :: operator==(channel& chl) {
     return 0 ;
 }
 
-int channel :: handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) {    
+int channel :: handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp) {    
     //将唤醒描述符中的信号读出来
     if(fd == wakeFd) {
         int ret ;
@@ -62,9 +62,11 @@ int channel :: handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) {
             return -1;
         }
         if(n == 0) {
-            auto ret = tmp.find(fd) ;
-            if(ret != tmp.end()) {
-                tmp.erase(ret) ;
+            for(auto s = tmp.begin(); s!=tmp.end(); s++) {
+                if(s->first == fd) {
+                    tmp.erase(s) ;
+                    break ;
+                }
             }
             ep->del(fd) ;
             close(fd) ;
@@ -145,7 +147,7 @@ int channel :: handleWrite() {
 }
 
 //执行读回调
-int channel :: handleRead(map<int, shared_ptr<channel>>&tmp) {
+int channel :: handleRead(vector<pair<int, shared_ptr<channel>>>&tmp) {
     //读数据
     int n = input.readBuffer(cliFd) ;
     if(n < 0) {

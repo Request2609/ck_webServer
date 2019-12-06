@@ -10,6 +10,7 @@ socketFd :: socketFd() {
 }
 
 socketFd :: socketFd(int port) {
+    this->port = to_string(port) ;
     sockFd = socket(AF_INET, SOCK_STREAM, 0) ;
     if(sockFd < 0) {
         std::cout<<__FILE__<<__LINE__<<std::endl; ;
@@ -50,8 +51,8 @@ socketFd :: socketFd(const std::string addr, const std::string port) {
     bzero(&sockAddr, sizeof(sockAddr)) ;
     sockAddr.sin_family = AF_INET ;
     sockAddr.sin_port = htons(atoi(port.c_str())) ;
-    sockAddr.sin_addr.s_addr = inet_addr(addr.c_str()) ;
-    setReuseAddr() ;
+    sockAddr.sin_addr.s_addr = htonl(INADDR_ANY) ;
+  //  setReuseAddr() ;
     setReusePort() ;
     if(bind(sockFd, (struct sockaddr*)&sockAddr, sizeof(sockAddr)) < 0) {
         std::cout << __FILE__ << "       " <<__LINE__ << "      " << strerror(errno) <<std::endl ;
@@ -61,6 +62,7 @@ socketFd :: socketFd(const std::string addr, const std::string port) {
 
 int socketFd :: setAddr(int port) {
     bzero(&sockAddr, sizeof(sockAddr)) ;
+    this->port = to_string(port) ;
     sockAddr.sin_family = AF_INET ;
     sockAddr.sin_port = htons(port) ;
     sockAddr.sin_addr.s_addr = htonl(INADDR_ANY) ;
@@ -71,10 +73,11 @@ int socketFd :: setAddr(int port) {
 int socketFd :: setAddr(const char* ip, const char* port) {
     assert(ip != NULL) ;
     assert(port != NULL) ;
+    this->port = port ;
     bzero(&sockAddr, sizeof(sockAddr)) ;
     sockAddr.sin_family = AF_INET ;
     sockAddr.sin_port = htons(atoi(port)) ;
-    sockAddr.sin_addr.s_addr = inet_addr(ip) ;
+    sockAddr.sin_addr.s_addr = htonl(INADDR_ANY) ;
     this->ip = ip ;
     this->port = port ;
     return 1 ;

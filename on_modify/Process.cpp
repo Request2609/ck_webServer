@@ -238,7 +238,7 @@ int process:: sendCgiResult(channel* chl, string res) {
 }
 
 //获取请求头
-int process :: requestHeader(channel* chl, map<int, shared_ptr<channel>>& mp) {
+int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>>>& mp) {
     canDel = 0 ;
     Buffer* bf =chl->getReadBuffer() ;
     //解析请求行
@@ -265,9 +265,12 @@ int process :: requestHeader(channel* chl, map<int, shared_ptr<channel>>& mp) {
     }
     //当canDel设置成1的时候就会将相应的channel对象移除
     if(canDel == 1) {
-        auto ret = mp.find(chl->getFd()) ;
-        if(ret != mp.end()) {
-             mp.erase(ret) ;
+        int fd = chl->getFd() ;
+        for(auto s=mp.begin(); s!=mp.end(); s++) {
+            if(s->first == fd) {
+                mp.erase(s) ;
+                break ;
+            }
         }
     }
     return 0  ;  

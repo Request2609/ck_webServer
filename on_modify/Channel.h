@@ -23,7 +23,7 @@ enum {
 //事件分发
 class channel {
 public :
-    typedef std::function<void(channel* chl, map<int, shared_ptr<channel>>&)> callBack ;
+    typedef std::function<void(channel* chl, vector<pair<int, shared_ptr<channel>>>&)> callBack ;
     typedef std::function<void(channel* chl)> wakeCall ;
 public :
     channel() ;
@@ -65,9 +65,9 @@ public :
     void setEpFd(int efd) { epFd = efd ;}
     int updateChannel() ;
     //判断是否收到了一段消息完整的消息"\r\n"结束
-    int handleEvent(int fd, map<int, shared_ptr<channel>>& tmp) ;
+    int handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp) ;
     int handleWrite() ;
-    int handleRead(map<int, shared_ptr<channel>>&tmp) ;
+    int handleRead(vector<pair<int, shared_ptr<channel>>>&tmp) ;
     int handleAccept(int fd) ;
     //设置channel监听的事件类型
     void setEvents(int event) { events = event ;}

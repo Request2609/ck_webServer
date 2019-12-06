@@ -41,10 +41,9 @@ void epOperation :: del(int epFd, int fd) {
 }
 
 //将活跃的事件全加入到clList
-int epOperation :: wait(eventLoop* loop, int64_t timeout, int index) {
+int epOperation :: wait(eventLoop* loop, int64_t timeout, int index, int listenFd) {
     int eventNum ;
     struct epoll_event epFd_[200] ;
-    int listenFd = loop->getListenFd() ; 
     try{
         eventNum = epoll_wait(epFd, epFd_, 200, timeout) ;
     }catch(exception e) {
@@ -60,7 +59,7 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout, int index) {
         //要是还未注册的事件
         if(fd == listenFd) {
             //接收并注册该连接
-            loop->handleAccept(index) ;
+            loop->handleAccept(index, listenFd) ;
         }
         else {
             shared_ptr<channel> chl = loop->search(index, fd) ;

@@ -45,7 +45,7 @@ public :
     int getRequest(channel* chl, string& tmp) ;
     int postRequest(string& tmp, channel* chl, string& bf) ;
     int isExist() ;
-    int requestHeader(channel* channel_, map<int, shared_ptr<channel>>& mp) ;
+    int requestHeader(channel* channel_, vector<pair<int, shared_ptr<channel>>>& mp) ;
     int requestBody(channel* channel_) ;
     int getMethod(string& line) ;
     int messageSend(const string& tmp, channel*chl) ;

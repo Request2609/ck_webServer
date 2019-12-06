@@ -18,7 +18,7 @@ public:
     ~connection() ;
 public :
     //将套接字类和channel进行绑定
-    typedef std :: function<void(channel*, std::map<int, std::shared_ptr<channel>>&)> callBack ;
+    typedef std :: function<void(channel*, std::vector<pair<int, std::shared_ptr<channel>>>&)> callBack ;
     typedef std :: function<void(channel*)> wakeCallBack ;
 public :
     void getChannel(channel* chl) ;
