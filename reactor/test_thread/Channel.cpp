@@ -28,6 +28,7 @@ int channel :: updateChannel() {
     struct epoll_event ev ;
     ev.data.fd = cliFd ;
     ev.events = events ;
+    int epFd = ep->getEpFd() ;
     int ret = epoll_ctl(epFd, EPOLL_CTL_MOD, cliFd, &ev) ;
     if(ret < 0) {
         std::cout << __FILE__ << "      " << __LINE__ << std::endl ;
@@ -44,20 +45,16 @@ int channel :: readMsg() {
     return 1 ;
 }
 
-int channel :: handleEvent() {
+int channel :: handleEvent(vector<pair<int, shared_ptr<channel>>>&clList) {
     if(events&EPOLLIN) { 
-        cout << "读事件" << endl ;
-        int n = handleRead() ;
+        int n = handleRead(clList) ;
         if(n < 0) {
             return -1;
-        }
-        if(n == 0) {
-            return 0 ;
         }
     }
     if(events&EPOLLOUT) {
         //发送数据
-        cout << "写事件" <<endl ;
+       // cout << "写事件" <<endl ;
         int ret = handleWrite() ;
         if(ret < 0) {
             std::cout << __FILE__ << "     " << __LINE__ << std::endl ;   
@@ -131,7 +128,7 @@ int channel :: handleWrite() {
 }
 
 //执行读回调
-int channel :: handleRead() {
+int channel :: handleRead(vector<pair<int, shared_ptr<channel>>>&clList) {
     
     //读数据
     int n = input.readBuffer(cliFd) ;
@@ -142,9 +139,10 @@ int channel :: handleRead() {
     if(n == 0) {
         return 0 ;
     }
+
     //消息设置好后，调用用户回调函数处理    
     if(input.getCanProcess() == true) {  
-        readCallBack(this) ;
+        readCallBack(this, clList) ;
     }
     return n ;
 }

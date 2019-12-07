@@ -6,6 +6,9 @@
 
 #include "Socket.h"
 #include "Buffer.h"
+#include "Epoll.h"
+
+class epOperation ;
 #define SIZE 1024
 using namespace std :: placeholders ;
 class Buffer ;
@@ -19,7 +22,7 @@ enum {
 //事件分发
 class channel {
 public :
-    typedef std::function<void(channel* chl)> callBack ;
+    typedef std::function<void(channel* chl, vector<pair<int, shared_ptr<channel>>>&)> callBack ;
 public:
     channel() ;
     ~channel() {}
@@ -42,13 +45,13 @@ public :
         timeoutCallBack = cb ;
     }
     void setSock(std::shared_ptr<socketFd>sock) { this->sock = sock; }
-    int getEpFd() { return epFd ; }
-    void setEpFd(int efd){epFd = efd ;}
+    shared_ptr<epOperation> getEp() { return ep ; }
+    void setEp(shared_ptr<epOperation> ep){this->ep = ep ;}
     int updateChannel() ;
     //判断是否收到了一段消息完整的消息"\r\n"结束
-    int handleEvent() ;
+    int handleEvent(vector<pair<int, shared_ptr<channel>>>&clList) ;
     int handleWrite() ;
-    int handleRead() ;
+    int handleRead(vector<pair<int, shared_ptr<channel>>>& clList) ;
     int handleAccept(int fd) ;
     //设置channel监听的事件类型
     void setEvents(int event) { events = event ;}
@@ -66,7 +69,7 @@ public :
 private :
     long len ;
     //管理channel描述符对象的epoll句柄
-    int epFd ;
+    shared_ptr<epOperation> ep ;
     int flag = 0 ;
     //设置一个标志，是否要继续读
     //感兴趣的事件

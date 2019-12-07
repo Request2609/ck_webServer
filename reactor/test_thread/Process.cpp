@@ -1,55 +1,132 @@
 #include "Process.h"
 
 int process :: postRequest(string& tmp, channel* chl, string& bf) {
-        long ret = 0 ;
-        //获取到请求路径和版本号
-        getVersionPath(tmp) ;
-        //获取尾部长度
-        ret = getContentLength(bf, chl) ;
-        if(ret == -5) {
+    long ret = 0 ;
+    //获取到请求路径和版本号
+    getVersionPath(tmp) ;
+    //获取尾部长度
+    ret = getContentLength(bf, chl) ;
+    if(ret == -5) {
+        sendNotFind(chl) ;
+        return POST ;
+    }
+    else {
+        paths = paths.c_str()+1 ;
+        if(isExist() < 0) {
             sendNotFind(chl) ;
-            return POST ;
+            return -1 ;
         }
+
+        int ret = paths.find("php") ;
+        //如果请求php文件
+        //CGI程序
+        if(ret == -1) { 
+            //cgi请求的数据
+            string res = processCgi() ;
+            responseHead(chl, "text/html", res.size(), 200, "OK") ;
+            getSendBuffer(chl, res) ;
+            sendBuffer(chl) ;
+            if(ret < 0) {
+                return -1 ;
+            }
+        } 
         else {
-            paths = paths.c_str()+1 ;
-            if(isExist() < 0) {
+            //传入contentlenth
+            string file = changePostHtml(chl->getWriteBuffer()->getPostPos(), bf) ; 
+            if(file == "") {
                 sendNotFind(chl) ;
                 return -1 ;
             }
-            
-            int ret = paths.find("php") ;
-            //如果请求php文件
-            if(ret != -1) {
-                //传入contentlenth
-                string file = changePostHtml(chl->getWriteBuffer()->getPostPos(), bf) ; 
-                if(file == "") {
-                    sendNotFind(chl) ;
-                    return -1 ;
-                }
-                int res= sendCgiResult(chl, file) ;
-                if(res < 0) {
-                    sendNotFind(chl) ;
-                    return -1 ;
-                }
-                return 1 ;
+            int res= sendCgiResult(chl, file) ;
+            if(res < 0) {
+                sendNotFind(chl) ;
+                return -1 ;
             }
-            readFile(chl) ;
-            flag = 1 ;
-            messageSend(tmp, chl) ; 
-            return POST ;
-        }
+            return 1 ;
+        }           
+        readFile(chl) ;
+        flag = 1 ;
+        messageSend(tmp, chl) ; 
+        return POST ;
+    }
     return 1 ;
+}
+
+void process :: sendBuffer(channel* chl) {
+    char buff[4096] ;
+    Buffer* buf = chl->getWriteBuffer() ;
+    int len = buf->getSize() ;
+    for(int i=0; i<len; i++) {
+        buff[i] = (*buf)[i] ;
+    }
+    int ret = 0 ;
+    int sockFd = chl->getFd() ;
+    if((ret = send(sockFd, buff, sizeof(buff), 0))< 0) {
+        cout << __LINE__ << "      " << __FILE__ << endl ;
+        return  ;
+    }
+    if(ret <= len) {
+        chl->getWriteBuffer()->bufferClear() ;
+        cout << "发送完成!" << endl ;
+    }
+    else {
+        cout << ret << endl ;
+        cout << "没有发送完成!" << endl ;
+    }
+    chl->getReadBuffer()->bufferClear() ;
+}
+
+void process :: getSendBuffer(channel* chl, const string res) {
+    Buffer* input = chl->getWriteBuffer() ;
+    int size = res.size() ;
+    for(int i=0; i<size; i++) {
+        input->append(res[i]) ;
+    }
+}
+
+string process :: processCgi() {
+    //将所请求的数据转化成绝对路径
+    int ret = cgiConnect::connectCgiServer() ;
+    if(ret < 0)
+        cout << "连接失败！" << endl ;
+    string info("1\r\n") ;
+    info += cgiArg ;
+    //设置环境变量
+    if(ret < 0) {
+        cout << __LINE__ << "       " << __FILE__ << endl ;
+        return "" ;
+    }
+    if(ret < 0) {
+        cout << __LINE__ << "      " << __FILE__ << endl ;
+        return "" ;
+    }
+    //设置环境 ;变量
+    char buf[BUFFERSIZE] ;
+    strcpy(buf, info.data()) ;
+    ret = cgiConnect ::sendMsg(buf) ;
+    if(ret < 0) {
+        cout <<"发送cgi请求失败！" << endl ;
+        return "" ;
+    }
+    //等待cgi服务器响应
+    string ss = cgiConnect :: recvMsg() ;
+    //关闭连接套接字
+    cgiConnect::closeFd() ;
+    return ss ;
 }
 
 string process :: changePostHtml(long len, string& bf) {
     //现根据contentlen找相应提交内容
     string tmp = getSubmit(len, bf) ;
+    //将要提交的内容
     if(tmp == "") {
         return "";
     }
+
     if(paths[0] == '/') {
         paths = paths.c_str()+1 ;
     }
+    //fastCgi处理请求
     ::FastCgi fc ;
     fc.setRequestId(1) ;
     fc.startConnect() ;
@@ -59,7 +136,7 @@ string process :: changePostHtml(long len, string& bf) {
     sprintf(l, "%ld", size) ;
     char p[1024] ;
     //构造路径,绝对路径
-    sprintf(p, "/home/changke/summer2019/util/summer2019/test/www/%s", paths.c_str()) ;
+    sprintf(p, "/home/changke/ck_webServer/www/%s", paths.c_str()) ;
     fc.sendParams("SCRIPT_FILENAME", p) ;
     //设置方法
     fc.sendParams("REQUEST_METHOD", "POST") ;
@@ -88,7 +165,6 @@ string process :: getSubmit(long len, string& bf) {
     }
     index = index+4 ;
     long l = bf.size() ;
-
     for(int i=index; i<l; i++) {
         info+=bf[i] ;
         len -- ;
@@ -121,7 +197,7 @@ int process :: getRequest(channel* chl, string& tmp) {
         int ret =  tmp.find("?") ;
         //带参数的url，搜索功能
         if(ret != -1) { 
-            processArgGet(tmp, chl) ;      
+            cout <<"这是带参数的get 请求" << endl ;
         }
         //要是php的话，就得转成html然后给服务器发
         //有php-fpm完成
@@ -134,7 +210,6 @@ int process :: getRequest(channel* chl, string& tmp) {
 
             string file = changeHtml() ;
             if(isExist() < 0) {
-                sendNotFind(chl) ;
                 return -1;
             }
             ///构造响应头
@@ -152,29 +227,24 @@ int process :: getRequest(channel* chl, string& tmp) {
 }
 
 int process:: sendCgiResult(channel* chl, string res) {
-            Buffer* bf =  chl->getWriteBuffer() ;
-            long len = res.size() ;
-            responseHead(chl, "text/html", len, OK, "OK") ;
-            for(int i=0; i<len; i++) {
-                bf->append(res[i]) ;
-            }
-            chl->enableWriting() ;
-            int ret = chl->updateChannel() ;
-            if(ret < 0) {
-                cout << __FILE__ << "      " << __LINE__ << endl ;
-                return -1 ;
-            }
-        return 1 ;
+    Buffer* bf =  chl->getWriteBuffer() ;
+    long len = res.size() ;
+    responseHead(chl, "text/html", len, OK, "OK") ;
+    for(int i=0; i<len; i++) {
+        bf->append(res[i]) ;
+    }
+    sss.sendInfo(chl) ;
+    return 1 ;
 }
 
 //获取请求头
-int process :: requestHeader(channel* chl) {
+int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>>>& mp) {
+    canDel = 0 ;
     Buffer* bf =chl->getReadBuffer() ;
     //解析请求行
     int readIndex = bf->getReadIndex() ;
     int writeIndex = bf->getWriteIndex() ;
     string a = bf->readBuffer(readIndex, writeIndex) ;
-    //将信息获取完成，再解析
     //解析请求头
     int index = 0 ;
     string tmp ;
@@ -187,28 +257,30 @@ int process :: requestHeader(channel* chl) {
     //如果是GET方法，解析路径名
     if(ret == GET) {
         getRequest(chl, tmp) ;
-        return GET ;
     }
     //如果是post请求，找出content_length
     if(ret == POST) {
         postRequest(tmp, chl, a) ;
     }
-    if(ret == DEFAULT) {
-        return DEFAULT ;
+    //当canDel设置成1的时候就会将相应的channel对象移除
+    if(canDel == 1) {
+        lock_guard<mutex>lk(eventLoop::mute) ;
+        int fd = chl->getFd() ;
+        for(auto s=mp.begin(); s!=mp.end(); s++) {
+            if(s->first == fd) {
+                mp.erase(s) ;
+                break ;
+            }
+        }
     }
     return 0  ;  
 }   
-
-int process :: processArgGet(string tmp, channel* chl) {
-    
-    return 1 ;
-}
-
 //获取请求的长度
 int process :: getContentLength(string a, channel* chl) {
     
     int l = chl->getReadBuffer()->getPostPos()  ;
     int pos = 0;
+    long p = a.find("\r\n\r\n") ;
     if(l == -1) {
         pos= a.find("Content-Length:") ;
         //没找到，可能发的数据不够，也可能是请求头错误(少见)
@@ -231,6 +303,14 @@ int process :: getContentLength(string a, channel* chl) {
             } 
         }
         l = atoi(len.c_str()) ;
+        
+        long ret = paths.find(".CGI") ;
+        //正在请求CGI程序处理
+        if(ret != -1) {
+            int r = a.find("\r\n\r\n") ;
+            cgiArg = a.substr(r+4, l) ;
+            return -4 ;
+        }
         chl->getWriteBuffer()->setPostPos(l) ;
     }
     int r = paths.find(".php") ;
@@ -238,7 +318,6 @@ int process :: getContentLength(string a, channel* chl) {
         return 0 ;
     }
     //确定提交的数据
-    long p = a.find("\r\n\r\n") ;
     //根据\r\n\r\n找ontent-length获取信息
     string info ;
     int ret = getSubmitInfo(info, p+4, l, a, chl) ;
@@ -315,6 +394,7 @@ void  process :: responseHead(channel* chl, string type, long len, int statusCod
 
 //处理get请求，发送响应头和
 int process :: messageSend(const string& tmp, channel* chl) {
+    int s = 0  ;
     //找出现第一个空格的地方
     if(flag == 0)
         getVersionPath(tmp) ;
@@ -325,7 +405,7 @@ int process :: messageSend(const string& tmp, channel* chl) {
         struct stat st ;
         int ret = stat(DEFAULT_PATH, &st) ;
         if(ret < 0) {
-            cout << __FILE__ << __LINE__ << endl ;
+            cout << __FILE__ << "      " << __LINE__ << strerror(errno)<< endl ;
             return -1 ;
         }
         //获取文件的大小
@@ -333,15 +413,13 @@ int process :: messageSend(const string& tmp, channel* chl) {
         paths = DEFAULT_PATH ;
         string type = getFileType() ;
         responseHead(chl, type, len, 200, "OK") ;
-        //将文件信息全部写入度缓冲区
+
+        //将文件信息全部写入读缓冲区
         readFile(DEFAULT_PATH, chl) ;
-       // ret = sendFile(chl) ;
-        //设置可写事件
-        chl->enableWriting() ;
-        //发送完数据关闭连接 
-        ret = chl->updateChannel() ;
-        if(ret < 0) {
-            return -1 ;
+        //设置发送文件的对象!
+        s = sss.sendInfo(chl) ;
+        if(ret <= 0) {
+            canDel = 1 ;
         }
         return 1 ;
     }
@@ -350,18 +428,20 @@ int process :: messageSend(const string& tmp, channel* chl) {
     paths = paths.c_str()+1 ;
     //获取资源类型,资源长度，状态码，提示语
     int ret = isExist() ;
-    chl->enableWriting() ;
     if(!ret) {
         //发送404页面
-        sendNotFind(chl) ;   
-        chl->updateChannel() ;
+        sendNotFind(chl) ; 
+        s = sss.sendInfo(chl) ;
     }
     //请求其他的资源
     else {
         readFile(chl) ;
-        chl->updateChannel() ;
+        s = sss.sendInfo(chl) ;
     }
-    flag  = 0 ;
+    if(s <= 0) {
+        canDel = 1 ;
+    }
+    flag = 0 ;
     return 1 ;
 }
 
@@ -425,9 +505,6 @@ string process :: getFileType() {
         }
         if(type == "css") {
             return "text/css" ;
-        }
-        if(type == "md") {
-            return "text/x-markdown;charset=utf-8" ;
         }
     }
     return "text/plain;charset=utf-8" ;
@@ -493,7 +570,6 @@ int process :: isExist() {
 }
 //获取版本号和请求路径
 int process :: getVersionPath(string tmp) {
-    
     int pathIndex = tmp.find(' ') ;
     pathIndex += 1 ;
     while(tmp[pathIndex] != ' ') {
@@ -507,13 +583,7 @@ int process :: getVersionPath(string tmp) {
     }
     return 1 ;   
 }
-
 //获取请求体
-int process :: requestBody(channel* channel_) {
-    
-    return 1 ;
-}
-
 int process :: getMethod(string& line) {
     if((int)line.find("GET") != -1) {
         method = GET ;

@@ -24,7 +24,7 @@ void epOperation :: change(int fd, int events) {
         std :: cout <<strerror(errno) <<"      " << __FILE__ << "   " << __LINE__ << std :: endl ;
         return ;
     }
-    cout << "重置成功!"<< endl ;
+  //  cout << "重置成功!"<< endl ;
 }
 
 void epOperation :: del(int fd) {
@@ -46,19 +46,21 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout) {
         int fd = epFds[i].data.fd ;
         //要是还未注册的事件
         if(fd == listenFd) {
+            cout << "接受连接" << endl ;
             //接收并注册该连接
             loop->handleAccept() ;
             continue ;
         }
         //无论那种事件，否加入到活跃列表
-        if(fd != listenFd) {
-            cout << "事件数量："<< eventNum << "线程ID:" << this_thread::get_id()<< endl ;
-            channel* ch = loop->search(fd) ;
+        else {
+            cout << "处理事件" << endl ;
+           //cout << "事件数量："<< eventNum << "线程ID:" << this_thread::get_id()<< endl ;
+            shared_ptr<channel> ch = loop->search(fd) ;
             if(ch == NULL) {
                 continue ;
             }
             else {
-                cout << "触发事件:--------->" << ch->getFd() << endl ;
+             //   cout << "触发事件:--------->" << ch->getFd() << endl ;
                 loop->fillChannelList(ch) ;   
             }
         }

@@ -8,12 +8,12 @@
 #include "Create.h"
 using namespace std ;
 
-void onRead(channel* chl) {
+void onRead(channel* chl, vector<pair<int, shared_ptr<channel>>>&clList) {
     //将信息获取完成，再解析
     //解析请求头
     process pro ;
     chl->getReadBuffer()->getCanProcess() ;
-    pro.requestHeader(chl) ;    
+    pro.requestHeader(chl, clList) ;    
 }
 
 
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
     }
     
     //设置新连接的回调函数
-    conn.setReadCallBack(std::bind(onRead, placeholders::_1)) ;
+    conn.setReadCallBack(std::bind(onRead, placeholders::_1, placeholders::_2)) ;
     //将新建的连接加入到loop中
     server.addNewConnection(&conn) ;
     //服务器开始工作

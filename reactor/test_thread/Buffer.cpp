@@ -78,7 +78,6 @@ int Buffer :: readBuffer(int fd) {
     char buffer_[1024] ;
     //接收消息
     int n ;
-    std::cout << "fd:" << fd << std::endl ;
     n = read(fd, buffer_, sizeof(buffer_)) ;
     if(n < 0 && errno == EAGAIN) {
         return 1 ;

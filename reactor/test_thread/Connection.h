@@ -18,7 +18,7 @@ public:
     ~connection() ;
 public :
     //将套接字类和channel进行绑定
-    typedef std :: function<void(channel* chl)> callBack ;
+    typedef std :: function<void(channel* chl, vector<pair<int, shared_ptr<channel>>>&)> callBack ;
 public :
     void createListenFd(socketFd* sock) ;
     void createChannel() {channel_ = std :: make_shared<channel>() ;}
@@ -26,7 +26,7 @@ public :
     void setConf(std::string ip, std::string port) ;
     std::shared_ptr<socketFd> getSock() { return sock ; }
     void setnoBlocking(int fd_) {sock->setNoBlocking(fd_) ;}
-    void setCallBackToChannel(channel* channel_) ;
+    void setCallBackToChannel(shared_ptr<channel> channel_) ;
     //设置channel的各种回调函数
     void setWriteCallBack(callBack cb) ;
     void setCloseCallBack(callBack cb) ;

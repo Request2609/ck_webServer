@@ -24,7 +24,7 @@ threadPool :: threadPool(unsigned short size) : stop(false){
                           if(this->stop && this->taskQueue.empty()) {
                           return ;
                           }
-                          std::cout << "开始执行任务==================================>" << std::endl ;
+ //                         std::cout << "开始执行任务==================================>" << std::endl ;
                           //这里使用右值引用，实现０赋值拷贝，提高效率
                           task = std :: move(this->taskQueue.front()) ;
                           this->taskQueue.pop() ;

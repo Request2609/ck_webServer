@@ -4,12 +4,17 @@
 #include<iostream>
 #include<string>
 #include<sys/stat.h>
+#include "CgiConnect.h"
 #include "Fcgi.h"
 #include"Channel.h"
 #include"ReadWrite.h"
 #include "Socket.h"
-#define DEFAULT_PATH "hello.html"
+#include "SendFile.h"
+#define DEFAULT_PATH "index.html"
 #define BUFLEN 65535 
+
+#define FASTCGI 1
+#define CGI 2 
 
 using namespace std ;
 enum {
@@ -19,7 +24,6 @@ enum {
 enum {
     NOT_FOUND=404, OK=200
 } ;
-
 //向进程发送的登录信息
 struct logBuf {
     //暂时业务为登录
@@ -41,7 +45,7 @@ public :
     int getRequest(channel* chl, string& tmp) ;
     int postRequest(string& tmp, channel* chl, string& bf) ;
     int isExist() ;
-    int requestHeader(channel* channel_) ;
+    int requestHeader(channel* channel_, vector<pair<int, shared_ptr<channel>>>& mp) ;
     int requestBody(channel* channel_) ;
     int getMethod(string& line) ;
     int messageSend(const string& tmp, channel*chl) ;
@@ -60,6 +64,9 @@ public :
     string changePostHtml(long len, string&bf) ;
     string getSubmit(long len, string&bf) ;
     int sendCgiResult(channel * chl, string res) ;
+    string processCgi() ;
+    void getSendBuffer(channel* chl, const string res) ;
+    void sendBuffer(channel* chl) ;
 private :
     string post ;
     string paths ;
@@ -67,5 +74,8 @@ private :
     string version ;
     //是get请求的话，就设置为1
     int flag ;
+    string cgiArg ;
+    sendFile sss ;
+    int canDel ;
 };
 #endif

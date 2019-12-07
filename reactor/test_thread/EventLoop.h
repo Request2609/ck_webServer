@@ -16,22 +16,23 @@ class epOperation ;
 //事件循环 EventLoop和connection共享channel对象
 class eventLoop
 {   
-    typedef std::map<int, channel> channelMap;
+    typedef std::vector<pair<int, shared_ptr<channel>>> channelMap;
 public:
     eventLoop() ;
     ~eventLoop() {}
 public :
-    channel* search(int fd) ;
+    shared_ptr<channel> search(int fd) ;
     int getListenFd() { return servFd ; }
     void loop() ;
     void addConnection(connection* con) ;
     void addClList(int fd, channel& channel_) ;
-    int fillChannelList(channel*chl) ;
+    int fillChannelList(shared_ptr<channel> chl) ;
     void handleAccept() ;
     int clearCloseChannel(std::vector<channel>&list_) ;
     void processConnect() ;
-    void threadTask(channel chl) ;
-    void closeConnect(channel& chl) ;
+    static void threadTask(shared_ptr<channel> chl, vector<pair<int, shared_ptr<channel>>>&) ;
+    static void closeConnect(shared_ptr<channel>chl, vector<pair<int, shared_ptr<channel>>>& clList) ;
+    static mutex mute ;
 private:
     int servFd  = -1 ;
     connection* conn ;
@@ -39,12 +40,11 @@ private:
     //一个eventLoop一个epoll
     std :: shared_ptr<epOperation> epPtr ;
     //活跃事件列表
-    std :: vector<channel> activeChannels;
+    std :: vector<shared_ptr<channel>> activeChannels;
     shared_ptr<threadPool> pool ;
     //该eventLoop对应的监听套接字封装
     //退出标志
     bool quit ;
-    mutex mute ;
     //设置套接字channel键值对
     channelMap clList ;
 };

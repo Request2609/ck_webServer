@@ -43,7 +43,7 @@ connection :: ~connection() {
 }
 
 //给channel设置回调
-void connection :: setCallBackToChannel(channel* channel_) {
+void connection :: setCallBackToChannel(shared_ptr<channel>channel_) {
     if(readCallBack != nullptr)
     channel_->setReadCallBack(readCallBack) ;
     if(writeCallBack != nullptr)

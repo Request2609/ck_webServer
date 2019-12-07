@@ -41,7 +41,7 @@ template<class F, class... Args>
 auto threadPool :: commit(F&& f, Args&&... args)-> std :: future<decltype(f(args...))> {
     
     if(stop.load()) {
-        std::cout << "-----" << std::endl ;
+ //       std::cout << "-----" << std::endl ;
        throw std :: runtime_error("线程池已经停止工作")  ;
     }
     //获取函数返回值类型
@@ -55,7 +55,7 @@ auto threadPool :: commit(F&& f, Args&&... args)-> std :: future<decltype(f(args
     {
         //对当前语句加锁
         std :: lock_guard<std :: mutex> lock{ muteLock } ;
-        std::cout << "提交任务......" << std::endl ;
+   //     std::cout << "提交任务......" << std::endl ;
         //将任务加入到队列中
         taskQueue.emplace(
                           [task](){
