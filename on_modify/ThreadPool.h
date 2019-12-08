@@ -51,7 +51,7 @@ auto threadPool :: commit(F&& f, Args&&... args)-> std :: future<decltype(f(args
                                                                   std :: bind(std :: forward<F>(f), std :: forward<Args>(args)...)                                                             
                                                                      ) ;
     //先获取future
-    std :: future<retType> future  = task->get_future() ;
+    std :: future<retType> future ;
     {
         //对当前语句加锁
         std :: lock_guard<std :: mutex> lock{ muteLock } ;

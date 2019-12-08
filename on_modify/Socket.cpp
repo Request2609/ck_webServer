@@ -52,7 +52,6 @@ socketFd :: socketFd(const std::string addr, const std::string port) {
     sockAddr.sin_family = AF_INET ;
     sockAddr.sin_port = htons(atoi(port.c_str())) ;
     sockAddr.sin_addr.s_addr = htonl(INADDR_ANY) ;
-  //  setReuseAddr() ;
     setReusePort() ;
     if(bind(sockFd, (struct sockaddr*)&sockAddr, sizeof(sockAddr)) < 0) {
         std::cout << __FILE__ << "       " <<__LINE__ << "      " << strerror(errno) <<std::endl ;

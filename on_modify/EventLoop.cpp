@@ -119,14 +119,6 @@ void eventLoop :: round(shared_ptr<channel>chl, shared_ptr<epOperation> ep, int 
     }
 }
 
-int eventLoop:: getNum() {
-    static int num = -1 ;
-    num++ ;
-    if(num == threadNums) {
-        num = 0 ;
-    }
-    return num ;
-}
 
 void eventLoop :: loop() {
     //创建线程0的epoll

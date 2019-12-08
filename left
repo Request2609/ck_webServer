@@ -1,0 +1,100 @@
+左旋转
+
+LEFT_REPORT(T, x)
+    y = right[x] //获取x右孩子节点y
+    right[x] = left[y] //将y的左孩子找到，作为x的右孩子
+    if(right[x] != null)  //要是右孩子不是null
+        parent[left[y]] = x ; //将右孩子的父亲节点设置成x
+    parent[y] = parent[x] //将y的父亲节点设置成原来x的父亲节点
+    if(parent[y] == null) //要是y父亲节点是空的话
+        root[T] = y //将y作为当前根节点
+    else if(x == left[parent[x]]) //要是X是左孩子
+        left[parent[x]] = y //将y设置成x的父亲节点的左孩子，也就是使用y代替x之前的位置
+    else //否则就是右孩子
+        right[parent[x]] = y  //使用y替换x的位置
+    left[y] = x //讲x设置成y的左孩子（因为是左旋转）
+    parent[x] = y //将y设置成x的父亲
+
+右旋转
+RIGHT_REPORT(T, x)
+    x = left[y] //获取y的右孩子x
+    left[y] = right[x]  //将x的右孩子作为y的左孩子
+    if(right[x]) //要是x的右孩子不为null
+        parent[right[x]] = left[y] //讲右孩子的父亲指针指向y
+    parent[x] = parent[y] //让x的父亲指针指向根节点y的父亲节点
+    if(parent[y] == null) //要是y的父亲节点是空，说明y就是根节点
+        root[T] = x //讲x设置成树的根节点
+    else if(y == left[parent[y]]) //x是其父亲节点左孩子
+        left[parent[x]] = x //将y原来的父亲节点左指针指向x
+    else 
+        right[parent[x]] = x //使原来y的父亲节点的右指针指向x
+    right[x] = y //将x的右指针指向y
+    parent[y] = x //将y的父亲指针指向x
+
+
+插入操作(在此操作之前有个插入操作，相当于BST插入节点的形式，比较简单)
+RB_INSERT_NODE
+    while(color[parent[z]] == RED) //要是当前父亲节点颜色是红色
+        if(parent[z] == left[parent[parent[z]]]) //当前节点的父亲节点是其上一辈节点的左孩子
+            y=right[parent[parent[z]]] //记录下叔叔节点
+        //情况1，z叔叔的颜色是红色
+        if(color[y]==RED) //要是叔叔节点也是红色
+            color[y] = BLACK
+            color[parent[z]] = BLACK //将叔叔和父亲节点都变成黑色
+            color[parent[parent[z]]] = RED //祖父节点的颜色变成红色
+            z = parent[parent[z]] //将祖父节点的颜色通过z记录下来，这里重置了z的值！！！
+        //第二种情况z是右孩子，叔叔节点是黑色
+        else if(z == right[parent[z]])
+            z=parent[z] //重新设置z为当前根节点
+            LEFT_ROTATE(T,z) //进行一次坐旋转，进入第三种情况
+        //第三种情况，z是左孩子，叔叔节点为黑色
+            color[parent[z]] = BLACK //将父亲节点设置成黑色
+            color[parent[parent[z]]]=RED //祖父节点设置成红色
+            //进行右旋转
+            RIGHT_ROTATE(T, parent[parent[z]])
+        要是当前z节点的情况满足while循环条件，继续变色和旋转
+    color[root] = BLACK //重新设置根节点颜色
+
+删除某个节点，先设置删除后该位置的元素
+
+u是将被删除的节点，v是u的后继节点
+RB_TRANS(T, u, v)
+    if(u.p == null) //当前节点u的父亲是空的
+        T.root = v //将v设置成新的根节点
+    else if(u == u.p.left) //要删除的节点是左孩子
+        u.p.left = v //使用v替换u的位置
+    else u.p.right = v
+v.p = u.p //将v的父亲指针指向u的父亲节点
+
+//删除节点(前面操作和二叉查找树的删除差不多)
+RD_DELETE(T, z)
+    if(left[z] == null || right[z] == null)
+        y = z  //左孩子或者右孩子为空
+    else y = tree-sucessor(z) //否则的话，y就等于某个具体的孩子节点
+    if(left[y] != null)
+        x = left[y]  //使y的左指针指向x
+    else x = right[y]
+    parent[x] = parent[y] //使x的父节点指针指向y
+    if(parent[y] == null) 
+        root[T] = x //将x设置成新的根节点
+    else if(y == left[parent[y]])
+        left[parent[y]] = x 
+    else right[parent[y]] = x 
+    if(y!=z) 
+        key[z] = key[y]
+        y.left = z.left
+        y.left.p = y
+        y.color = z.color
+    if(color[y] == black)
+        RB_DELETE_FIXUP(T,x) //用来恢复红黑树的性质
+    return y
+
+RD_DELETE_FIX(T,z)
+    while(z != root && color[z] == black)
+        if(z == left[parent[z]]) //这里只考虑左子树，右子树的话同样的道理
+            w = right[parent[z]]
+            if(color[w] == RED) 
+                color[parent[z]] = RED
+                LEFT_ROTATE(T, parent[z])   
+                w = right[parent[x]]
+

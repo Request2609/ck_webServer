@@ -39,7 +39,6 @@ public :
     shared_ptr<channel>  handleAccept(int index, int listenFd) ;
     int clearCloseChannel(int fd, int index) ;
     void round(shared_ptr<channel>, shared_ptr<epOperation>, int fd) ;
-    int getNum() ;
     void initEventSet() ;
     shared_ptr<socketFd> getSock() ;
 private :

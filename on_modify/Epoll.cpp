@@ -45,10 +45,10 @@ void epOperation :: del(int epFd, int fd) {
 
 //将活跃的事件全加入到clList
 int epOperation :: wait(eventLoop* loop, int64_t timeout, int index, int listenFd) {
+    
     int eventNum ;
     struct epoll_event epFd_[200] ;
     try{
-     //   cout << "开始阻塞" << "==========>" << index << endl ;
         eventNum = epoll_wait(epFd, epFd_, 200, timeout) ;
     }catch(exception e) {
         cout << e.what() ;
@@ -62,11 +62,11 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout, int index, int listenF
         int fd = epFd_[i].data.fd ;
         //要是还未注册的事件
         if(fd == listenFd) {
-       //     cout << "接受连接" << endl ;
+            printf("123\n") ;
             loop->handleAccept(index, listenFd) ;
         }
         else {
-           // cout << "触发可读事件" << "     " << index << "-------->" <<listenFd <<"<--------------------"  << fd<< endl ;
+    //cout << "触发可读事件" << "     " << index << "-------->" <<listenFd <<"<--------------------"  << fd<< endl ;
             shared_ptr<channel> chl = loop->search(index, fd) ;
             loop->fillChannelList(index, chl) ;
         }

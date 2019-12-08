@@ -40,21 +40,20 @@ void epOperation :: del(int fd) {
 int epOperation :: wait(eventLoop* loop, int64_t timeout) {
     
     int listenFd = loop->getListenFd() ; 
+    ///cout << "epoll_wait" << endl ;
     int eventNum = epoll_wait(epFd, &epFds[0], epFds.capacity(), timeout) ;
     //将活跃的事件全部加入到事件列表中
     for(int i=0; i<eventNum; i++) {
         int fd = epFds[i].data.fd ;
         //要是还未注册的事件
         if(fd == listenFd) {
-            cout << "接受连接" << endl ;
             //接收并注册该连接
             loop->handleAccept() ;
             continue ;
         }
         //无论那种事件，否加入到活跃列表
         else {
-            cout << "处理事件" << endl ;
-           //cout << "事件数量："<< eventNum << "线程ID:" << this_thread::get_id()<< endl ;
+           ///cout << "事件数量："<< eventNum << "线程ID:" << this_thread::get_id()<< endl ;
             shared_ptr<channel> ch = loop->search(fd) ;
             if(ch == NULL) {
                 continue ;
