@@ -27,7 +27,6 @@ public:
         else {
             tmp.push_back(nums[index]) ;
             getRes(nums, target-nums[index], index+1, tmp) ;
-            getRes(nums, target-nums[index+1], index+2, tmp) ;
         }
     }
 };
