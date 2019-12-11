@@ -23,16 +23,22 @@ public :
     tree_node():
         data(-1),
         own_color(RED),
-        addtional_color(INVALID) {}
+        addtional_color(INVALID), 
+        root(nullptr),
+        left(nullptr),
+        right(nullptr),
+        parent(nullptr) 
+    {}
+
     ~tree_node() {}
 private :
     int data ;
     int own_color ;
     int addtional_color ;
-    shared_ptr<rb_tree>root ;
-    shared_ptr<rb_tree>left ;
-    shared_ptr<rb_tree>right ;
-    shared_ptr<rb_tree>parent ;
+    NODE root ;
+    NODE left ;
+    NODE right ;
+    NODE parent ;
 } ;
 
 class rb_tree {
@@ -42,6 +48,10 @@ public:
 public :
     void insert_tree(int info) ;
 private :
+    //右旋
+    void right_rotate(NODE cur) ;
+    void left_rotate(NODE cur) ;
+
     void insert_by_bst_way(NODE root, NODE cur) ;
 private :
     NODE root ;
