@@ -34,7 +34,7 @@ public :
 private :
     int data ;
     int own_color ;
-    int addtional_color ;
+    int original_color ;
     NODE root ;
     NODE left ;
     NODE right ;
@@ -47,14 +47,17 @@ public:
     ~rb_tree() {}
 public :
     void insert_tree(int info) ;
+    NODE find_node(int num) ;
+    void delete_node(NODE cur) ;
 private :
     //右旋
+    void rb_transform(NODE tmp1, NODE tmp2) ;
     void right_rotate(NODE cur) ;
     void left_rotate(NODE cur) ;
-
     void fix_up_insert(NODE cur) ;
-    void insert_by_bst_way(NODE root, NODE cur) ;
+    void insert_by_bst_way(NODE cur) ;
 private :
     NODE root ;
+    NODE null ;
 };
 
