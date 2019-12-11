@@ -1,4 +1,3 @@
-#pragma once
 #include <iostream>
 #include <memory>
 using namespace std ;
@@ -11,12 +10,8 @@ const int  RED = 2 ;
 //节点是复合颜色
 const int ALL = 3 ;
 
-class rb_tree ;
 class tree_node ;
-class rb_tree ;
-
 typedef shared_ptr<tree_node> NODE ;
-
 class tree_node {
     friend class rb_tree;
 public :
@@ -40,21 +35,38 @@ private :
     NODE right ;
     NODE parent ;
 } ;
-
-class rb_tree {
-public:
-    rb_tree():root(nullptr) {}
-    ~rb_tree() {}
+class tree_node ;
+typedef shared_ptr<tree_node> NODE ;
+class tree_node1 {
+    friend class rb_tree;
 public :
-    void insert_tree(int info) ;
-private :
-    //右旋
-    void right_rotate(NODE cur) ;
-    void left_rotate(NODE cur) ;
+    tree_node1():
+        data(-1),
+        own_color(RED),
+        addtional_color(INVALID), 
+        root(nullptr),
+        left(nullptr),
+        right(nullptr),
+        parent(nullptr) 
+    {}
 
-    void fix_up_insert(NODE cur) ;
-    void insert_by_bst_way(NODE root, NODE cur) ;
+    ~tree_node1() {}
 private :
-    NODE root ;
-};
+    int data ;
+    int own_color ;
+    int addtional_color ;
+    tree_node* root ;
+    tree_node* left ;
+    tree_node* right ;
+    tree_node* parent ;
+} ;
+
+
+
+int main()
+{
+    cout << sizeof(tree_node1) << endl ;
+    std::cout << sizeof(tree_node) << std::endl;
+    return 0;
+}
 
