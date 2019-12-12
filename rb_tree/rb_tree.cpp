@@ -149,13 +149,18 @@ void rb_tree :: delete_node(NODE cur) {
     }
 }
 
-//删除节点后，进行修复
+//删除节点后，进行修复(修复的当前节点是父亲节点的左孩子)
 //第一种情况:当前节点是黑+黑且兄弟节点是红色
 //第二种情况：当前节点是黑+黑色并且兄弟节点的两个子节点全为黑色
 //第三种情况：当前节点颜色是黑+黑色，兄弟节点是黑色，
 //兄弟的左子是红色，右子是黑色
 //第四种情况：当前节点颜色是黑+黑色，他的兄弟节点是黑色，但是兄弟节点的右子
 //是红色，兄弟节点左子是任意色
+//修复：当前节点是右孩子（与上面对称）
+//第一种情况：当前节点是黑色和黑色当前节点的兄弟是红色
+//第二种情况：当前节点是黑色+黑色，并且兄弟及其两个子节点是黑色
+//第三种情况：当前节点是黑色+黑色，并且兄弟的右子树的是红色，
+//左子树的颜色任意
 void rb_tree :: fix_delete_tree(NODE cur) {
     //判断只要传进来的的节点颜色是黑色，加上删除的父亲节点的黑色
     //当前节点是黑+黑色
@@ -204,8 +209,40 @@ void rb_tree :: fix_delete_tree(NODE cur) {
         }
         //当前节点是右子树，参考上面步骤同样的道理
         else {
-            
-        }
+            auto brother = cur->parent->right ;
+            //第一种情况
+            //将父亲节点染成红色，将兄弟节点染成黑色
+            //并且以父亲节点为支点进行右旋，旋转完成重新设置
+            //兄弟节点
+            if(brother->own_color == RED) {
+                cur->parent->own_color = RED ;               
+                brother->own_color = BLACK ;
+                right_rotate(cur->parent) ;
+                brother = cur->parent->left ;
+            }
+            //第二种情况，移动当前节点,到父亲节点
+            if(brother->left->own_color == BLACK  && 
+               brother->right->own_color == BLACK) {
+                brother->own_color = RED ;
+                cur = cur->parent ;
+            } 
+            //第三种情况，将兄弟节点颜色设置红色，将右子树染成黑色
+            if(brother->right->own_color == BLACK 
+               && brother->left->own_color == RED) {
+                brother->own_color = RED ;
+                brother->right->own_color = BLACK ;
+                left_rotate(brother) ;
+                brother = cur->parent->right ;
+            }
+            //将当前兄弟节点设置成父亲节点的颜色，
+            //讲父亲节点的颜色设置成黑色
+            //将兄弟节点的左节点设置成黑色
+            brother->own_color = cur->parent->own_color ;
+            cur->parent->own_color = BLACK ;
+            brother->left->own_color = BLACK ;
+            right_rotate(cur->parent) ;
+            cur = root ;
+        }   
     }    
 }
 
