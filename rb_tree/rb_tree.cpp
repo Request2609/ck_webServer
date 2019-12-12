@@ -109,22 +109,136 @@ NODE rb_tree :: find_node(int num) {
 
 //删除节点
 void rb_tree :: delete_node(NODE cur) {
+
+    NODE x ;
     auto tmp = cur ;
- //   if()
+    tmp->original_color = cur->own_color ;
+    //判断左孩子是否为叶子节点
+    if(cur->left == null) {
+        x = cur->right ;
+        //使用右子树替换当前删除节点
+        rb_transform(cur, cur->right) ;
+    }
+    else if(cur->right == null) {
+        x = cur->left ;   
+    }
+    else {     
+        //找右子树中的最小节点找到，插入到删除节点的位置
+        //这样右子树都比这个新节点大，左子树都比新节点小
+        //维持了二叉搜索树的性质
+        tmp = get_minimum(cur->right) ;
+        //记下原来的颜色
+        tmp->original_color = x->own_color ;
+        x = tmp->right ;
+        if(tmp->parent == cur) {
+            x->parent = tmp ;
+        }
+        //找的节点的父亲节点不是当前删除节点
+        else {
+            rb_transform(cur, cur->right) ;
+            tmp->right = cur->right ;
+            tmp->right->parent = tmp ;
+        }   
+        rb_transform(cur, tmp) ;
+        tmp->left = cur->left ;
+        tmp->left->parent = tmp ;
+        tmp->own_color = cur->own_color ;
+    }
+    if(tmp->original_color == BLACK) {
+        fix_delete_tree(x) ;
+    }
+}
+
+//删除节点后，进行修复
+//第一种情况:当前节点是黑+黑且兄弟节点是红色
+//第二种情况：当前节点是黑+黑色并且兄弟节点的两个子节点全为黑色
+//第三种情况：当前节点颜色是黑+黑色，兄弟节点是黑色，
+//兄弟的左子是红色，右子是黑色
+//第四种情况：当前节点颜色是黑+黑色，他的兄弟节点是黑色，但是兄弟节点的右子
+//是红色，兄弟节点左子是任意色
+void rb_tree :: fix_delete_tree(NODE cur) {
+    //判断只要传进来的的节点颜色是黑色，加上删除的父亲节点的黑色
+    //当前节点是黑+黑色
+    while(cur != root && cur->own_color == BLACK) {
+        //是当前父亲节点的左子树
+        if(cur == cur->parent->left) {
+            //获取兄弟节点 
+            auto brother = cur->parent->right ;
+            //如果兄弟节点是红色----->第一种情况
+            if(brother->own_color == RED) {
+                //将父亲节点染成红色，将兄弟节点设置成黑色
+                cur->parent->own_color = RED ;
+                brother->own_color = BLACK ;
+                //进行左旋
+                left_rotate(cur->parent) ;
+                //这个时候兄弟节点已经变成黑色了
+                brother = cur->parent->right ;   
+            }
+            //第二种情况
+            //从当前节点和兄弟节点中抽取一重黑色，给父亲节点
+            //重新设置当前节点的指
+            if(brother->left->own_color == BLACK 
+               && brother->right->own_color == RED) {
+                brother->own_color = RED ;
+                cur = cur->parent ;
+            }
+            //第三种情况
+            //将兄弟节点的染成红色
+            //将左孩子染成黑色
+            //进行右旋转
+            else if(brother->right->own_color == BLACK) {
+                brother->own_color = RED ;
+                brother->left->own_color = BLACK ;
+                right_rotate(brother) ;
+                brother = cur->parent->right ;
+            }      
+            //第四种情况
+            //将兄弟节点染成当前父亲节点的颜色，把当前节点父节点
+            //染成黑色，兄弟节点右子节点染成黑色。之后以当前节点的
+            //父亲节点为支点进行左旋
+            brother->own_color = cur->parent->own_color ;
+            cur->parent->own_color = BLACK ;
+            brother->right->own_color = BLACK ;   
+            right_rotate(cur->parent) ;
+            cur = root ;
+        }
+        //当前节点是右子树，参考上面步骤同样的道理
+        else {
+            
+        }
+    }    
+}
+
+//找当前出入节点中存的数值最小堆的节点
+NODE rb_tree :: get_minimum(NODE cur) {
+    auto  tmp = cur->left ;   
+    while(tmp != null) {
+        if(tmp->left == null) {
+            break ;
+        }              
+        else {
+            tmp = tmp->left ;
+        }
+    }
+    return tmp ;
 }
 
 //删除树中的一个节点
 void rb_tree :: rb_transform(NODE  cur, NODE son) {
+    //判断是不是根节点，是就讲儿子节点设置成根节点
     if(cur->parent == null) {
         son->parent = null ;
         root = cur ;
     }
+    //设置当前删除父亲节点的指向
     else if(cur == cur->parent->left){
+        
         cur->parent->left = son ;             
     }
     else if(cur == cur->parent->right){
         cur->parent->right = son ;
     }
+    //儿子节点的父亲设置成要删除节点的父亲
     son->parent = cur->parent ;
 } 
 

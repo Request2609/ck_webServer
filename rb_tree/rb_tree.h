@@ -23,7 +23,7 @@ public :
     tree_node():
         data(-1),
         own_color(RED),
-        addtional_color(INVALID), 
+        original_color(INVALID), 
         root(nullptr),
         left(nullptr),
         right(nullptr),
@@ -50,12 +50,14 @@ public :
     NODE find_node(int num) ;
     void delete_node(NODE cur) ;
 private :
+    NODE get_minimum(NODE cur) ;
     //右旋
     void rb_transform(NODE tmp1, NODE tmp2) ;
     void right_rotate(NODE cur) ;
     void left_rotate(NODE cur) ;
     void fix_up_insert(NODE cur) ;
     void insert_by_bst_way(NODE cur) ;
+    void fix_delete_tree(NODE cur) ;
 private :
     NODE root ;
     NODE null ;
