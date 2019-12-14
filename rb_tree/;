@@ -32,6 +32,7 @@ void rb_tree :: fix_up_insert(NODE cur) {
         return ;
     }
     NODE uncle ;
+
     //当父亲节点的颜色是红色
     while(cur->parent->own_color == RED) {
         //情况1父亲节点和叔叔节点都是红色，
@@ -41,98 +42,61 @@ void rb_tree :: fix_up_insert(NODE cur) {
         if(parent == parent->parent->left) {
             //记录叔叔节点
             uncle = parent->parent->right ;
-            if(uncle == null) {
-                //要是当前父亲节点是红色，修改颜色再自旋
-                if(parent->own_color == RED) {
-                    parent->parent->own_color = RED ;
-                    parent->own_color = BLACK ;
-                }
-                //对当前祖父节点进行左旋
-                left_rotate(parent->parent) ;
-            }
-            //叔叔节点是不是红色
-            else {
-                //叔叔节点是红色
-                if(uncle -> own_color == RED) {
-                    cout <<"---->"<<uncle->data << "        " << uncle->own_color << endl ;
-                    //将叔叔节点和父亲节点设置成红色
-                    uncle->own_color = BLACK ;
-                    parent->own_color = BLACK ;
-                    parent->parent->own_color = RED ;
-                    //移动当前插入的节点的指针游标,
-                    //因为可能会破坏上面子树的结构
-                    cur = parent->parent ;
-                }
-                else {
-                    break ;
-                }
-                cout << parent->parent->data << "     " << parent->parent->own_color  << endl ;
-            }
-            //判断当前节点的父亲节点指向是否为空
-            if(cur->parent == null) {
-                break ;
-            }   
-            //要是当前游标指向的节点是其父亲节点的右指针指向的位置
-            //处于第二种情况
-            if(cur->parent != null && 
-               cur == cur->parent->right) {
-                //将游标指向父亲节点
-                cur = cur->parent ;
-                left_rotate(cur) ;   
-            }
-            //判断cur节点的爷爷节点是否为空，为空就跳出循环
-            //第三种情况，变色加右旋就行
-            if(cur->parent->parent == null) {
-                cur->parent->own_color = BLACK ;
-                break ;
-            }
-            //不为空就变色
-            cur->parent->own_color = BLACK ;
-            cur->parent->parent->own_color = RED ;
-            //进行右旋
-            right_rotate(cur->parent->parent) ;
+            // }
+            ///else {
+            // uncle = parent->parent->left ;
+            // }
+            //要是叔叔节点是空的
+        if(uncle == null) {
+            //对当前祖父节点进行左旋
+            left_rotate(parent->parent) ;
         }
-        ///当前父亲节点是祖父节点的右孩子，和上面的情况相似
-        //稍作改动即可
+        //叔叔节点是不是红色
         else {
-            uncle = parent->parent->left ;
-            if(uncle == null) {
-                if(parent->own_color == RED) {
-                    parent->parent->own_color = RED ;
-                    parent->own_color = BLACK ;
-                }
-                right_rotate(parent->parent) ;
+            //叔叔节点是红色
+            if(uncle -> own_color == RED) {
+                //将叔叔节点和父亲节点设置成红色
+                uncle->own_color = BLACK ;
+                parent->own_color = BLACK ;
+                parent->parent->own_color = RED ;
+                //移动当前插入的节点的指针游标,
+                //因为可能会破坏上面子树的结构
+                cur = parent->parent ;
             }
-            else {
-
-                if(uncle->own_color == RED) {
-                    uncle->own_color = BLACK ;       
-                    parent->own_color = BLACK ;
-                    parent->parent->own_color = RED ;
-                    cur = parent->parent ;
-                }
-                else {
-                    break ;
-                }
-            }
-            if(cur->parent == null) {
-                break ;
-            }
-            if(cur->parent != null && 
-               cur == cur->parent->left) {
-                cur = cur->parent ;
-                left_rotate(cur) ;
-            }
-            if(cur->parent->parent == null) {
-                cur->parent->own_color = BLACK ;
-                break ;
-            }
+        }
+        //判断当前节点的父亲节点指向是否为空
+        if(cur->parent == null) {
+            break ;
+        }   
+        //要是当前游标指向的节点是其父亲节点的右指针指向的位置
+        //处于第二种情况
+        if(cur->parent != null && 
+           cur == cur->parent->right) {
+            //将游标指向父亲节点
+            cur = cur->parent ;
+            left_rotate(cur) ;   
+        }
+        //判断cur节点的爷爷节点是否为空，为空就跳出循环
+        //第三种情况，变色加右旋就行
+        if(cur->parent->parent == null) {
             cur->parent->own_color = BLACK ;
-            cur->parent->parent ->own_color = RED ;
-            right_rotate(cur->parent->parent) ;
+            break ;
+        }
+        //不为空就变色
+        cur->parent->own_color = BLACK ;
+        cur->parent->parent->own_color = RED ;
+        //进行右旋
+        right_rotate(cur->parent->parent) ;
+    }
+    else {
+        uncle = parent->parent->left ;
+        if(uncle == null) {
+            
         }
     }
-    root->own_color = BLACK ;
+}
+
+root->own_color = BLACK ;
 }   
 
 NODE rb_tree :: find_node(int num) {
@@ -408,33 +372,18 @@ void rb_tree :: insert_by_bst_way(NODE cur) {
     cur->left = null ;
     cur->right = null ;
     fix_up_insert(cur) ;
-    print_rb_tree() ;
-    cout << endl ;
-    cout << endl ;
 }
 
 void rb_tree :: print_rb_tree() {
     queue<shared_ptr<tree_node>> que ;
     que.push(root) ;
-    root->flag = -1 ;
     while(!que.empty()) {
         auto tmp = que.front() ;
         if(tmp->left != null) {
-            tmp->left->flag = 1 ;
             que.push(tmp->left) ;
         }
         if(tmp->right != null) {
-            tmp->right->flag = 0 ;
             que.push(tmp->right) ;
-        } 
-        if(tmp->flag == -1) {
-            cout << "根节点 " ;
-        }
-        else if(tmp->flag == 0) {
-            cout << "右子树  " ;
-        }
-        else {
-            cout << "左子树  " ;
         } 
         cout << "数据:" << tmp->data << "  " << "颜色:" << tmp->own_color << endl ;
         que.pop() ;

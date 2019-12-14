@@ -1,0 +1,2 @@
+g++ main.cpp rb_tree.cpp -o main -g
+./main

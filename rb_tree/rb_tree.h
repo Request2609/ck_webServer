@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <memory>
+#include <queue>
+
 using namespace std ;
 //附加颜色没有用处
 const int INVALID = 0 ;
@@ -39,6 +41,7 @@ private :
     NODE left ;
     NODE right ;
     NODE parent ;
+    int flag ;
 } ;
 
 class rb_tree {
@@ -49,6 +52,7 @@ public :
     void insert_tree(int info) ;
     NODE find_node(int num) ;
     void delete_node(NODE cur) ;
+    void print_rb_tree() ;
 private :
     NODE get_minimum(NODE cur) ;
     //右旋
