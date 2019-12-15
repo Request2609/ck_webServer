@@ -175,10 +175,10 @@ NODE rb_tree :: find_node(int num) {
 //删除节点
 void rb_tree :: delete_node(int num) {
 
-    NODE x ;
+    NODE x;
     NODE cur = get_delete_node(num) ;
     while(cur != null) {
-        cout << cur->data <<"<-----"<< endl ;
+        //getchar() ;
         auto tmp = cur ;
         tmp->original_color = cur->own_color ;
         //判断左孩子是否为叶子节点
@@ -189,41 +189,42 @@ void rb_tree :: delete_node(int num) {
         }
         else if(cur->right == null) {
             x = cur->left ;   
+            rb_transform(cur, cur->left) ;
+            //cout << cur->data << "   " << cur->left->data << endl ;
+            //exit(1) ;
         }
         else {     
             //找右子树中的最小节点找到，插入到删除节点的位置
             //这样右子树都比这个新节点大，左子树都比新节点小
             //维持了二叉搜索树的性质
-            
             tmp = get_minimum(cur->right) ;
             //记下原来的颜色
             tmp->original_color = tmp->own_color ;
             x = tmp->right ;
-            //cout << tmp->data << "    " <<tmp->own_color << endl ;
             if(tmp->parent == cur) {
                 x->parent = tmp ;
             }
             //找的节点的父亲节点不是当前删除节点
             else {
-                cout <<"---->"<< x->data << endl ;
-                rb_transform(cur, cur->right) ;
+                //使得后继节点指向要填补节点的父亲节点
+                rb_transform(tmp, tmp->right) ;
+                //使用预备填补删除节点位置的节点是指向要删除节点的子树
                 tmp->right = cur->right ;
                 tmp->right->parent = tmp ;
             }   
-            while('\n' != getchar()) ;
-            getchar() ;
+            //继承父亲节点
             rb_transform(cur, tmp) ;
             tmp->left = cur->left ;
             tmp->left->parent = tmp ;
             tmp->own_color = cur->own_color ;
         }
-
-        if(tmp->ort iginal_color == BLACK) {
-            cout << x->data << "     " << x->own_color << endl ;
+        if(tmp->original_color == BLACK) {
             fix_delete_tree(x) ;
         }
         cur = get_delete_node(num) ;
     }
+    print_rb_tree() ;
+    cout << "ok" << endl ;
 }
 
 NODE rb_tree :: get_delete_node(int num) {
@@ -285,6 +286,7 @@ void rb_tree :: fix_delete_tree(NODE cur) {
             //将左孩子染成黑色
             //进行右旋转
             else if(brother->right->own_color == BLACK) {
+                cout << "第三种情况" <<  endl;
                 brother->own_color = RED ;
                 brother->left->own_color = BLACK ;
                 right_rotate(brother) ;
@@ -302,7 +304,8 @@ void rb_tree :: fix_delete_tree(NODE cur) {
         }
         //当前节点是右子树，参考上面步骤同样的道理
         else {
-            auto brother = cur->parent->right ;
+            //cout << cur->parent->data <<"<+++++"<< endl ;
+            auto brother = cur->parent->left ;
             //第一种情况
             //将父亲节点染成红色，将兄弟节点染成黑色
             //并且以父亲节点为支点进行右旋，旋转完成重新设置
@@ -337,6 +340,7 @@ void rb_tree :: fix_delete_tree(NODE cur) {
             cur = root ;
         }   
     }    
+    cur->own_color = BLACK ;
 }
 
 //找当前出入节点中存的数值最小堆的节点
@@ -363,7 +367,6 @@ void rb_tree :: rb_transform(NODE  cur, NODE son) {
     }
     //设置当前删除父亲节点的指向
     else if(cur == cur->parent->left){
-        
         cur->parent->left = son ;             
     }
     else if(cur == cur->parent->right){
