@@ -33,11 +33,13 @@ void rb_tree :: fix_up_insert(NODE cur) {
     }
     NODE uncle ;
     //当父亲节点的颜色是红色
-    while(cur->parent->own_color == RED) {
+    while(cur->parent != null && cur->parent->own_color == RED) {
+        //cout << "cur----->" << cur->data << "    颜色:"  << cur->own_color << endl ;
         //情况1父亲节点和叔叔节点都是红色，
         //则插入点违反了红黑树性质
         //并且要是爷爷节点左孩子
         //当前父亲节点要是爷爷节点的左孩子
+        parent = cur->parent ;  
         if(parent == parent->parent->left) {
             //记录叔叔节点
             uncle = parent->parent->right ;
@@ -48,13 +50,12 @@ void rb_tree :: fix_up_insert(NODE cur) {
                     parent->own_color = BLACK ;
                 }
                 //对当前祖父节点进行左旋
-                left_rotate(parent->parent) ;
+                right_rotate(parent->parent) ;
             }
             //叔叔节点是不是红色
             else {
                 //叔叔节点是红色
                 if(uncle -> own_color == RED) {
-                    cout <<"---->"<<uncle->data << "        " << uncle->own_color << endl ;
                     //将叔叔节点和父亲节点设置成红色
                     uncle->own_color = BLACK ;
                     parent->own_color = BLACK ;
@@ -66,31 +67,39 @@ void rb_tree :: fix_up_insert(NODE cur) {
                 else {
                     break ;
                 }
-                cout << parent->parent->data << "     " << parent->parent->own_color  << endl ;
             }
-            //判断当前节点的父亲节点指向是否为空
-            if(cur->parent == null) {
+            //判断当前节点的父亲节点的父亲节点指向是否为空
+            if(cur->parent == null || cur->parent->parent == null) {
                 break ;
-            }   
+            } 
             //要是当前游标指向的节点是其父亲节点的右指针指向的位置
             //处于第二种情况
+            //获取叔叔节点
+            if(cur->parent == cur->parent->parent->left) {
+                uncle = cur->parent->parent->right ;
+            }
+            else {
+                uncle = cur->parent->parent->left ;
+            }
             if(cur->parent != null && 
-               cur == cur->parent->right) {
+               cur == cur->parent->right && uncle->own_color == BLACK) {
                 //将游标指向父亲节点
                 cur = cur->parent ;
                 left_rotate(cur) ;   
             }
             //判断cur节点的爷爷节点是否为空，为空就跳出循环
             //第三种情况，变色加右旋就行
-            if(cur->parent->parent == null) {
+            if(cur->parent == null || cur->parent->parent == null) {
                 cur->parent->own_color = BLACK ;
                 break ;
             }
-            //不为空就变色
-            cur->parent->own_color = BLACK ;
-            cur->parent->parent->own_color = RED ;
-            //进行右旋
-            right_rotate(cur->parent->parent) ;
+            //叔叔节点是黑色，就需要旋转
+            if(uncle->own_color == BLACK && cur == cur->parent->left) {
+                cur->parent->own_color = BLACK ;
+                cur->parent->parent->own_color = RED ;
+                //进行右旋
+                right_rotate(cur->parent->parent) ;
+            }
         }
         ///当前父亲节点是祖父节点的右孩子，和上面的情况相似
         //稍作改动即可
@@ -101,10 +110,9 @@ void rb_tree :: fix_up_insert(NODE cur) {
                     parent->parent->own_color = RED ;
                     parent->own_color = BLACK ;
                 }
-                right_rotate(parent->parent) ;
+                left_rotate(parent->parent) ;
             }
             else {
-
                 if(uncle->own_color == RED) {
                     uncle->own_color = BLACK ;       
                     parent->own_color = BLACK ;
@@ -115,11 +123,20 @@ void rb_tree :: fix_up_insert(NODE cur) {
                     break ;
                 }
             }
-            if(cur->parent == null) {
+            if(cur->parent == null || cur->parent->parent == null) {
                 break ;
             }
+
+            if(cur->parent == cur->parent->parent->left) {
+                uncle = cur->parent->parent->right ;
+            }
+            else {
+                uncle = cur->parent->parent->left ;
+            }
+            cout << cur->data << "   " <<cur->own_color << endl ;
+            
             if(cur->parent != null && 
-               cur == cur->parent->left) {
+               cur == cur->parent->right && uncle->own_color == BLACK) {
                 cur = cur->parent ;
                 left_rotate(cur) ;
             }
@@ -127,9 +144,13 @@ void rb_tree :: fix_up_insert(NODE cur) {
                 cur->parent->own_color = BLACK ;
                 break ;
             }
-            cur->parent->own_color = BLACK ;
-            cur->parent->parent ->own_color = RED ;
-            right_rotate(cur->parent->parent) ;
+              
+            if(uncle->own_color == BLACK && cur == cur->parent->left) {
+                cur->parent->own_color = BLACK ;
+                cur->parent->parent->own_color = RED ;
+                //进行右旋
+                right_rotate(cur->parent->parent) ;
+            }
         }
     }
     root->own_color = BLACK ;
@@ -152,45 +173,73 @@ NODE rb_tree :: find_node(int num) {
 }
 
 //删除节点
-void rb_tree :: delete_node(NODE cur) {
+void rb_tree :: delete_node(int num) {
 
     NODE x ;
-    auto tmp = cur ;
-    tmp->original_color = cur->own_color ;
-    //判断左孩子是否为叶子节点
-    if(cur->left == null) {
-        x = cur->right ;
-        //使用右子树替换当前删除节点
-        rb_transform(cur, cur->right) ;
-    }
-    else if(cur->right == null) {
-        x = cur->left ;   
-    }
-    else {     
-        //找右子树中的最小节点找到，插入到删除节点的位置
-        //这样右子树都比这个新节点大，左子树都比新节点小
-        //维持了二叉搜索树的性质
-        tmp = get_minimum(cur->right) ;
-        //记下原来的颜色
-        tmp->original_color = x->own_color ;
-        x = tmp->right ;
-        if(tmp->parent == cur) {
-            x->parent = tmp ;
-        }
-        //找的节点的父亲节点不是当前删除节点
-        else {
+    NODE cur = get_delete_node(num) ;
+    while(cur != null) {
+        cout << cur->data <<"<-----"<< endl ;
+        auto tmp = cur ;
+        tmp->original_color = cur->own_color ;
+        //判断左孩子是否为叶子节点
+        if(cur->left == null) {
+            x = cur->right ;
+            //使用右子树替换当前删除节点
             rb_transform(cur, cur->right) ;
-            tmp->right = cur->right ;
-            tmp->right->parent = tmp ;
-        }   
-        rb_transform(cur, tmp) ;
-        tmp->left = cur->left ;
-        tmp->left->parent = tmp ;
-        tmp->own_color = cur->own_color ;
+        }
+        else if(cur->right == null) {
+            x = cur->left ;   
+        }
+        else {     
+            //找右子树中的最小节点找到，插入到删除节点的位置
+            //这样右子树都比这个新节点大，左子树都比新节点小
+            //维持了二叉搜索树的性质
+            
+            tmp = get_minimum(cur->right) ;
+            //记下原来的颜色
+            tmp->original_color = tmp->own_color ;
+            x = tmp->right ;
+            //cout << tmp->data << "    " <<tmp->own_color << endl ;
+            if(tmp->parent == cur) {
+                x->parent = tmp ;
+            }
+            //找的节点的父亲节点不是当前删除节点
+            else {
+                cout <<"---->"<< x->data << endl ;
+                rb_transform(cur, cur->right) ;
+                tmp->right = cur->right ;
+                tmp->right->parent = tmp ;
+            }   
+            while('\n' != getchar()) ;
+            getchar() ;
+            rb_transform(cur, tmp) ;
+            tmp->left = cur->left ;
+            tmp->left->parent = tmp ;
+            tmp->own_color = cur->own_color ;
+        }
+
+        if(tmp->ort iginal_color == BLACK) {
+            cout << x->data << "     " << x->own_color << endl ;
+            fix_delete_tree(x) ;
+        }
+        cur = get_delete_node(num) ;
     }
-    if(tmp->original_color == BLACK) {
-        fix_delete_tree(x) ;
+}
+
+NODE rb_tree :: get_delete_node(int num) {
+    NODE cur = root ;
+    while(cur != null) {
+        if(cur->data == num) {
+            return cur ;
+        }
+        else if(cur->data > num) {
+            cur = cur->left ;
+        }
+        else {
+           cur = cur->right ; 
+        }
     }
+    return null ;
 }
 
 //删除节点后，进行修复(修复的当前节点是父亲节点的左孩子)
@@ -292,8 +341,9 @@ void rb_tree :: fix_delete_tree(NODE cur) {
 
 //找当前出入节点中存的数值最小堆的节点
 NODE rb_tree :: get_minimum(NODE cur) {
-    auto  tmp = cur->left ;   
+    auto  tmp = cur ;   
     while(tmp != null) {
+        cout << tmp->data << endl ;
         if(tmp->left == null) {
             break ;
         }              
@@ -386,7 +436,7 @@ void rb_tree::right_rotate(NODE cur) {
 void rb_tree :: insert_by_bst_way(NODE cur) {
     auto tmp = root ;
     while(tmp != null && cur != null) {
-        if(tmp->data > cur->data) {
+        if(tmp->data >= cur->data) {
             if(tmp->left == null) {
                 cur->left = tmp->left ;
                 tmp->left = cur ;
@@ -408,9 +458,7 @@ void rb_tree :: insert_by_bst_way(NODE cur) {
     cur->left = null ;
     cur->right = null ;
     fix_up_insert(cur) ;
-    print_rb_tree() ;
-    cout << endl ;
-    cout << endl ;
+   // print_rb_tree() ;
 }
 
 void rb_tree :: print_rb_tree() {
@@ -436,7 +484,9 @@ void rb_tree :: print_rb_tree() {
         else {
             cout << "左子树  " ;
         } 
-        cout << "数据:" << tmp->data << "  " << "颜色:" << tmp->own_color << endl ;
+        cout << "数据:" << tmp->data << "  " << "颜色:"  ;
+        if(tmp->own_color == 1) cout << "黑色" << endl ;
+        else cout << "红色" << endl ;
         que.pop() ;
     }
 }

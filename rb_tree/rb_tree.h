@@ -51,12 +51,13 @@ public:
 public :
     void insert_tree(int info) ;
     NODE find_node(int num) ;
-    void delete_node(NODE cur) ;
+    void delete_node(int num) ;
     void print_rb_tree() ;
 private :
     NODE get_minimum(NODE cur) ;
     //右旋
     void rb_transform(NODE tmp1, NODE tmp2) ;
+    NODE get_delete_node(int num) ;
     void right_rotate(NODE cur) ;
     void left_rotate(NODE cur) ;
     void fix_up_insert(NODE cur) ;
