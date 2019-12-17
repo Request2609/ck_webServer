@@ -133,7 +133,6 @@ void rb_tree :: fix_up_insert(NODE cur) {
             else {
                 uncle = cur->parent->parent->left ;
             }
-            cout << cur->data << "   " <<cur->own_color << endl ;
             
             if(cur->parent != null && 
                cur == cur->parent->right && uncle->own_color == BLACK) {
@@ -223,8 +222,6 @@ void rb_tree :: delete_node(int num) {
         }
         cur = get_delete_node(num) ;
     }
-    print_rb_tree() ;
-    cout << "ok" << endl ;
 }
 
 NODE rb_tree :: get_delete_node(int num) {
@@ -286,7 +283,6 @@ void rb_tree :: fix_delete_tree(NODE cur) {
             //将左孩子染成黑色
             //进行右旋转
             else if(brother->right->own_color == BLACK) {
-                cout << "第三种情况" <<  endl;
                 brother->own_color = RED ;
                 brother->left->own_color = BLACK ;
                 right_rotate(brother) ;
@@ -347,7 +343,6 @@ void rb_tree :: fix_delete_tree(NODE cur) {
 NODE rb_tree :: get_minimum(NODE cur) {
     auto  tmp = cur ;   
     while(tmp != null) {
-        cout << tmp->data << endl ;
         if(tmp->left == null) {
             break ;
         }              
