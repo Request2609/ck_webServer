@@ -1,0 +1,67 @@
+Microsoft (R) Macro Assembler Version 5.10                  11/7/19 18:56:49
+                                                             Page     1-1
+
+
+       1				//将大写字母转换成小写字母
+TEST4.ASM(1): warning A4001: Extra characters on line
+       2				assume cs:code, ds:data, ss:stack
+TEST4.ASM(2): error A2009: Symbol not defined: STACK
+       3				
+       4 0000				data segment 
+       5 0000  48 45 4C 4C 4F		    db 'HELLO'
+       6 0005				data ends
+       7				
+       8				
+       9 0000				code segment 
+      10				    
+      11 0000				start :
+      12 0000  B8 ---- R		    mov ax, data 
+      13 0003  8E D8			    mov ds, ax 
+      14 0005  BC 0008			    mov sp, 8
+      15				    //将大写字母转换成小写字
+					母
+TEST4.ASM(15): warning A4001: Extra characters on line
+      16 0008  83 26 0000 10		    and ds:[0], 00010000b
+TEST4.ASM(16): error A2035: Operand must have size
+      17 000D  83 26 0001 10		    and ds:[1], 00010000b
+TEST4.ASM(17): error A2035: Operand must have size
+      18 0012  83 26 0002 10		    and ds:[2], 00010000b
+TEST4.ASM(18): error A2035: Operand must have size
+      19 0017  83 26 0003 10		    and ds:[3], 00010000b
+TEST4.ASM(19): error A2035: Operand must have size
+      20 001C  83 26 0004 10		    and ds:[4], 00010000b
+TEST4.ASM(20): error A2035: Operand must have size
+      21 0021				code ends 
+      22				
+      23				end start
+Microsoft (R) Macro Assembler Version 5.10                  11/7/19 18:56:49
+                                                             Symbols-1
+
+
+Segments and Groups:
+
+                N a m e         	Length	 Align	Combine Class
+
+CODE . . . . . . . . . . . . . .  	0021	PARA	NONE	
+DATA . . . . . . . . . . . . . .  	0005	PARA	NONE	
+STACK  . . . . . . . . . . . . .  	0000	FAR	NONE	
+
+Symbols:            
+
+                N a m e         	Type	 Value	 Attr
+
+START  . . . . . . . . . . . . .  	L NEAR	0000	CODE
+
+@CPU . . . . . . . . . . . . . .  	TEXT  0101h		
+@FILENAME  . . . . . . . . . . .  	TEXT  TEST4		
+@VERSION . . . . . . . . . . . .  	TEXT  510		
+
+
+     23 Source  Lines
+     23 Total   Lines
+      9 Symbols
+
+  47410 + 463929 Bytes symbol space free
+
+      2 Warning Errors
+      6 Severe  Errors

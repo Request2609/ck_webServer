@@ -1,0 +1,31 @@
+
+DATA SEGMENT 
+    OBUF DB "hhhh"
+DATA ENDS
+
+CODE SEGMENT 
+    ASSUME CS:CODE, DS:DATA
+START:
+    MOV AX, DATA 
+    MOV DS, AX
+    MOV AH, 06H
+    MOV AL, 0
+    MOV BH, 07H
+    MOV CH, 18H
+    MOV CL, 0
+    MOV DH, 19D
+    MOV DL, 79
+    INT 10H
+
+    MOV AH, 13H
+    MOV BL, 9EH
+    MOV BH, 0
+    MOV BP, OFFSET OBUF
+    MOV AL, 1
+    MOV CX, 5
+    MOV DH, 12D
+    MOV DL, 32D
+    INT 10H
+       
+CODE ENDS
+    END START
