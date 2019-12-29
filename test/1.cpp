@@ -1,22 +1,24 @@
 #include <iostream>
 #include <future>
 #include <thread>
+#include <fcntl.h>
+#include <string.h>
+#include <unistd.h>
 using namespace std ;
 
-class A {
-public :
-    void print() {
-        cout << "hello " << endl ;
+void func() {
+    int fd = open("hello", O_RDWR) ;
+    if(fd < 0) {
+    cout <<"打开文件" << " 错误信息:" <<strerror(errno) << endl ;
     }
-} ;
-void print(shared_ptr<A>a) {
-    a->print() ;
+    getchar() ;
+    close(fd) ;
 }
     
 int main() {  
-    shared_ptr<A>a = make_shared<A>() ;
-    thread t1(print, a) ;
-    cout << "world" << endl ;
+    thread t1(func) ;
+    thread t2(func) ;
     t1.join() ;
+    t2.join() ;
 }
 

@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
     servaddr.sin_port = htons(atoi(argv[2])) ;
     int flag = 1 ;
     servaddr.sin_addr.s_addr = inet_addr(argv[1]) ;
-    int ret = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag)) ;
-    ret = bind(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) ;
+    int ret = bind(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) ;
+    ret = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag)) ;
     std :: cout << strerror(errno) << std:: endl ;
     assert(ret!=-1) ;
     assert(ret!=-1) ;
