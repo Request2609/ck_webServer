@@ -10,8 +10,8 @@ void thread_func(int fd) {
     char buf[4096] ;
     bzero(buf, sizeof(buf)) ;
     long a = pthread_self() ;
-    sprintf(buf, "aaaaaabbbbbbccccccccpppppppppp这是线程  %ld\n", a) ;
-    std::cout << a << std::endl ;
+    sprintf(buf, "这是线程  %ld\n", a) ;
+    //std::cout << a << std::endl ;
    // std::lock_guard<std::mutex>lk(mute) ;
     for(int i=0; i<100; i++) {
         write(fd, buf, sizeof(buf)) ;
