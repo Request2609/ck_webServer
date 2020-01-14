@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/changke/code/ck_webServer/the_best/test/demo1/main.cpp
+iostream
+-
+test.h
+/home/changke/code/ck_webServer/the_best/test/demo1/test.h
+
+/home/changke/code/ck_webServer/the_best/test/demo1/test.cpp
+iostream
+-
+test.h
+/home/changke/code/ck_webServer/the_best/test/demo1/test.h
+
+/home/changke/code/ck_webServer/the_best/test/demo1/test.h
+

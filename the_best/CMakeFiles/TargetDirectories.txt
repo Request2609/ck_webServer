@@ -1,0 +1,3 @@
+/home/changke/code/ck_webServer/the_best/CMakeFiles/rebuild_cache.dir
+/home/changke/code/ck_webServer/the_best/CMakeFiles/Server.dir
+/home/changke/code/ck_webServer/the_best/CMakeFiles/edit_cache.dir
