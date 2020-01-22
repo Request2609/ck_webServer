@@ -42,14 +42,16 @@ public :
     void setWakeCall(wakeCall cb) {
         wakeCb = move(cb) ;
     }
-
     void setFd(int fd) { 
         cliFd = fd ; 
     }   
-
+    void chlCallBack(callBack cb) {
+        readCallBack = cb ;
+    }
     void setReadCallBack(callBack& cb) {
         readCallBack = cb ;
     }
+    void print() ;
     
     void setWriteCallBack(callBack& cb) {
         writeCallBack = cb ;
@@ -61,6 +63,7 @@ public :
     void setTimeoutCallBack(callBack& cb) {
         timeoutCallBack = cb ;
     }
+    void  clearBuffer() ;
     void setSock(std::shared_ptr<socketFd>sock) { this->sock = sock; }
     shared_ptr<epOperation> getEp() { return ep ; }
     void setEp(shared_ptr<epOperation> epo){ ep = epo ;}

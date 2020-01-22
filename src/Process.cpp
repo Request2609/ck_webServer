@@ -267,6 +267,10 @@ int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>
         int fd = chl->getFd() ;
         for(auto s=mp.begin(); s!=mp.end(); s++) {
             if(s->first == fd) {
+                int id = s->second->getId() ;
+                auto tmp = objectPool<channel>::getPool() ;
+               //归还对象
+                tmp->returnObject(s->second, id) ;
                 mp.erase(s) ;
                 break ;
             }
@@ -412,7 +416,6 @@ int process :: messageSend(const string& tmp, channel* chl) {
         paths = DEFAULT_PATH ;
         string type = getFileType() ;
         responseHead(chl, type, len, 200, "OK") ;
-
         //将文件信息全部写入读缓冲区
         readFile(DEFAULT_PATH, chl) ;
         //设置发送文件的对象!
@@ -522,7 +525,8 @@ void process :: sendNotFind(channel* chl) {
     responseHead(chl, "text/html", len, 404, "NOT FOUND") ;
     readFile("404.html", chl) ;
 }
-/*
+
+
 void process :: readFile(const char* file, channel* chl) {
     int fd = open(file, O_RDONLY)  ;
     if(fd < 0) {
@@ -541,7 +545,7 @@ void process :: readFile(const char* file, channel* chl) {
             cout << __FILE__ << "     " << __LINE__ << endl ;
             return ;
         }
-        if(len == 0) {
+       if(len == 0) {
             break ;
         }
         for(int i=0; i<len; i++) {
@@ -550,11 +554,11 @@ void process :: readFile(const char* file, channel* chl) {
         sum+= len ;
         bzero(buf, sizeof(buf)) ;
     }
-
     chl->setLen(sum+1) ;
     close(fd) ;
 }
-*/
+
+/*
 //读文件
 void process :: readFile(const char* file, channel* chl) {
     int fd = open(file, O_RDONLY)  ;
@@ -571,6 +575,8 @@ void process :: readFile(const char* file, channel* chl) {
     //读文件
     int sum = 0 ;
     char * bufp = (char*)mmap(NULL, stat.st_size, PROT_READ, MAP_SHARED, fd, 0) ;
+    cout << "文件内容!" << endl;
+    cout << bufp << endl ;
     len = strlen(bufp) ;
     for(int i=0; i<len; i++) {
         bf->append(buf[i]) ;
@@ -580,6 +586,7 @@ void process :: readFile(const char* file, channel* chl) {
     munmap(bufp, stat.st_size) ;
     close(fd) ;
 }
+*/
 //资源是否存在
 int process :: isExist() {
     if(access(paths.c_str(), F_OK) != -1) {

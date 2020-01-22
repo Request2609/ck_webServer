@@ -53,6 +53,7 @@ void connection :: setWakeChlCall(shared_ptr<channel>&chl) {
 void connection :: setCallBackToChannel(shared_ptr<channel> channel_) {
     int flag = 0 ;
     if(readCallBack != nullptr) {
+        cout << "给对象设置回调函数!" << endl ;
         flag = 1 ;
         channel_->setReadCallBack(readCallBack) ;
     }

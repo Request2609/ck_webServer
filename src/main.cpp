@@ -24,7 +24,7 @@ void onRead(channel* chl, vector<pair<int, shared_ptr<channel>>>&tmp) {
     //将信息获取完成，再解析
     //解析请求头
     process pro ;
-    chl->getReadBuffer()->getCanProcess() ;
+    //chl->getReadBuffer()->getCanProcess() ;
     pro.requestHeader(chl, tmp) ;    
 }
 

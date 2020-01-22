@@ -24,6 +24,7 @@ class socketFd ;
 class eventLoop {   
     //线程号码
     typedef std::vector<vector<pair<int, shared_ptr<channel>>>> channelMap;
+    typedef std::function<void(channel* chl, vector<pair<int, shared_ptr<channel>>>&)> callBack ;
 public:
     eventLoop() ;
     ~eventLoop() ;
@@ -39,11 +40,15 @@ public :
     int fillChannelList(int index, shared_ptr<channel>chl) ;
     shared_ptr<channel>  handleAccept(int index, int listenFd) ;
     int clearCloseChannel(int fd, int index) ;
-    void round(shared_ptr<channel>, shared_ptr<epOperation>, int fd) ;
+    void round(shared_ptr<channel>, shared_ptr<epOperation>) ;
     int getNum() ;
     void initEventSet() ;   
+    void printClList() ;
+    channelMap getMap() { return clList ;}
     shared_ptr<socketFd> getSock() ;
+    static mutex mute ;
 private :
+    callBack readCall ;
     //对象池
     shared_ptr<objectPool<channel>> obp ;
     int objectNum ;
@@ -51,7 +56,6 @@ private :
     string port ;
     shared_ptr<threadPool>pool ;
     int threadNums ;
-    mutex mute ;
     //线程
     vector<thread> threads ;
     //线程loop中的重要信息

@@ -1,7 +1,7 @@
 #include "Epoll.h"
 
 void epOperation :: add(int fd, int events) {
- //   cout << "添加可读事件: " << fd << endl ;
+       cout << "添加可读事件:--------> " << fd << endl ;
     struct epoll_event ev ;
     ev.data.fd = fd ;
     ev.events = events ;
@@ -28,17 +28,18 @@ void epOperation :: change(int fd, int events) {
 }
 
 void epOperation :: del(int fd) {
-   // cout << "关闭链接" << endl ;
+   cout << "关闭链接---->" << fd<<endl ;
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
-    //    std :: cout << __FILE__ << "   " << __LINE__ << "      " << strerror(errno)<< std :: endl ;
+        std :: cout << __FILE__ << "   " << __LINE__ << "      " << strerror(errno)<< std :: endl ;
         return  ;
     }
    //cout << "关闭完成          " << fd<<endl ;
     fds -- ;
 }
 void epOperation :: del(int epFd, int fd) {
+    cout << "关闭链接"<< fd<<"   epfd:"<< epFd<<std::this_thread::get_id() << endl ;
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
-   //     std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
+        std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
         return  ;
     }
 }
@@ -48,6 +49,12 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout, int index, int listenF
     int eventNum ;
     struct epoll_event epFd_[200] ;
     try{
+        cout << "阻塞......"<<index << endl ;
+        auto cl = loop->getMap() ;
+        for(auto s:cl[index]) {
+           cout << getPort(s.first) << endl ;
+        }
+    
         eventNum = epoll_wait(epFd, epFd_, 200, timeout) ;
     }catch(exception e) {
         cout << e.what() ;
@@ -61,13 +68,27 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout, int index, int listenF
         int fd = epFd_[i].data.fd ;
         //要是还未注册的事件
         if(fd == listenFd) {
+            cout<< "发生时间的监听套接字<-------------"<< index<< endl ;
             loop->handleAccept(index, listenFd) ;
         }
         else {
+            cout << "有可读事件============>" << fd <<"--------->"<< index<< endl ;
             shared_ptr<channel> chl = loop->search(index, fd) ;
+            cout << "查找到的fd:========>" << chl->getFd() << endl ;
             loop->fillChannelList(index, chl) ;
         }
     }
     return eventNum ;
 }
+
+int epOperation::getPort(int fd) {
+
+    struct sockaddr_in sock ;
+    socklen_t len ;
+    len=sizeof(sock) ;
+    getpeername(fd, (struct sockaddr*)&sock, &len) ;
+    int port = ntohs(sock.sin_port)  ;
+    return port ;
+}
+
 

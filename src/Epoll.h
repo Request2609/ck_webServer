@@ -21,6 +21,7 @@ public :
     ~epOperation() { close(epFd) ; }
     static void del(int epFd, int fd) ;
 public :
+    int getPort(int fd) ;
     int getEpFd() {return epFd ;}
     int  wait(eventLoop* loop, int64_t timeout, int index, int listenFd) ;
     void add(int fd, int events) ;

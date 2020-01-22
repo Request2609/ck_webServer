@@ -1,29 +1,22 @@
 #include "SendFile.h"
 
 int sendFile :: sendInfo(channel* chl) {
-
     int ret = 0 ;
     int index= 0 ;
     string s = "" ;
     char buf[SEND_SIZE] ;
     bzero(buf, sizeof(buf)) ;
     int cliFd = chl->getFd() ;
-    /*struct sockaddr_in local ;
-    socklen_t lens = sizeof(local) ;
-    getpeername(cliFd, (struct sockaddr*)&local, &lens) ;
-    cout << "PORT:" << ntohs(local.sin_port) << endl ;
-*/
     Buffer* bf = chl->getWriteBuffer() ;
-    int len = bf->getSize() ;
-    //cout << "发送消息" <<"      长度:" << len << endl ;
+    int len = bf->getSize();
+    cout << len << "     " << SEND_SIZE << endl;
     if(len <= SEND_SIZE) {
         for(int i=0; i<len; i++) {
             buf[index] = (*bf)[i] ;
             index ++ ;
         }
         buf[index] = '\0' ;
-        ret = writen(cliFd, buf, sizeof(buf)) ;
-       // cout <<"已经发送的长度:"<< ret << endl ;
+        ret = write(cliFd, buf, sizeof(buf)) ;
         //有数据没有被发送
         if(errno == EAGAIN || ret < len) {
             s = buf ;
@@ -40,7 +33,7 @@ int sendFile :: sendInfo(channel* chl) {
             cout << __LINE__ << "   " << __FILE__ << endl ;
             return -1 ;
         }
-     //   cout << "发送完成"<< endl ;
+        cout << "关闭套接字信息"<< endl ;
         over(chl) ;
         return 0 ;
     }
@@ -98,7 +91,6 @@ int sendFile :: sendInfo(channel* chl) {
 
 void sendFile :: over(channel* chl) {
     if(chl == nullptr) {
-        cout << "kong de " << endl ;
     }
    int fd = chl->getFd() ; 
    chl->getEp()->del(fd) ;

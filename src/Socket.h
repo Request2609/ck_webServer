@@ -12,7 +12,7 @@
 #include <sys/un.h>
 #include<string.h>
 #include<assert.h>
-#define BACKLOG 1024
+#define BACKLOG 2048
 #define PATH "/tmp/sss"
 using namespace std ;
 //创建Unix套接字,连接服务器

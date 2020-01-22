@@ -10,11 +10,10 @@ channel :: channel() {
 
 //接收新连接
 int channel::handleAccept(int servFd) {
-
     //设置监听套接字
+    
     sock->setListenFd(servFd) ;
     //获取新客户端连接
-    
     cliFd = sock->acceptSocket() ;
     sock->setNoBlocking(cliFd) ;
     setEvents(READ) ;
@@ -38,6 +37,11 @@ int channel :: sendMsg() {
      return 1 ;  
 }
 
+void channel::clearBuffer() {
+    input.bufferClear() ;
+    output.bufferClear() ;
+}
+
 int channel :: readMsg() {
     return 1 ;
 }
@@ -52,16 +56,19 @@ bool channel :: operator==(channel& chl) {
 int channel :: handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp, int index) {    
     //将唤醒描述符中的信号读出来
     if(fd == wakeFd) {
+        cout << "唤醒线程？？？？"<< endl ;
         int ret ;
         read(fd, &ret, sizeof(ret)) ;
         return 1;
     }
     if(events&EPOLLIN) {
+        cout << "可读事件"<< endl ;
         int n = handleRead(tmp) ;
         if(n < 0) {
             return -1;
         }
         if(n == 0) {
+            cout << "清空事件 " << endl ;
             for(auto s = tmp.begin(); s!=tmp.end(); s++) {
                 if(s->first == fd) {
                     //归还对象
@@ -85,17 +92,16 @@ int channel :: handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp, 
     return 1 ;
 }
 
+
 void channel :: delFd(int fd, map<int, shared_ptr<channel>>& tmp) {
     auto ret = tmp.find(fd) ;
     if(ret == tmp.end()) {
-        cout << "没找到套接字" << __LINE__ << "     " << __FILE__ << endl ;
         return ;
     }
     tmp.erase(ret) ;
 }
 //执行写回调
 int channel :: handleWrite() {
-    cout << "准备发送数据" << endl ;
     //写缓冲区
     char buf[SIZE] ;
     int j = 0 ;
@@ -165,6 +171,5 @@ int channel :: handleRead(vector<pair<int, shared_ptr<channel>>>&tmp) {
     if(input.getCanProcess() == true) {  
         readCallBack(this, tmp) ;
     }
-    //cout <<"发送完成" << endl ;
     return 1 ;
 }

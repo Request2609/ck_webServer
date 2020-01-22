@@ -34,6 +34,9 @@ public :
     void setCloseCallBack(callBack cb) ;
     void setReadCallBack(callBack cb) ;
     void setTimeoutCallBack(callBack cb) ;
+    callBack getReadCall() {
+        return  readCallBack ;
+    }
     //绑定唤醒函数
     void setWakeCb(wakeCallBack cb) { wakeCb = move(cb) ; }
     void setWakeChlCall(std::shared_ptr<channel>&chl) ;

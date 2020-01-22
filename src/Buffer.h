@@ -6,9 +6,10 @@
 #include<assert.h>
 #include<errno.h>
 #include<string.h>
+#include <thread>
 #include"ReadWrite.h"
-class Buffer
-{
+
+class Buffer {
     //用户缓冲区应该和套接字进行绑定
 public:
     Buffer(std::string buf) ;

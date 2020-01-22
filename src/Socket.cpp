@@ -162,13 +162,13 @@ int socketFd :: acceptSocket() {
     struct sockaddr_in sock ;
     socklen_t len = sizeof(sock) ;
     assert(sockFd != -1) ;
-   //cout << "接受连接----------------------------------------->" << sockFd << endl ;
+   cout << "接受连接----------------------------------------->" << sockFd << endl ;
     int connFd = accept(sockFd,(struct sockaddr*)&sock, &len) ;
     if(connFd < 0) {
         std::cout<<__FILE__<<"       " << __LINE__ << "      " << strerror(errno)<<std::endl; ;
         return -1 ;
     }
-    //cout << "sockfd---->port---->" << ntohs(sock.sin_port) << endl ;
+    cout << "sockfd---->port---->" << connFd<<   "   " << ntohs(sock.sin_port) << endl ;
     return connFd ;
 }
 

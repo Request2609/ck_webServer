@@ -7,10 +7,12 @@
 #include<sys/stat.h>
 #include "CgiConnect.h"
 #include "Fcgi.h"
-#include"Channel.h"
-#include"ReadWrite.h"
+#include "Channel.h"
+#include "ReadWrite.h"
 #include "Socket.h"
 #include "SendFile.h"
+#include "EventLoop.h"
+#include "ObjectPool.h"
 #define DEFAULT_PATH "index.html"
 #define BUFLEN 65535 
 
@@ -36,6 +38,7 @@ struct logBuf {
     char path_[1024] ;
 } ;
 
+class eventLoop ;
 class process
 {
 public:

@@ -50,6 +50,7 @@ std :: string Buffer :: readBuffer(int start, int end) {
     for(int i=start; i<end; i++) {
         a+=buffer[i] ; 
     }
+
     return a ;
 }
 
@@ -77,12 +78,11 @@ int Buffer :: readBuffer(int fd) {
     char buffer_[1024] ;
     //接收消息
     int n ;
-   // std::cout << "开始读------>" << fd << std::endl ;
-    if(((n = read(fd, buffer_, sizeof(buffer_))) < 0) && errno != EINTR && errno != 104) {
-        std :: cout << __FILE__ << "    " << __LINE__ << "   "<< strerror(errno)<< std :: endl ;
+    std::cout <<"线程ID:"<< std::this_thread::get_id() << std:: endl ;
+    if(((n = read(fd, buffer_, sizeof(buffer_))) < 0) && errno != EINTR) {
+        std :: cout << "     " << fd<<"    "<< errno <<"    "  <<  __FILE__ << "    " << __LINE__ << "   "<< strerror(errno)<< std :: endl ;
         return -1 ;
     }
-    ///std::cout << "读到了"<<n<<"字节" << std::endl ;
     //如果读取到0字节，就关闭连接
     if(n == 0) {
         return 0 ;
@@ -118,5 +118,4 @@ int Buffer :: readBuffer(int fd) {
     }
     return n ;
 }
-
 

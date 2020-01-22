@@ -48,9 +48,11 @@ public:
         std::lock_guard<std::mutex>lk(mute) ;
         //第index号队列为空
         if(freeList[index].empty()) {
+            std::cout << "当前队列中没创建对象，正在创建对象!" << std::endl ;
             //创建对象
             objectPool<T>::allocObject(index) ;
         }    
+        std::cout << "申请对象----->"<< index <<"　　　剩余对象数量:  "<<freeList[index].size()<< std::endl ;
         isUsing = 1 ;
         std::shared_ptr<T> tmp = objectPool<T>::freeList[index].front() ;
         freeList[index].pop() ;
@@ -68,6 +70,7 @@ public:
 
     //归还对象
     void returnObject(std::shared_ptr<T>tmp, int index) {
+        std:: cout <<"归还对象" << std::endl ;
         std::lock_guard<std::mutex>lk(mute) ;
         objectPool<T>::freeList[index].push(tmp) ;
     } 
@@ -81,6 +84,7 @@ private:
             std::shared_ptr<T> tmp =std:: make_shared<T>() ;
             freeList[index].push(tmp) ;
         }    
+        std::cout << "创建对象完成!" << "------>" << num << std::endl ;
     }
     //加锁
     std::mutex mute ;
