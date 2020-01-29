@@ -71,6 +71,8 @@ public :
     string processCgi() ;
     void getSendBuffer(channel* chl, const string res) ;
     void sendBuffer(channel* chl) ;
+    int sendHeader(channel* chl) ;
+    int sendfiles(channel* chl, string path) ;
 private :
     string post ;
     string paths ;

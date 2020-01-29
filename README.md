@@ -62,7 +62,7 @@ webbench -c [客户端数量] -t [运行时间] http://[IP]:[PORT]/
 给出下面测试数据，并将平均值获取到，绘制成条形图进行对比
 
 
-![jj](image/CK_webServer.png)
+![jj](image/ck.png)
 
 
 性能对比：

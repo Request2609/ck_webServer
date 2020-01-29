@@ -14,7 +14,7 @@ public:
     int sendInfo(channel* chl) ;
     int newBuffer(Buffer* bf, long pos, string& s) ;
     void setBuf(Buffer* bf, const string& s) ;
-    void setWrite(channel* chl) ;
-    void over(channel* chl) ;
+    static void setWrite(channel* chl) ;
+    static void over(channel* chl) ;
 };
 
