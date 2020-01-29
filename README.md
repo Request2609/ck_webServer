@@ -24,7 +24,7 @@ ck_webServer是一个web服务器，ck是个人简称，所以叫ck_webServer，
 |:---:|:---:|
 |webServer|web服务器|
 |cgiServer|进程池CGI服务器|
-|serverIntroduction|服务器介绍文档目录|
+|image|服务器介绍相关的图片|
 |www|服务器资源目录|
 
 ### 使用说明
@@ -46,11 +46,11 @@ make
 服务器刚开始开了一个线程处理时：
 
 性能：1889808 pages/min  129010544byte/sec
-![one](single.png)
+![one](image/single.png)
 
 在此期间，四核CPU空闲情况(看idle值越小，说明CPU越繁忙)：
 
-![single](single_idle.png)
+![single](image/single_idle.png)
 
 开启8个线程测试情况：
 
@@ -58,29 +58,29 @@ make
 
 性能：2838342 pages/min  193762400 bytes/sec
 
-![8_10](8_10.png)
+![8_10](image/8_10.png)
 
 CPU空闲情况:
 
-![idle](idle.png)
+![idle](image/idle.png)
 
 
-![idle1](idle1.png)
+![idle1](image/idle1.png)
 
 
 多个连接，持续15秒
 
 数据如下：
 
-![more](more.png)
+![more](image/more.png)
 
 CPU空闲情况：
 
-![more_idle](more_idle.png)
+![more_idle](image/more_idle.png)
 
 使用siege进行测试：
 
-![siege](siege.png)
+![siege](image/siege.png)
 
 -c 是并发量，指定多少客户端，-r是重复次数
 
