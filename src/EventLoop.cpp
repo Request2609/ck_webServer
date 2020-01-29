@@ -5,7 +5,7 @@
 eventLoop :: eventLoop() {
     //开8线程
     //创建一个epoll
-    threadNums = 10;
+    threadNums = 7;
     //对象数量
     objectNum = 15 ;
     quit = false ;
