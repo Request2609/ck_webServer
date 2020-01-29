@@ -555,8 +555,8 @@ void process :: readFile(const char* file, channel* chl) {
     chl->setLen(sum+1) ;
     close(fd) ;
 }
-
 /*
+
 //读文件
 void process :: readFile(const char* file, channel* chl) {
     int fd = open(file, O_RDONLY)  ;

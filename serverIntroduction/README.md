@@ -1,20 +1,22 @@
 ### ck_webServer介绍
 
-ck_webServer是一个web服务器框架，ck是个人简称，所以叫ck_webServer，使用c++11编写！实现了静态页面请求；FastCGI服务，
+ck_webServer是一个web服务器，ck是个人简称，所以叫ck_webServer，使用c++11编写！实现了静态页面请求；FastCGI服务，
 和基于进程池的CGI服务器实现动态网页的服务。
 
-### 特点
+### 技术点
 
-高性能：使用多线程和IO多路复用技术，往每个线程中的epoll加入绑定相同IP+端口的监听套接字，内核作负载均衡，将每个新连接分发到不同线程管理的epoll中，实现高并发，响应速度快！
-少内存泄露：使用智能指针管理对象，不会造成内存泄漏问题！
-读性能高：对于HTML、CSS文，JS文件等前端文件的读取使用mmap进行直接映射，避免了用户程序和内核页缓存之间的数据拷贝过程！
-跨平台的CMake：cmake使用简单的语句来描述所有平台的编译过程，能输出各种makefile，使用cmake进行编译，编译的跨平台性得到了有效提升！
-稳定性高：接受过webbench等工具的压测，一般情况下，很少被测崩！
+- 多线程异步监听设计架构，内核作负载均衡，往应用层各套接字分配新连接。
+- 在每一个线程中，使用I/O多路复用epoll对读写事件进行检测，使用回调函数进行处理。
+- 设置套接字为非阻塞+ET模式，设计用户缓冲区，对写不完的数据进行保留触发可写事件继续发送。
+- 使用单实例模式，多队列对象池为新来的连接分配对象，进行管理，避免频繁创建对象带来的性能损失。
+- 支持POST和GET请求，设计进程池CGI服务器在后台运行，处理动态网页请求，并使用FastCgi对php等动态网页进行辅助处理。
+- 使用智能指针对对象进行管理，有效避免内存泄漏问题。
+- 支持的MIME类型丰富，可以发送视频，音频，pdf，png，pptx等文件。
 
 ### 实现的功能
 
-静态网页支持传输视频，音频，文档，pdf等(根据这些功能所以此web服务器已经部署到[个人购买的商业服务器](http://changke.fun:3065)中得到应用)，动态网页要使用到CGI或者FastCGI(主机需要有php-fpm服务器的支持)，
-此服务器二者都支持，其中CGI是一个基于进程池的CGI服务器的形式运行的！
+静态网页支持传输视频，音频，文档，pdf，pptx等(已经部署到[个人购买的商业服务器](47.94.238.90:3066)中得到应用)。
+动态网处理，像php，表单数据等处理该服务器都支持！
 
 ### 目录说明
 
@@ -30,26 +32,81 @@ ck_webServer是一个web服务器框架，ck是个人简称，所以叫ck_webSer
 进入src目录
 
 sudo apt-get install cmake(已经安装的话跳过)
+
 cmake
+
 cmake CMakeLists.txt
+
 make
-./Server IP PORT
+
+./Server或./Server IP PORT
 
 ### 性能测试
 
-10个客户端，运行15秒
-841600page/min
+服务器刚开始开了一个线程处理时：
 
-![tu](10_15.png)
+性能：1889808 pages/min  129010544byte/sec
+![one](single.png)
 
-100个客户端运行15秒
-1891188page/min
+在此期间，四核CPU空闲情况(看idle值越小，说明CPU越繁忙)：
 
-![tu](100_15.png)
+![single](single_idle.png)
 
-100个客户端运行30秒
-2074994page/min
+开启8个线程测试情况：
 
-![tu](100_30.png)
+8个连接，持续10秒
+
+性能：2838342 pages/min  193762400 bytes/sec
+
+![8_10](8_10.png)
+
+CPU空闲情况:
+
+![idle](idle.png)
 
 
+![idle1](idle1.png)
+
+
+多个连接，持续15秒
+
+数据如下：
+
+![more](more.png)
+
+CPU空闲情况：
+
+![more_idle](more_idle.png)
+
+使用siege进行测试：
+
+![siege](siege.png)
+
+-c 是并发量，指定多少客户端，-r是重复次数
+
+```
+Transactions:  500hits (处理次数，本次处理了500次请求)
+
+Availability: 100.00 % (可用性/成功次数的百分比,比如本次100%成功)
+
+Elapsed time: 0.04 secs （运行时间，本次总消耗0.04秒）
+
+Data transferred: 0.01 MB （数据传送量）
+
+Response time: 0.00 secs （响应时间）
+
+Transaction rate: 12500 trans/sec (处理请求频率，每秒钟处理12500次请求）
+
+Throughput: 0.14 MB/sec （吞吐量,传输速度）
+
+Concurrency: 3.50 (实际最高并发连接数)
+
+Successful transactions: 500 (成功的传输次数)
+
+Failed transactions: 0 (失败的传输次数)
+
+Longest transaction: 0.01 (处理传输是所花的最长时间)
+
+Shortest transaction: 0.00 (处理传输是所花的最短时间)
+
+```

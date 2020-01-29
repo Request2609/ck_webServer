@@ -79,7 +79,6 @@ int Buffer :: readBuffer(int fd) {
     //接收消息
     int n ;
     if(((n = read(fd, buffer_, sizeof(buffer_))) < 0) && errno != EINTR) {
-        std :: cout << "     " << fd<<"    "<< errno <<"    "  <<  __FILE__ << "    " << __LINE__ << "   "<< strerror(errno)<< std :: endl ;
         return -1 ;
     }
     //如果读取到0字节，就关闭连接
