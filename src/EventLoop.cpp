@@ -5,7 +5,7 @@
 eventLoop :: eventLoop() {
     //开8线程
     //创建一个epoll
-    threadNums = 1;
+    threadNums = 7;
     //对象数量
     objectNum = 15 ;
     quit = false ;
@@ -110,7 +110,6 @@ void eventLoop :: round(shared_ptr<channel>chl, shared_ptr<epOperation> ep) {
         if(ret == 0) {
             continue ;
         } 
-        cout << "发生事件的数量!----->"<< activeChannels[id].size() << endl;
         for(shared_ptr<channel> chl : activeChannels[id]) {
             int fd = chl->getFd() ;
             int ret = chl->handleEvent(fd, clList[id], id)  ;      
@@ -124,7 +123,6 @@ void eventLoop :: round(shared_ptr<channel>chl, shared_ptr<epOperation> ep) {
             clearCloseChannel(id, chl->getFd()) ;  
         }
         closeLst.clear() ;
-        cout << "清理------>"<< id << endl ;
         activeChannels[id].clear() ;
     }
 }
@@ -171,8 +169,6 @@ void eventLoop :: loop() {
             //处理连接，所有连接事件分给各个线程中的reactor
             for(shared_ptr<channel> chl : activeChannels[0]) {
                 int fd = chl->getFd() ;
-                getpeername(fd, (struct sockaddr*)&sock, &len) ;
-                cout << "端口地址:" << ntohs(sock.sin_port)<< endl  ;
                 int ret = chl->handleEvent(fd, clList[0], 0) ;
                 if(ret < 0) {
                     obp->returnObject(chl, 0) ;
@@ -216,7 +212,6 @@ void eventLoop :: addConnection(connection* con) {
 shared_ptr<channel> eventLoop :: search(int index, int fd) {
     auto it = clList[index] ;
     for(auto s=it.begin(); s!=it.end(); s++) {
-        cout << s->first << "    " << s->second->getFd() << endl ;
         if(fd == s->first) {   
             if(fd != s->second->getFd()) {
                 s->second->setFd(s->first) ;

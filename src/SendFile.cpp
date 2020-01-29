@@ -9,7 +9,6 @@ int sendFile :: sendInfo(channel* chl) {
     int cliFd = chl->getFd() ;
     Buffer* bf = chl->getWriteBuffer() ;
     int len = bf->getSize();
-    cout << len << "     " << SEND_SIZE << endl;
     if(len <= SEND_SIZE) {
         for(int i=0; i<len; i++) {
             buf[index] = (*bf)[i] ;
@@ -33,7 +32,6 @@ int sendFile :: sendInfo(channel* chl) {
             cout << __LINE__ << "   " << __FILE__ << endl ;
             return -1 ;
         }
-        cout << "关闭套接字信息"<< endl ;
         over(chl) ;
         return 0 ;
     }

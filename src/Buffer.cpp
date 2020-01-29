@@ -78,7 +78,6 @@ int Buffer :: readBuffer(int fd) {
     char buffer_[1024] ;
     //接收消息
     int n ;
-    std::cout <<"线程ID:"<< std::this_thread::get_id() << std:: endl ;
     if(((n = read(fd, buffer_, sizeof(buffer_))) < 0) && errno != EINTR) {
         std :: cout << "     " << fd<<"    "<< errno <<"    "  <<  __FILE__ << "    " << __LINE__ << "   "<< strerror(errno)<< std :: endl ;
         return -1 ;

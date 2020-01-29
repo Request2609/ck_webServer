@@ -67,11 +67,9 @@ void process :: sendBuffer(channel* chl) {
     }
     if(ret <= len) {
         chl->getWriteBuffer()->bufferClear() ;
-        cout << "发送完成!" << endl ;
     }
     else {
         cout << ret << endl ;
-        cout << "没有发送完成!" << endl ;
     }
     chl->getReadBuffer()->bufferClear() ;
 }

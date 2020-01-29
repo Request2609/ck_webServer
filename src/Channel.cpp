@@ -56,19 +56,16 @@ bool channel :: operator==(channel& chl) {
 int channel :: handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp, int index) {    
     //将唤醒描述符中的信号读出来
     if(fd == wakeFd) {
-        cout << "唤醒线程？？？？"<< endl ;
         int ret ;
         read(fd, &ret, sizeof(ret)) ;
         return 1;
     }
     if(events&EPOLLIN) {
-        cout << "可读事件"<< endl ;
         int n = handleRead(tmp) ;
         if(n < 0) {
             return -1;
         }
         if(n == 0) {
-            cout << "清空事件 " << endl ;
             for(auto s = tmp.begin(); s!=tmp.end(); s++) {
                 if(s->first == fd) {
                     //归还对象
