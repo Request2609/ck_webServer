@@ -414,21 +414,30 @@ int process :: messageSend(const string& tmp, channel* chl) {
         paths = DEFAULT_PATH ;
         string type = getFileType() ;
         responseHead(chl, type, len, 200, "OK") ;
-        ret = sendHeader(chl) ;
-        if(ret < 0) {
-            cout << __LINE__ << "  "  << __FILE__ << endl ;
-            canDel = 1 ;
-            return 1 ;
-        }
-        ret = sendfiles(chl, DEFAULT_PATH) ;
-        if(ret == 1 || ret < 0) {
-            sendFile::over(chl) ;
-            canDel = 1 ;
-            return 1 ;
+        if(st.st_size<G_2) {
+            ret = sendHeader(chl) ;
+            if(ret < 0) {
+                cout << __LINE__ << "  "  << __FILE__ << endl ;
+                canDel = 1 ;
+                return 1 ;
+            }
+            ret = sendfiles(chl, DEFAULT_PATH) ;
+            if(ret == 1 || ret < 0) {
+                sendFile::over(chl) ;
+                canDel = 1 ;
+                return 1 ;
+            }
+            else {
+                //设置可写事件
+                sendFile::setWrite(chl) ;
+            }
         }
         else {
-            //设置可写事件
-            sendFile::setWrite(chl) ;
+           readFile(DEFAULT_PATH, chl) ;
+           s = sss.sendInfo(chl) ;
+           if(s <= 0) {
+                canDel = 1 ;
+           }
         }
         return 1 ;
     }

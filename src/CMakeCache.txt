@@ -200,12 +200,6 @@ src_BINARY_DIR:STATIC=/home/changke/code/ck_webServer/src
 //Value Computed by CMake
 src_SOURCE_DIR:STATIC=/home/changke/code/ck_webServer/src
 
-//Value Computed by CMake
-the_best_BINARY_DIR:STATIC=/home/changke/code/ck_webServer/src
-
-//Value Computed by CMake
-the_best_SOURCE_DIR:STATIC=/home/changke/code/ck_webServer/src
-
 
 ########################
 # INTERNAL cache entries

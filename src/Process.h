@@ -4,6 +4,7 @@
 #include<iostream>
 #include<string>
 #include <sys/mman.h>
+#include <sys/sendfile.h>
 #include<sys/stat.h>
 #include "CgiConnect.h"
 #include "Fcgi.h"
@@ -15,9 +16,11 @@
 #include "ObjectPool.h"
 #define DEFAULT_PATH "index.html"
 #define BUFLEN 65535 
-
 #define FASTCGI 1
 #define CGI 2 
+
+const long M_1=(1024*1024) ;
+const long G_2=M_1*1024*2 ;
 
 using namespace std ;
 enum {
