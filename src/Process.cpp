@@ -454,12 +454,7 @@ int process :: messageSend(const string& tmp, channel* chl) {
     //请求其他的资源
     else {
         readFile(chl) ;
-        s = sss.sendInfo(chl) ;
     }
-    if(s <= 0) {
-        canDel = 1 ;
-    }
-    flag = 0 ;
     return 1 ;
 }
 
@@ -497,7 +492,7 @@ int process :: sendfiles(channel* chl, string path) {
     off_t offset = 0 ;
     ret = sendfile(fd, cliFd, &offset, st.st_size) ;
     if(ret < 0) {
-        cout << __FILE__ << "   " << __LINE__ << endl ;
+        cout << __FILE__ << "   " << __LINE__ << "  "<< strerror(errno)<< endl ;
         return -1 ;
     }
     int size = st.st_size-ret ;
@@ -533,7 +528,29 @@ void process :: readFile(channel* chl) {
     long len = st.st_size;
     chl->setLen(len+1) ;
     responseHead(chl, type, len, 200, "OK") ;
-    readFile(paths.c_str(), chl) ;
+    if(st.st_size<G_2) {
+        int ret = sendHeader(chl) ;
+        if(ret < 0) {
+            cout << __LINE__ << "  " << __FILE__ << endl ;
+            return ;
+        }
+        ret = sendfiles(chl, paths.c_str()) ;
+        if(ret ==1||ret < 0) {
+            sendFile::over(chl) ;
+            canDel = 1 ;
+        }
+        else {
+            sendFile::setWrite(chl) ;
+            canDel = 0 ;
+        }
+    }
+    else {
+        readFile(paths.c_str(), chl) ;
+        int s = sss.sendInfo(chl) ;
+        if(s <= 0) {
+            canDel = 1 ;
+        }
+    }
 }
 
 string process :: getFileType() {
@@ -600,38 +617,6 @@ void process :: sendNotFind(channel* chl) {
     readFile("404.html", chl) ;
 }
 
-/*
-void process :: readFile(const char* file, channel* chl) {
-    int fd = open(file, O_RDONLY)  ;
-    if(fd < 0) {
-        sendNotFind(chl) ;
-        cout << __FILE__ << "    " << __LINE__  << endl ;
-        return  ;
-    }
-    int len ;
-    char buf[1024] ;
-    Buffer* bf = chl->getWriteBuffer() ;
-    //读文件
-    int sum = 0 ;
-    while(1) {
-        len = readn(fd, buf, sizeof(buf)) ;
-        if(len < 0) {
-            cout << __FILE__ << "     " << __LINE__ << endl ;
-            return ;
-        }
-       if(len == 0) {
-            break ;
-        }
-        for(int i=0; i<len; i++) {
-            bf->append(buf[i]) ;
-        }
-        sum+= len ;
-        bzero(buf, sizeof(buf)) ;
-    }
-    chl->setLen(sum+1) ;
-    close(fd) ;
-}
-*/
 //读文件
 void process :: readFile(const char* file, channel* chl) {
     int fd = open(file, O_RDONLY)  ;
