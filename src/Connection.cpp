@@ -110,8 +110,6 @@ void connection :: createListenFd(socketFd* sock) {
 //创建一个新监听套接字，并将相应的channel中的fd设置一下
 int connection :: createListenFd(int port) {
     sock->setAddr(port) ;   
-   /// sock->setNoBlocking(sock->getListenSock()) ;
-    //sock->setReuseAddr() ;
     sock->setReusePort() ;
     sock->bindAddress() ;
     sock->startListen() ;

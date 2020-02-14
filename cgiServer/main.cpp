@@ -48,6 +48,7 @@ int main(int argc, char** argv) {
     if(pool)
         pool->run() ;
     close(listenFd) ;
+    wait(NULL) ;
 }
 
 

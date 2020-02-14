@@ -136,7 +136,6 @@ void processPool<T> :: setupSigPipe() {
 
 template<typename T> 
 void processPool<T> :: runParent() {
-    cout << "运行父进程" << endl ; 
     //设置信号
     setupSigPipe() ;
     tool :: addFd(epollFd, listenFd)  ; 
@@ -179,7 +178,6 @@ template<typename T>
 void processPool<T> :: runChild() {
 
     setupSigPipe() ;
-    cout << "运行子进程" << endl ;
     int pipeFd = proDescInfo[index]->getReadFd() ;
     //将管道描述符加入到epoll中
     tool::addFd(epollFd, pipeFd) ;
@@ -207,7 +205,6 @@ void processPool<T> :: runChild() {
                     cout << __LINE__ << "       " << __FILE__ << endl ;
                     return ;
                 }
-                cout << "接收新连接" << endl ;
                 ret = tool::addFd(epollFd, connFd) ;
                 if(ret < 0) {
                     cout << __LINE__ <<  "         " << __FILE__ << endl ;
@@ -218,7 +215,6 @@ void processPool<T> :: runChild() {
             } 
             //处理事件
             else if(ev[i].events&EPOLLIN) {
-                cout << "发生可读事件" << endl ;
                 user[fd]->process() ;
             }
         }
@@ -236,7 +232,9 @@ public :
         memset(buf, '\0', BUFFERSIZE) ;
         endIndex = 0 ;
     }
-    ~cgiConn() {close(sockFd) ;}
+    ~cgiConn() {
+        close(sockFd) ;
+    }
     int createSocketPair() {
         int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) ;
         if(ret < 0) {
@@ -258,8 +256,6 @@ public :
                 return ;
             }
             else if(ret == 0) {
-                cout << "接收数据" << endl ;
-                cout << buf << endl ;
                 int res = tool :: removeFd(epollFd, sockFd) ;
                 if(res < 0) {
                     return ;
@@ -267,17 +263,12 @@ public :
                 break ;
             }
             else {
-                cout << "接收数据:--->" << buf << endl ;
-                cout << "结束" << endl ;
                 cgiArg = buf ;
                 if(cgiArg[0] == '1') {
                     int a, b ;
                     getArg(a, b) ;
                     cgiProcess(a, b, a+b) ;
-                    cout <<"设置完成!" << endl ;
                 }
-                //处理消息
-                //web服务器传来cgi文件路径
                 break ;
             }
         }
