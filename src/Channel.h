@@ -8,11 +8,12 @@
 #include "Socket.h"
 #include "Buffer.h"
 #include "ObjectPool.h"
+#include "SendFile.h"
 
-#define SIZE 1024
 using namespace std ;
 class epOperation ;
 class channel ;
+class sendFile ;
 using namespace std :: placeholders ;
 enum {
     READ = EPOLLIN,
@@ -83,8 +84,6 @@ public :
     int getEvents() { return events ; }
     void setId(int num) { id = num; }
     int getId() { return id; }
-    int sendMsg() ;
-    int readMsg() ;
     void setLen(long len) { this->len= len ; }
     long getLen() { return len ; }
     Buffer* getReadBuffer() { return  &input ;}

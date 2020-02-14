@@ -24,7 +24,7 @@ int readn(int fd, void *buf, int n) {
     return (n - nleft);
 }
 
-int writen(int fd, void *buf, int n){
+int writen(int fd, const char *buf, unsigned int n){
     int nleft = n;
     char *bufptr = (char*)buf;
     int nwrite;

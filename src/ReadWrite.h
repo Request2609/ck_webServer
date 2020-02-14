@@ -6,5 +6,5 @@
 #include<errno.h>
 
 int readn(int fd, void*buf, int n) ;
-int writen(int fd, void* buf, int n) ;
+int writen(int fd, const char *buf, unsigned int n);
 #endif

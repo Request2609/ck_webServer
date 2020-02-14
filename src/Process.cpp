@@ -1,5 +1,12 @@
 #include "Process.h"
 
+const long M_1=(1024*1024) ;
+const long G_2=(2048*M_1) ;
+const char* DEFAULT_PATH = "index.html" ;
+const int BUFLEN = 65535 ;
+const int FASTCGI = 1 ;
+const int CGI = 2 ; 
+
 int process :: postRequest(string& tmp, channel* chl, string& bf) {
     long ret = 0 ;
     //获取到请求路径和版本号
@@ -16,16 +23,17 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
             sendNotFind(chl) ;
             return -1 ;
         }
-
         int ret = paths.find("php") ;
         //如果请求php文件
         //CGI程序
-        if(ret == -1) { 
+        if(paths.find("php") == string::npos) { 
             //cgi请求的数据
             string res = processCgi() ;
-            responseHead(chl, "text/html", res.size(), 200, "OK") ;
+            responseHead(chl, "text/html", -1, 200, "OK") ;
+            sendHeader(chl) ;
+            chl->clearBuffer() ;
             getSendBuffer(chl, res) ;
-            sendBuffer(chl) ;
+            sss.sendInfo(chl) ;
             if(ret < 0) {
                 return -1 ;
             }
@@ -44,34 +52,9 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
             }
             return 1 ;
         }           
-        readFile(chl) ;
-        flag = 1 ;
-        messageSend(tmp, chl) ; 
         return POST ;
     }
     return 1 ;
-}
-
-void process :: sendBuffer(channel* chl) {
-    char buff[4096] ;
-    Buffer* buf = chl->getWriteBuffer() ;
-    int len = buf->getSize() ;
-    for(int i=0; i<len; i++) {
-        buff[i] = (*buf)[i] ;
-    }
-    int ret = 0 ;
-    int sockFd = chl->getFd() ;
-    if((ret = send(sockFd, buff, sizeof(buff), 0))< 0) {
-        cout << __LINE__ << "      " << __FILE__ << endl ;
-        return  ;
-    }
-    if(ret <= len) {
-        chl->getWriteBuffer()->bufferClear() ;
-    }
-    else {
-        cout << ret << endl ;
-    }
-    chl->getReadBuffer()->bufferClear() ;
 }
 
 void process :: getSendBuffer(channel* chl, const string res) {
@@ -82,8 +65,9 @@ void process :: getSendBuffer(channel* chl, const string res) {
     }
 }
 
+//发送post请求
 string process :: processCgi() {
-    //将所请求的数据转化成绝对路径
+    //连接CGI服务器
     int ret = cgiConnect::connectCgiServer() ;
     if(ret < 0)
         cout << "连接失败！" << endl ;
@@ -98,9 +82,9 @@ string process :: processCgi() {
         cout << __LINE__ << "      " << __FILE__ << endl ;
         return "" ;
     }
-    //设置环境 ;变量
     char buf[BUFFERSIZE] ;
     strcpy(buf, info.data()) ;
+    //向CGI服务器发送请求
     ret = cgiConnect ::sendMsg(buf) ;
     if(ret < 0) {
         cout <<"发送cgi请求失败！" << endl ;
@@ -192,16 +176,10 @@ string process :: changeHtml() {
 }
 
 int process :: getRequest(channel* chl, string& tmp) {
-        int ret =  tmp.find("?") ;
-        //带参数的url，搜索功能
-        if(ret != -1) { 
-            cout <<"这是带参数的get 请求" << endl ;
-        }
-        //要是php的话，就得转成html然后给服务器发
-        //有php-fpm完成
+        int ret =  0 ;
         getVersionPath(tmp) ;
-        ret = paths.find("php") ;
-        if(ret != -1) {
+        paths.find("php") ;
+        if(paths.find("php") != string::npos) {
             if(paths[0] == '/') {
                 paths = paths.c_str()+1 ;
             }
@@ -218,7 +196,6 @@ int process :: getRequest(channel* chl, string& tmp) {
             return 1 ;
         }
         else {
-            flag = 1  ;
             ret = messageSend(tmp, chl) ;
         }
         return 1 ;
@@ -227,10 +204,12 @@ int process :: getRequest(channel* chl, string& tmp) {
 int process:: sendCgiResult(channel* chl, string res) {
     Buffer* bf =  chl->getWriteBuffer() ;
     long len = res.size() ;
-    responseHead(chl, "text/html", len, OK, "OK") ;
+    responseHead(chl, "text/html", -1, OK, "OK") ;
     for(int i=0; i<len; i++) {
         bf->append(res[i]) ;
     }
+    sendHeader(chl) ;
+    chl->clearBuffer() ;
     sss.sendInfo(chl) ;
     return 1 ;
 }
@@ -377,13 +356,19 @@ int process :: getSubmitInfo(string& info, int pos, int l, string &a, channel* c
     }    
 }
 
-void  process :: responseHead(channel* chl, string type, long len, int statusCode, string tip) {
+void  process :: responseHead(channel* chl, string type, 
+                              long len, int statusCode, 
+                              string tip) {
      //发送响应头
     char buf[1024] ;
     //构造响应头
     string head ;
-    sprintf(buf, "%s %d %s\r\nContent-Type: %s\r\nConnection: Keep-Alive\r\nContent-Length:%ld\r\n\r\n",
+    if(len != -1)
+        sprintf(buf, "%s %d %s\r\nContent-Type: %s\r\nConnection: Keep-Alive\r\nContent-Length:%ld\r\n\r\n",
             version.c_str(), statusCode, tip.c_str(), type.c_str(),len) ;
+    else 
+        sprintf(buf, "%s %d %s\r\nContent-Type: %s\r\nConnection: Keep-Alive\r\nTransfer-Encoding: chunked\r\n\r\n",
+            version.c_str(), statusCode, tip.c_str(), type.c_str()) ;
     //将信息存入输入缓冲区中    
     int l = strlen(buf) ;
     //构造用户态缓冲区
@@ -392,6 +377,30 @@ void  process :: responseHead(channel* chl, string type, long len, int statusCod
         input->append(buf[i]) ;
     }
 }   
+
+int process::sendLittleFile(channel* chl, long len, int fd) {
+    int ret ; 
+    string type = getFileType() ;
+    responseHead(chl, type, len, 200, "OK") ;
+    ret = sendHeader(chl) ;
+    if(ret < 0) {
+        cout << __LINE__ << "  "  << __FILE__ << endl ;
+        canDel = 1 ;
+        return -1 ;
+    }
+    ret = sendfiles(chl, fd, len) ;
+    close(fd) ;
+    if(ret == 0) {
+        sendFile::over(chl) ;
+        canDel = 1 ;
+        return -1 ;
+    }
+    else {
+        sendFile::setWrite(chl) ;
+        canDel = 0 ;
+    }
+    return 0 ;
+}
 
 //处理get请求，发送响应头和
 int process :: messageSend(const string& tmp, channel* chl) {
@@ -403,60 +412,103 @@ int process :: messageSend(const string& tmp, channel* chl) {
     //解析路径名
     //如果路径只包含“/”，发送初始化页面
     if(paths == "/") {
-        struct stat st ;
-        int ret = stat(DEFAULT_PATH, &st) ;
+        int fd = -1;
+        long len = 0 ;
+        int ret = getFileInfo(fd, len, DEFAULT_PATH) ;
         if(ret < 0) {
-            cout << __FILE__ << "      " << __LINE__ << strerror(errno)<< endl ;
-            return -1 ;
+            canDel = 1 ;
+            return 1 ;
         }
-        //获取文件的大小
-        long len = st.st_size ;
-        paths = DEFAULT_PATH ;
         string type = getFileType() ;
-        responseHead(chl, type, len, 200, "OK") ;
-        if(st.st_size<G_2) {
-            ret = sendHeader(chl) ;
-            if(ret < 0) {
-                cout << __LINE__ << "  "  << __FILE__ << endl ;
+        if(len < G_2) {
+            int ret = sendLittleFile(chl, len, fd) ;
+            if(ret  <  0) {
                 canDel = 1 ;
-                return 1 ;
+                return 0;
             }
-            ret = sendfiles(chl, DEFAULT_PATH) ;
-            if(ret == 1 || ret < 0) {
-                sendFile::over(chl) ;
-                canDel = 1 ;
-                return 1 ;
-            }
-            else {
-                //设置可写事件
-                sendFile::setWrite(chl) ;
-            }
+            close(fd) ;
         }
         else {
-           readFile(DEFAULT_PATH, chl) ;
-           s = sss.sendInfo(chl) ;
-           if(s <= 0) {
+            close(fd) ;
+            //chunk-encoding
+            responseHead(chl, type, -1, 200, "OK") ;
+            //先将头发送出去
+            sendHeader(chl) ;
+            chl->clearBuffer() ;
+            readFile(DEFAULT_PATH, chl) ;
+            s = sss.sendInfo(chl) ;
+            if(s == 0) {
                 canDel = 1 ;
-           }
+            }
+            else canDel = 0 ;
         }
         return 1 ;
     }
     //将路径前面的/去掉
     if(paths[0] == '/')
-    paths = paths.c_str()+1 ;
+        paths = paths.c_str()+1 ;
     //获取资源类型,资源长度，状态码，提示语
     int ret = isExist() ;
     if(!ret) {
         //发送404页面
         sendNotFind(chl) ; 
-        s = sss.sendInfo(chl) ;
     }
     //请求其他的资源
     else {
-        readFile(chl) ;
+        int fd = -1 ;
+        long len = 0 ;
+        int ret = getFileInfo(fd, len, paths.c_str()) ;
+        if(ret < 0) {
+            canDel = 1 ;
+            return -1 ;
+        }
+        //chunk-encoding
+        if(len>G_2) {
+            close(fd) ;
+            string type = getFileType() ;
+            responseHead(chl, type, -1, 200, "OK") ;
+            sendHeader(chl) ;
+            chl->clearBuffer() ;
+            readFile(paths.c_str() ,chl) ;
+            int ret = sss.sendInfo(chl) ;
+            if(ret == 0) {
+                canDel = 1 ;
+            }
+            else canDel = 0 ;
+        }
+        //使用sendfile发送
+        else {
+            long len = 0 ;
+            int ret = getFileInfo(fd, len, paths.c_str()) ;
+            if(ret < 0) {
+                canDel = 1 ;
+                return 1 ;
+            }
+            string type = getFileType() ;
+            if(len < G_2) {
+                int ret = sendLittleFile(chl, len, fd) ;
+                close(fd) ;
+                if(ret  < 0) {
+                    canDel = 0 ;
+                    return 0;
+                }
+            }
+        }
     }
     return 1 ;
 }
+
+int process::getFileInfo(int& fd, long& len, const char* paths) {
+    fd = open(paths, O_RDONLY) ;
+    if(fd < 0) {
+        cout << __FILE__ <<"   " << __LINE__ << endl ;
+        return -1;
+    }
+    struct stat st ;
+    fstat(fd, &st) ;
+    len = st.st_size ;
+    return 1 ;
+}   
 
 int process::sendHeader(channel* chl) {
     char buf[BUFSIZ] ;
@@ -469,63 +521,56 @@ int process::sendHeader(channel* chl) {
         buf[index] = (*bf)[i] ;
         index++ ;
     }
+    len = strlen(buf) ;
     buf[index] = '\0' ;
-    int ret = writen(cliFd, buf, sizeof(buf)) ;
+    int ret = writen(cliFd, buf, len) ;
     return ret ;
 }
 
-int process :: sendfiles(channel* chl, string path) {
+int process :: sendfiles(channel* chl, int fd, int len) {
     int cliFd = chl->getFd() ;
     char buf[BUFSIZ] ;
     bzero(buf, sizeof(buf)) ;
-    int fd = open(path.c_str(), O_RDONLY) ;
-    if(fd < 0) {
-        cout << __FILE__ << "   " << __LINE__ << endl ;
-        return -1 ;
-    }
-    struct stat st ;
-    int ret = fstat(fd, &st) ;
+    int ret =  0 ;
+    ret = sendfile(cliFd, fd, NULL, len) ;
     if(ret < 0) {
-        cout << __FILE__ << "   " << __LINE__ << endl ;
         return -1 ;
     }
-    off_t offset = 0 ;
-    ret = sendfile(fd, cliFd, &offset, st.st_size) ;
-    if(ret < 0) {
-        cout << __FILE__ << "   " << __LINE__ << "  "<< strerror(errno)<< endl ;
-        return -1 ;
-    }
-    int size = st.st_size-ret ;
-    if(size != 0) {
-        lseek(fd, 0, ret) ;
-        while(1) {
-            int ret = read(fd, buf, sizeof(buf)) ;
-            if(ret < 0) {
-                cout << __FILE__ <<"   " << __LINE__ << endl ;
-                return -1 ;
-            }
-            if(ret < 0) break ;
-            for(int i=0; i<ret; i++) {
-                chl->getWriteBuffer()->bufferClear() ;
-                chl->getWriteBuffer()->append(buf[i]) ;
-            }
+    int size = len-ret ;
+    if(size < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+        char* buf = (char*)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0) ;
+        chl->clearBuffer() ;
+        int size = strlen(buf) ;
+        for(int i=0; i<size; i++) {
+            chl->getWriteBuffer()->append(buf[i]) ;
         }
+        munmap(buf, len);
+        return -1 ;
     }   
-    close(fd) ;
-    return size==0?0:(st.st_size-ret) ;
+    return 0 ;
 }
 
 
 void process :: readFile(channel* chl) {
     string type = getFileType() ; 
     struct stat st ;
-    int ret  = stat(paths.c_str(), &st) ;
+    int fd = open(DEFAULT_PATH, O_RDONLY) ;
+    if(fd < 0) {
+        cout << __FILE__ << "   " << __LINE__ << endl ;
+        return  ;
+    }
+    int ret = fstat(fd, &st) ;
+    if(ret < 0) {
+        cout << __FILE__ << "   " << __LINE__ << endl ;
+        return  ;
+    }
+    //获取文件的大小
+    long len = st.st_size ;
     if(ret < 0) {
         sendNotFind(chl) ;
         cout << __FILE__ << "    "<< __LINE__ << endl ;
         return ; 
     }
-    long len = st.st_size;
     chl->setLen(len+1) ;
     responseHead(chl, type, len, 200, "OK") ;
     if(st.st_size<G_2) {
@@ -534,8 +579,9 @@ void process :: readFile(channel* chl) {
             cout << __LINE__ << "  " << __FILE__ << endl ;
             return ;
         }
-        ret = sendfiles(chl, paths.c_str()) ;
-        if(ret ==1||ret < 0) {
+        ret = sendfiles(chl, fd, len) ;
+        close(fd) ;
+        if(ret == 0) {
             sendFile::over(chl) ;
             canDel = 1 ;
         }
@@ -614,34 +660,34 @@ void process :: sendNotFind(channel* chl) {
     }
     int len = st.st_size ;
     responseHead(chl, "text/html", len, 404, "NOT FOUND") ;
+    sendHeader(chl) ;
+    chl->clearBuffer() ;
     readFile("404.html", chl) ;
+    sendFile ss ;   
+    //分块发送
+    ss.sendInfo(chl) ;
 }
 
 //读文件
 void process :: readFile(const char* file, channel* chl) {
     int fd = open(file, O_RDONLY)  ;
     if(fd < 0) {
-        sendNotFind(chl) ;
         cout << __FILE__ << "    " << __LINE__  << endl ;
+        canDel = 1 ;
         return  ;
     }
-    struct stat stat ;
-    fstat(fd, &stat) ;
-    int len ;
-    char buf[1024] ;
-    Buffer* bf = chl->getWriteBuffer() ;
+    struct stat st ;
+    fstat(fd, &st) ;
+    Buffer* bf = chl->getWriteBuffer() ; 
     //读文件
     int sum = 0 ;
-    char * bufp = (char*)mmap(NULL, stat.st_size, PROT_READ, MAP_SHARED, fd, 0) ;
-    cout << "文件内容!" << endl;
-    cout << bufp << endl ;
-    len = strlen(bufp) ;
-    for(int i=0; i<len; i++) {
-        bf->append(buf[i]) ;
+    char * bufp = (char*)mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0) ;
+    for(int i=0; i<st.st_size; i++) {
+        bf->append(bufp[i]) ;
     }
-    sum+= len ;
+    sum+= st.st_size ;
     chl->setLen(sum+1) ;
-    munmap(bufp, stat.st_size) ;
+    munmap(bufp, st.st_size) ;
     close(fd) ;
 }
 
@@ -657,6 +703,7 @@ int process :: isExist() {
 
 //获取版本号和请求路径
 int process :: getVersionPath(string tmp) {
+    paths.clear() ;
     int pathIndex = tmp.find(' ') ;
     pathIndex += 1 ;
     while(tmp[pathIndex] != ' ') {

@@ -1,5 +1,6 @@
 #include "Channel.h"
 
+const int SIZE = 4096 ;
 channel :: channel() {
     events = 0 ;
     input.bufferClear() ;
@@ -33,18 +34,12 @@ int channel :: updateChannel() {
     return 1 ;
 }
 
-int channel :: sendMsg() {
-     return 1 ;  
-}
 
 void channel::clearBuffer() {
     input.bufferClear() ;
     output.bufferClear() ;
 }
 
-int channel :: readMsg() {
-    return 1 ;
-}
 
 bool channel :: operator==(channel& chl) {
     if(cliFd == chl.getFd()) {
@@ -97,59 +92,32 @@ void channel :: delFd(int fd, map<int, shared_ptr<channel>>& tmp) {
     }
     tmp.erase(ret) ;
 }
+
 //执行写回调
 int channel :: handleWrite() {
     //写缓冲区
     char buf[SIZE] ;
-    int j = 0 ;
+    int index = 0;
+    string s = "" ;
     bzero(buf, sizeof(buf)) ;
     int len = output.getSize() ;
-    //文件长度小于4096
-    int sum = 0 ;
-    if(len < SIZE) {
-        for(int i=0; i< len; i++) {
-            buf[j] = output[i] ;
-            j++ ;
-        }
-        buf[j] = '\0' ;
-        //写文件长度
-        int ret = writen(cliFd, buf, sizeof(buf)) ;
-        if(ret < 0) {
-            std :: cout << __FILE__ << "     " << std:: endl ;
-            return -1 ;
-        }
-        sum+= ret ;
-        input.bufferClear() ;
-        return  1;
-    }
-    int ret = 0 ;
-    //文件长度大于4096
     for(int i=0; i<len; i++) {
-        if(j == SIZE) {
-            buf[j] = '\0' ;
-            ret = writen(cliFd, buf, sizeof(buf)) ;
+        buf[index] = output[i] ;
+        index++ ;
+        if(!(index%(SIZE-2))||i==len-1) {
+            buf[index] = '\0' ;
+            s = sendFile::makeChunk(buf) ;
+            int ret = writen(cliFd, s.data(), s.size()) ;
             if(ret < 0) {
-                std::cout << __FILE__ << "     "  << __LINE__<<"      " <<strerror(errno) <<"       num:"<< errno<< std::endl ;  
                 return -1 ;
-            } 
-            sum += ret ;
+            }
+            if(i == len-1) break ;
             bzero(buf, sizeof(buf)) ;
-            j = 0 ;
+            index = 0 ;
+            s.clear() ;
         }
-        buf[j] = output[i] ;
-        output.moveRead() ;
-        j++ ;
     }
-    
-    if(strlen(buf) > 0) {
-        ret = writen(cliFd, buf, sizeof(buf)) ;
-        if(ret < 0) {
-            std :: cout << __FILE__ << "      " << __LINE__ << std::endl ;
-            return -1 ;
-        }
-        sum+= ret ;
-    }
-    input.bufferClear() ;
+    sendFile::sendEmptyChunk(cliFd) ;
     return 0 ;
 }
 

@@ -14,13 +14,8 @@
 #include "SendFile.h"
 #include "EventLoop.h"
 #include "ObjectPool.h"
-#define DEFAULT_PATH "index.html"
-#define BUFLEN 65535 
-#define FASTCGI 1
-#define CGI 2 
 
-const long M_1=(1024*1024) ;
-const long G_2=M_1*1024*2 ;
+
 
 using namespace std ;
 enum {
@@ -75,7 +70,11 @@ public :
     void getSendBuffer(channel* chl, const string res) ;
     void sendBuffer(channel* chl) ;
     int sendHeader(channel* chl) ;
-    int sendfiles(channel* chl, string path) ;
+    int sendfiles(channel* chl, int fd, int size) ;
+    void readFile(string filename) ;
+    void chunkEncodingHead() ;
+    int getFileInfo(int& fd, long& len, const char* paths) ;
+    int sendLittleFile(channel* chl, long len, int fd) ;
 private :
     string post ;
     string paths ;

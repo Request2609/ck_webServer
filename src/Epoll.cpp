@@ -27,6 +27,7 @@ void epOperation :: change(int fd, int events) {
 }
 
 void epOperation :: del(int fd) {
+    
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
         //std :: cout << __FILE__ << "   " << __LINE__ << "      " << strerror(errno)<< std :: endl ;
         return  ;

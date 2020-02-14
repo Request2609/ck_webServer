@@ -50,7 +50,6 @@ std :: string Buffer :: readBuffer(int start, int end) {
     for(int i=start; i<end; i++) {
         a+=buffer[i] ; 
     }
-
     return a ;
 }
 
