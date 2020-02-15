@@ -100,9 +100,9 @@ int channel :: handleWrite() {
         index++ ;
         if(!(index%(SIZE-2))||i==len-1) {
             buf[index] = '\0' ;
-            s = sendFile::makeChunk(buf) ;
-            int ret = writen(cliFd, s.data(), s.size()) ;
+            int ret = writen(cliFd, s.data(), index+1) ;
             if(ret < 0) {
+                cout << __LINE__ << "       " << __FILE__ <<"     " << strerror(errno)<< endl ;
                 return -1 ;
             }
             if(i == len-1) break ;
@@ -111,7 +111,6 @@ int channel :: handleWrite() {
             s.clear() ;
         }
     }
-    sendFile::sendEmptyChunk(cliFd) ;
     return 0 ;
 }
 

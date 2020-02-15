@@ -40,7 +40,7 @@ void sendFile::tohex(unsigned long num,char*hexStr) {
 }    
 
 void sendFile::sendEmptyChunk(int fd) {
-    const char* buf = "0\r\n\r\n" ;
+    const char buf[] = "0\r\n\r\n" ;
     int ret = writen(fd, buf, strlen(buf)) ;
     if(ret < 0) {
         cout << __FILE__ <<"     "  << __LINE__ <<"    "<< strerror(errno)<< endl ;

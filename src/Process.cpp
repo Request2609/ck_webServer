@@ -34,6 +34,7 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
             sendHeader(chl) ;
             chl->clearBuffer() ;
             getSendBuffer(chl, res) ;
+            cout <<"hello" << endl ;
             sss.sendChunk(chl) ;
             if(ret < 0) {
                 return -1 ;
@@ -210,6 +211,7 @@ int process:: sendCgiResult(channel* chl, string res) {
     }
     sendHeader(chl) ;
     chl->clearBuffer() ;
+    cout << "world!" << endl ;
     sss.sendChunk(chl) ;
     return 1 ;
 }
@@ -377,7 +379,7 @@ int process::sendLittleFile(channel* chl, long len, int fd) {
     responseHead(chl, type, len, 200, "OK") ;
     ret = sendHeader(chl) ;
     if(ret < 0) {
-        cout << __LINE__ << "  "  << __FILE__ << endl ;
+        cout << __LINE__ << "  "  << __FILE__<<"    " << strerror(errno) << endl ;
         canDel = 1 ;
         return -1 ;
     }
@@ -413,13 +415,14 @@ int process :: messageSend(const string& tmp, channel* chl) {
         }
         string type = getFileType() ;
         if(len < G_2) {
-            
             int ret = sendLittleFile(chl, len, fd) ;
             if(ret  <  0) {
                 canDel = 1 ;
                 return 0;
             }
             close(fd) ;
+    
+            return  1;
         }
         else {
             responseHead(chl, type, len, 200, "OK") ;
