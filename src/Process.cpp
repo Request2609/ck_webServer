@@ -1,8 +1,8 @@
 #include "Process.h"
 
 const long M_1=(1024*1024) ;
-//const long G_2=(2048*M_1) ;
-const long G_2=2 ;
+const long G_2=(2048*M_1) ;
+//const long G_2=2 ;
 const char* DEFAULT_PATH = "index.html" ;
 const int BUFLEN = 65535 ;
 const int FASTCGI = 1 ;
@@ -217,7 +217,7 @@ int process:: sendCgiResult(channel* chl, string res) {
 //获取请求头
 int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>>>& mp) {
     canDel = 0 ;
-    Buffer* bf =chl->getReadBuffer() ;
+    Buffer* bf = chl->getReadBuffer() ;
     //解析请求行
     int readIndex = bf->getReadIndex() ;
     int writeIndex = bf->getWriteIndex() ;
@@ -413,6 +413,7 @@ int process :: messageSend(const string& tmp, channel* chl) {
         }
         string type = getFileType() ;
         if(len < G_2) {
+            
             int ret = sendLittleFile(chl, len, fd) ;
             if(ret  <  0) {
                 canDel = 1 ;
