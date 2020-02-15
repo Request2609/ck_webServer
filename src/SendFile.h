@@ -14,7 +14,8 @@ class sendFile {
 public:
     sendFile() {}
     ~sendFile() {}
-    int sendInfo(channel* chl) ;
+    int sendChunk(channel* chl) ;
+    int sendStaticInfo(channel* chl, const char* buf, unsigned long size) ;
     int newBuffer(Buffer* bf, long pos, string& s) ;
     void setBuf(Buffer* bf, const string& s) ;
     static void setWrite(channel* chl) ;

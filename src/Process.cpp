@@ -1,7 +1,8 @@
 #include "Process.h"
 
 const long M_1=(1024*1024) ;
-const long G_2=(2048*M_1) ;
+//const long G_2=(2048*M_1) ;
+const long G_2=2 ;
 const char* DEFAULT_PATH = "index.html" ;
 const int BUFLEN = 65535 ;
 const int FASTCGI = 1 ;
@@ -33,7 +34,7 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
             sendHeader(chl) ;
             chl->clearBuffer() ;
             getSendBuffer(chl, res) ;
-            sss.sendInfo(chl) ;
+            sss.sendChunk(chl) ;
             if(ret < 0) {
                 return -1 ;
             }
@@ -183,7 +184,6 @@ int process :: getRequest(channel* chl, string& tmp) {
             if(paths[0] == '/') {
                 paths = paths.c_str()+1 ;
             }
-
             string file = changeHtml() ;
             if(isExist() < 0) {
                 return -1;
@@ -210,7 +210,7 @@ int process:: sendCgiResult(channel* chl, string res) {
     }
     sendHeader(chl) ;
     chl->clearBuffer() ;
-    sss.sendInfo(chl) ;
+    sss.sendChunk(chl) ;
     return 1 ;
 }
 
@@ -300,15 +300,8 @@ int process :: getContentLength(string a, channel* chl) {
     //确定提交的数据
     //根据\r\n\r\n找ontent-length获取信息
     string info ;
-    int ret = getSubmitInfo(info, p+4, l, a, chl) ;
+    getSubmitInfo(info, p+4, l, a, chl) ;
     //post只提交登录功能
-    if(ret == 1) {
-        //处理post请求
-        int s = doPost(info) ;
-        if(s == 1) {
-            return -5;
-        }
-    }
     return l ;
 }
 
@@ -404,7 +397,6 @@ int process::sendLittleFile(channel* chl, long len, int fd) {
 
 //处理get请求，发送响应头和
 int process :: messageSend(const string& tmp, channel* chl) {
-    int s = 0  ;
     //找出现第一个空格的地方
     if(flag == 0)
         getVersionPath(tmp) ;
@@ -429,18 +421,11 @@ int process :: messageSend(const string& tmp, channel* chl) {
             close(fd) ;
         }
         else {
-            close(fd) ;
-            //chunk-encoding
-            responseHead(chl, type, -1, 200, "OK") ;
+            responseHead(chl, type, len, 200, "OK") ;
             //先将头发送出去
             sendHeader(chl) ;
             chl->clearBuffer() ;
-            readFile(DEFAULT_PATH, chl) ;
-            s = sss.sendInfo(chl) ;
-            if(s == 0) {
-                canDel = 1 ;
-            }
-            else canDel = 0 ;
+            readBigFile(chl, fd, len) ;
         }
         return 1 ;
     }
@@ -462,19 +447,12 @@ int process :: messageSend(const string& tmp, channel* chl) {
             canDel = 1 ;
             return -1 ;
         }
-        //chunk-encoding
+
         if(len>G_2) {
-            close(fd) ;
             string type = getFileType() ;
-            responseHead(chl, type, -1, 200, "OK") ;
+            responseHead(chl, type, len, 200, "OK") ;
             sendHeader(chl) ;
-            chl->clearBuffer() ;
-            readFile(paths.c_str() ,chl) ;
-            int ret = sss.sendInfo(chl) ;
-            if(ret == 0) {
-                canDel = 1 ;
-            }
-            else canDel = 0 ;
+            readBigFile(chl, fd, len) ;
         }
         //使用sendfile发送
         else {
@@ -550,55 +528,6 @@ int process :: sendfiles(channel* chl, int fd, int len) {
     return 0 ;
 }
 
-
-void process :: readFile(channel* chl) {
-    string type = getFileType() ; 
-    struct stat st ;
-    int fd = open(DEFAULT_PATH, O_RDONLY) ;
-    if(fd < 0) {
-        cout << __FILE__ << "   " << __LINE__ << endl ;
-        return  ;
-    }
-    int ret = fstat(fd, &st) ;
-    if(ret < 0) {
-        cout << __FILE__ << "   " << __LINE__ << endl ;
-        return  ;
-    }
-    //获取文件的大小
-    long len = st.st_size ;
-    if(ret < 0) {
-        sendNotFind(chl) ;
-        cout << __FILE__ << "    "<< __LINE__ << endl ;
-        return ; 
-    }
-    chl->setLen(len+1) ;
-    responseHead(chl, type, len, 200, "OK") ;
-    if(st.st_size<G_2) {
-        int ret = sendHeader(chl) ;
-        if(ret < 0) {
-            cout << __LINE__ << "  " << __FILE__ << endl ;
-            return ;
-        }
-        ret = sendfiles(chl, fd, len) ;
-        close(fd) ;
-        if(ret == 0) {
-            sendFile::over(chl) ;
-            canDel = 1 ;
-        }
-        else {
-            sendFile::setWrite(chl) ;
-            canDel = 0 ;
-        }
-    }
-    else {
-        readFile(paths.c_str(), chl) ;
-        int s = sss.sendInfo(chl) ;
-        if(s <= 0) {
-            canDel = 1 ;
-        }
-    }
-}
-
 string process :: getFileType() {
     int index = paths.find(".") ;
     string type ;
@@ -653,7 +582,12 @@ string process :: getFileType() {
 void process :: sendNotFind(channel* chl) {
     struct stat st ;
     chl->getWriteBuffer()->bufferClear() ;
-    int ret = stat("404.html", &st) ;
+    int fd = open("404.html", O_RDONLY) ;
+    if(fd < 0) {
+        cout << __FILE__ << "       " << __LINE__ << endl ;
+        return ;
+    }
+    int ret = fstat(fd,  &st) ;
     if(ret < 0) {
         cout << __FILE__ << "       " << __LINE__ << endl ;
         return  ;
@@ -662,32 +596,28 @@ void process :: sendNotFind(channel* chl) {
     responseHead(chl, "text/html", len, 404, "NOT FOUND") ;
     sendHeader(chl) ;
     chl->clearBuffer() ;
-    readFile("404.html", chl) ;
-    sendFile ss ;   
+    readBigFile(chl, fd, len) ;
     //分块发送
-    ss.sendInfo(chl) ;
 }
 
 //读文件
-void process :: readFile(const char* file, channel* chl) {
-    int fd = open(file, O_RDONLY)  ;
+void process :: readBigFile(channel* chl, int fd, unsigned long len) {
     if(fd < 0) {
         cout << __FILE__ << "    " << __LINE__  << endl ;
         canDel = 1 ;
+        close(fd) ;
         return  ;
     }
-    struct stat st ;
-    fstat(fd, &st) ;
-    Buffer* bf = chl->getWriteBuffer() ; 
     //读文件
-    int sum = 0 ;
-    char * bufp = (char*)mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0) ;
-    for(int i=0; i<st.st_size; i++) {
-        bf->append(bufp[i]) ;
+    char * bufp = (char*)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0) ;
+    int ret  = sss.sendStaticInfo(chl, bufp, len) ;
+    if(ret == 0) {
+        canDel = 1 ;
     }
-    sum+= st.st_size ;
-    chl->setLen(sum+1) ;
-    munmap(bufp, st.st_size) ;
+    else {
+        canDel = 0 ;
+    }
+    munmap(bufp, len) ;
     close(fd) ;
 }
 

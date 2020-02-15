@@ -48,7 +48,25 @@ void sendFile::sendEmptyChunk(int fd) {
     }
 }
 
-int sendFile :: sendInfo(channel* chl) {
+int sendFile::sendStaticInfo(channel* chl, const char* buf, unsigned long size) {
+    Buffer* bf = chl->getWriteBuffer() ; 
+    int cliFd = chl->getFd() ;
+    //writeb返回的是已经发送的字节数
+    unsigned long ret = writen(cliFd, buf, size) ;
+    if((errno==EAGAIN||errno==EWOULDBLOCK)&&ret > 0){
+        bf->bufferClear() ;
+        for(unsigned long i=ret; i<size; i++) {
+            bf->append(buf[i]) ;
+        }
+        //设置写事件
+        setWrite(chl) ;
+        return -1 ;
+    }
+    over(chl) ;
+    return 0 ;
+}
+
+int sendFile :: sendChunk(channel* chl) {
     int index= 0 ;
     string s = "" ;
     char buf[SEND_SIZE] ;

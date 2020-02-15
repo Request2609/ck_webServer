@@ -53,9 +53,8 @@ public :
     int messageSend(const string& tmp, channel*chl) ;
     int getVersionPath(string  tmp) ;
     void responseHead(channel* chl, string type, long len, int statusCode, string tip) ;
-    void readFile(const char* file, channel* chl) ;
+    void readBigFile(channel* chl, int fd, unsigned long len) ;
     void sendNotFind(channel* chl) ;
-    void readFile(channel* chl) ;
     string getFileType() ;
     int processArgGet(string tmp, channel* chl) ;
     int getContentLength(string a, channel* chl) ;  

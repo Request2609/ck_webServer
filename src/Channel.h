@@ -34,8 +34,6 @@ public :
     }
 public :
     bool operator==(channel& chl) ;
-    int getWakeFd() { return wakeFd ; }
-    void setWakeFd(int fd) { wakeFd = fd ; }
     int getFd() {
         return cliFd ;
     }
@@ -119,7 +117,6 @@ private :
     //要是监听套接字的话，就是监听套接字的文件描述符
     //否则就是目标客户端的fd
     int cliFd ;
-    int wakeFd ;
 };
 
 #endif
