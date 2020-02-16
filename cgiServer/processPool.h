@@ -5,6 +5,14 @@
 #include <sys/epoll.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
+#include <memory>
 #include <sys/types.h>
 #include <unistd.h>
 #include <map>
@@ -279,9 +287,7 @@ public :
         body += "<body><p>The result is " + to_string(a) + "+" + to_string(b) + " = " + to_string(t);
         body += "</p></body></html>";
         strcpy(buf, body.data()) ;
-        cout <<"发送数据" << buf << endl ;
         int ret  = send(sockFd, buf, sizeof(buf), 0) ;
-        cout << "发送完成"<< "     长度:" << ret << endl ;
         if(ret < 0) {
             cout << __LINE__ << "          " <<  __FILE__ << endl ;
             return -1 ;

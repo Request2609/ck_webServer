@@ -150,33 +150,6 @@ Buffer.cpp.s:
 	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Buffer.cpp.s
 .PHONY : Buffer.cpp.s
 
-Call.o: Call.cpp.o
-
-.PHONY : Call.o
-
-# target to build an object file
-Call.cpp.o:
-	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Call.cpp.o
-.PHONY : Call.cpp.o
-
-Call.i: Call.cpp.i
-
-.PHONY : Call.i
-
-# target to preprocess a source file
-Call.cpp.i:
-	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Call.cpp.i
-.PHONY : Call.cpp.i
-
-Call.s: Call.cpp.s
-
-.PHONY : Call.s
-
-# target to generate assembly for a file
-Call.cpp.s:
-	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Call.cpp.s
-.PHONY : Call.cpp.s
-
 CgiConnect.o: CgiConnect.cpp.o
 
 .PHONY : CgiConnect.o
@@ -366,6 +339,60 @@ Http.cpp.s:
 	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Http.cpp.s
 .PHONY : Http.cpp.s
 
+Log.o: Log.cpp.o
+
+.PHONY : Log.o
+
+# target to build an object file
+Log.cpp.o:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Log.cpp.o
+.PHONY : Log.cpp.o
+
+Log.i: Log.cpp.i
+
+.PHONY : Log.i
+
+# target to preprocess a source file
+Log.cpp.i:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Log.cpp.i
+.PHONY : Log.cpp.i
+
+Log.s: Log.cpp.s
+
+.PHONY : Log.s
+
+# target to generate assembly for a file
+Log.cpp.s:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Log.cpp.s
+.PHONY : Log.cpp.s
+
+ParseConf.o: ParseConf.cpp.o
+
+.PHONY : ParseConf.o
+
+# target to build an object file
+ParseConf.cpp.o:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/ParseConf.cpp.o
+.PHONY : ParseConf.cpp.o
+
+ParseConf.i: ParseConf.cpp.i
+
+.PHONY : ParseConf.i
+
+# target to preprocess a source file
+ParseConf.cpp.i:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/ParseConf.cpp.i
+.PHONY : ParseConf.cpp.i
+
+ParseConf.s: ParseConf.cpp.s
+
+.PHONY : ParseConf.s
+
+# target to generate assembly for a file
+ParseConf.cpp.s:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/ParseConf.cpp.s
+.PHONY : ParseConf.cpp.s
+
 Process.o: Process.cpp.o
 
 .PHONY : Process.o
@@ -528,6 +555,33 @@ ThreadPool.cpp.s:
 	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/ThreadPool.cpp.s
 .PHONY : ThreadPool.cpp.s
 
+easylog.o: easylog.cpp.o
+
+.PHONY : easylog.o
+
+# target to build an object file
+easylog.cpp.o:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/easylog.cpp.o
+.PHONY : easylog.cpp.o
+
+easylog.i: easylog.cpp.i
+
+.PHONY : easylog.i
+
+# target to preprocess a source file
+easylog.cpp.i:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/easylog.cpp.i
+.PHONY : easylog.cpp.i
+
+easylog.s: easylog.cpp.s
+
+.PHONY : easylog.s
+
+# target to generate assembly for a file
+easylog.cpp.s:
+	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/easylog.cpp.s
+.PHONY : easylog.cpp.s
+
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -567,9 +621,6 @@ help:
 	@echo "... Buffer.o"
 	@echo "... Buffer.i"
 	@echo "... Buffer.s"
-	@echo "... Call.o"
-	@echo "... Call.i"
-	@echo "... Call.s"
 	@echo "... CgiConnect.o"
 	@echo "... CgiConnect.i"
 	@echo "... CgiConnect.s"
@@ -591,6 +642,12 @@ help:
 	@echo "... Http.o"
 	@echo "... Http.i"
 	@echo "... Http.s"
+	@echo "... Log.o"
+	@echo "... Log.i"
+	@echo "... Log.s"
+	@echo "... ParseConf.o"
+	@echo "... ParseConf.i"
+	@echo "... ParseConf.s"
 	@echo "... Process.o"
 	@echo "... Process.i"
 	@echo "... Process.s"
@@ -609,6 +666,9 @@ help:
 	@echo "... ThreadPool.o"
 	@echo "... ThreadPool.i"
 	@echo "... ThreadPool.s"
+	@echo "... easylog.o"
+	@echo "... easylog.i"
+	@echo "... easylog.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

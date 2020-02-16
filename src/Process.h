@@ -14,7 +14,8 @@
 #include "SendFile.h"
 #include "EventLoop.h"
 #include "ObjectPool.h"
-
+#include "ParseConf.h"
+#include "Log.h"
 
 
 using namespace std ;
@@ -47,18 +48,22 @@ public :
     int getRequest(channel* chl, string& tmp) ;
     int postRequest(string& tmp, channel* chl, string& bf) ;
     int isExist() ;
-    int requestHeader(channel* channel_, vector<pair<int, shared_ptr<channel>>>& mp) ;
+    int requestHeader(channel* channel_, 
+                      vector<pair<int, 
+                      shared_ptr<channel>>>& mp) ;
     int requestBody(channel* channel_) ;
     int getMethod(string& line) ;
     int messageSend(const string& tmp, channel*chl) ;
     int getVersionPath(string  tmp) ;
-    void responseHead(channel* chl, string type, long len, int statusCode, string tip) ;
+    void responseHead(channel* chl, string type, 
+                      long len, int statusCode, string tip) ;
     void readBigFile(channel* chl, int fd, unsigned long len) ;
     void sendNotFind(channel* chl) ;
     string getFileType() ;
     int processArgGet(string tmp, channel* chl) ;
     int getContentLength(string a, channel* chl) ;  
-    int getSubmitInfo(string& info, int pos, int l, string& a, channel* chl) ;
+    int getSubmitInfo(string& info, int pos, 
+                      int l, string& a, channel* chl) ;
     int doPost(string& info) ;
     int sendSock(logBuf& buf, int fd, int connFd) ;
     string changeHtml() ;
@@ -74,6 +79,9 @@ public :
     void chunkEncodingHead() ;
     int getFileInfo(int& fd, long& len, const char* paths) ;
     int sendLittleFile(channel* chl, long len, int fd) ;
+    bool isConnect(const string& a) ;
+    void processDisConnect( channel* chl,  
+                            vector<pair<int, shared_ptr<channel>>>& mp) ;
 private :
     string post ;
     string paths ;
@@ -84,5 +92,7 @@ private :
     string cgiArg ;
     sendFile sss ;
     int canDel ;
+    shared_ptr<log>err ;
+    string connection ;
 };
 #endif

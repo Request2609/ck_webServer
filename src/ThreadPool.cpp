@@ -1,4 +1,5 @@
 #include"ThreadPool.h"
+
 //创建线程池
 threadPool :: threadPool(unsigned short size) : stop(false){
     
@@ -14,7 +15,7 @@ threadPool :: threadPool(unsigned short size) : stop(false){
                           //准备接收加入到线程池中的任务并执行    
                           std :: function <void ()> task ;
                           {
-                          std :: unique_lock<std :: mutex> lock {this->muteLock} ;
+                          std :: unique_lock<std::mutex> lock {this->muteLock} ;
                           //等待条件成立
                           this->cond.wait(lock, 
                                           [this]{ 

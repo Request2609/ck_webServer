@@ -1,13 +1,13 @@
 #include"EventLoop.h" 
-#include "Call.h"
 
 
 eventLoop :: eventLoop() {
     //开8线程
     //创建一个epoll
-    threadNums = 6;
+    auto res = configure::getConfigure() ;
+    threadNums = res->getThreadNum();
     //对象数量
-    objectNum = 15 ;
+    objectNum = res->getObjectNumber() ;
     quit = false ;
     epPtr = std::make_shared<epOperation>() ;
     for(int i=0; i<=threadNums; i++) {
@@ -20,6 +20,7 @@ eventLoop :: eventLoop() {
         activeChannels.push_back(ls) ;
     }
     epSet[0] = epPtr ;
+    err = log::getLogObject() ;
 }
 
 //创建对象池，并创建对象
@@ -76,7 +77,8 @@ int eventLoop :: wakeup(int fd) {
     ret++ ;
     int res = send(fd, &ret, sizeof(ret), 0) ;
     if(res < 0) {
-        cout << __FILE__ << "         " << __LINE__ <<"   " << strerror(errno)<< endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return -1 ;
     }
     return 1 ;
@@ -114,7 +116,6 @@ void eventLoop :: round(shared_ptr<channel>chl, shared_ptr<epOperation> ep) {
             int fd = chl->getFd() ;
             int ret = chl->handleEvent(fd, clList[id], id)  ;      
             if(ret == 0) {
-                //返还对象
                 obp->returnObject(chl, id) ;
                 closeLst.push_back(chl) ;    
             }

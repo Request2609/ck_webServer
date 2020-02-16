@@ -31,7 +31,30 @@ ck_webServer是一个小型web服务器，使用c++11编写！实现了GET、POS
 |webServer|web服务器|
 |cgiServer|进程池CGI服务器|
 |image|服务器介绍相关的图片|
+|conf|配置目录|
 |www|服务器资源目录|
+
+
+### 配置说明
+
+**需要安装RapidJSON**
+
+```json
+{
+    "以下信息填写说明":"填写字符串需要加双引，填写整型数字不加，日志文件路径为绝对
+    "ip addr":"127.0.0.1",
+    "port":8888, //服务器端口号
+    "thread(s) number":5, //开启的线程数量
+    "FastCGI dir path":"/root/ck_webServer/www/", //FastCGI程序所在的目录
+    "php-fpm ip addr":"127.0.0.1", //php-fpm的ip地址
+    "php-fpm port":9000,    //php-fpm 的端口地址
+    "log file":"../log/info.log",  //日志文件名称
+    "object number":15     //每个对象池初始化时的对象数量
+    "cgi ip":"127.0.0.1",  //CGI服务器的IP地址
+    "cgi port":8001, 　    //CGI服务器的端口
+    "process number":3　　 // CGI服务器的进程数量
+}
+```
 
 ### 使用说明
 
@@ -45,20 +68,20 @@ cmake CMakeLists.txt
 
 make
 
-./Server或./Server IP PORT
+./Server
 
 ### 性能测试
 
 使用webbench进行测试，和nginx服务器性能作了对比如下。
 
 测试方式：在开启服务器的情况下，执行以下命令，时间保持15s不变。
+(并在同样的情况下测试nginx)
 
 ***[]中是待填写内容***
 
-
 webbench -c [客户端数量] -t [运行时间] http://[IP]:[PORT]/
 
-给出下面测试数据，并将平均值获取到，绘制成条形图进行对比
+给出下面测试数据
 
 
 ![jj](image/ck.png)

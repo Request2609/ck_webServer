@@ -121,22 +121,20 @@ bool FastCgi::makeNameValueBody(std::string name,int nameLen,std::string value,i
 }
 
 
-void FastCgi::startConnect(void)
-{
+void FastCgi::startConnect(const char* ip, int port) {
     int sockfd;
     struct sockaddr_in server_address;
 
     //获取配置文件中的ip地址
     //std::string ip = getIpFromConf();
-    std:: string ip = "127.0.0.1" ;
     sockfd = socket(AF_INET,SOCK_STREAM,0);
     assert(sockfd > 0);
 
     bzero(&server_address,sizeof(server_address));
 
     server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = inet_addr(ip.c_str());
-    server_address.sin_port = htons(9000);
+    server_address.sin_addr.s_addr = inet_addr(ip);
+    server_address.sin_port = htons(port);
     int result = connect(sockfd,(struct sockaddr *)&server_address,sizeof(server_address));
     if(result < 0) {
         std:: cout << __FILE__ << "      " << __LINE__ << std::endl ;

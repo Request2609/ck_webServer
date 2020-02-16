@@ -5,7 +5,8 @@ void epOperation :: add(int fd, int events) {
     ev.data.fd = fd ;
     ev.events = events ;
     if(epoll_ctl(epFd, EPOLL_CTL_ADD, fd, &ev) < 0) {
-        std :: cout << __FILE__ << "   " << __LINE__ << "   " << strerror(errno)<< std :: endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return ;
     }
 
@@ -21,18 +22,19 @@ void epOperation :: change(int fd, int events) {
     ev.data.fd = fd ;
     ev.events = events ;
     if(epoll_ctl(epFd, EPOLL_CTL_MOD, fd, &ev) < 0) {
-        std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return ;
     }
 }
 
 void epOperation :: del(int fd) {
-    
+
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
-        //std :: cout << __FILE__ << "   " << __LINE__ << "      " << strerror(errno)<< std :: endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return  ;
     }
-   //cout << "关闭完成          " << fd<<endl ;
     fds -- ;
 }
 void epOperation :: del(int epFd, int fd) {
@@ -52,7 +54,8 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout, int index, int listenF
         cout << e.what() ;
     }
     if(eventNum < 0) {
-        cout << eventNum << "           错误：" << strerror(errno) << endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return -1 ;
     }
     //将活跃件全部加入到事件列表中

@@ -115,6 +115,7 @@ void sendFile :: over(channel* chl) {
 
 void sendFile :: setWrite(channel* chl) {
     chl->enableWriting() ;
+    
     chl->updateChannel() ;
 }
 

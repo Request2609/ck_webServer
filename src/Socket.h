@@ -12,9 +12,10 @@
 #include <sys/un.h>
 #include<string.h>
 #include<assert.h>
-#define BACKLOG 2048
+#include "Log.h"
 #define PATH "/tmp/sss"
 using namespace std ;
+
 //创建Unix套接字,连接服务器
 class unixSocket {
 public :
@@ -89,6 +90,7 @@ private:
     struct sockaddr_in sockAddr ;
     string ip ;
     string port ;
+    shared_ptr<log>err ;
 };
 
 #endif

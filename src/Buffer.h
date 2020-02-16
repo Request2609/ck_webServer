@@ -6,9 +6,10 @@
 #include<assert.h>
 #include<errno.h>
 #include<string.h>
+#include <memory>
 #include <thread>
 #include"ReadWrite.h"
-
+#include "Log.h"
 class Buffer {
     //用户缓冲区应该和套接字进行绑定
 public:
@@ -50,6 +51,7 @@ private :
     //开始写的地方
     int writeIndex = 0;
     std::vector<char>buffer ;
+    shared_ptr<log>err ;
 };
 #endif
 

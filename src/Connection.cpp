@@ -122,14 +122,12 @@ int connection :: createListenFd(int port) {
 int connection :: doAccept() {
     int servFd = sock->getListenSock() ;
     if(servFd == -1) {
-        std::cout << __FILE__ << "    " << __LINE__ << std::endl ;  
         return -1 ;
     }   
     //存在的话
     int connFd = sock->acceptSocket() ;
     //接受连接失败;
     if(connFd < 0) {
-        std::cout << __FILE__ << "    " << __LINE__ << std::endl ;  
         return -1 ;
     }
     this->fd = connFd ;

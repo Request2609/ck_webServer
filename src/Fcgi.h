@@ -10,7 +10,6 @@ class FastCgi
     public:
         FastCgi();
         ~FastCgi();
-
         //设置套接字的值
         //void setSockfd(){sockfd_ = startConnect();}
         //设置请求Id
@@ -30,7 +29,7 @@ class FastCgi
         std::string getIpFromConf(void);
         
         //连接php-fpm，如果成功则返回对应的套接字描述符
-        void startConnect(void);
+        void startConnect(const char* ip, int port);
 
         //发送开始请求记录
         bool sendStartRequestRecord(void);

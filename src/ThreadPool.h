@@ -17,8 +17,6 @@ public:
 public :
     template<class F, class... Args> 
         auto commit(F&& f, Args&&... args)-> std :: future<decltype(f(args...))> ;
-
-    void print() { printf("hhhhh") ;}
     int count() ;
 private:    
     //定义线程中的函数类型
@@ -41,13 +39,12 @@ template<class F, class... Args>
 auto threadPool :: commit(F&& f, Args&&... args)-> std :: future<decltype(f(args...))> {
     
     if(stop.load()) {
-        std::cout << "-----" << std::endl ;
        throw std :: runtime_error("线程池已经停止工作")  ;
     }
     //获取函数返回值类型
     using retType = decltype(f(args...)) ;
-   //任意参数的函数/任务转化成同意的void()类型的函数，通过task接收
-    auto task = std :: make_shared<std :: packaged_task<retType()>> (
+   //任意参数的函数/任务转化成同样的void()类型的函数，通过task接收
+    auto task = std :: make_shared<std::packaged_task<retType()>> (
                                                                   std :: bind(std :: forward<F>(f), std :: forward<Args>(args)...)                                                             
                                                                      ) ;
     //先获取future
@@ -62,6 +59,7 @@ auto threadPool :: commit(F&& f, Args&&... args)-> std :: future<decltype(f(args
                           }
                           ) ;
     }
+    //唤醒线程
     cond.notify_one() ;
     return future ;
 }

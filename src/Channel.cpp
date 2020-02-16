@@ -2,6 +2,7 @@
 
 const int SIZE = 4096 ;
 channel :: channel() {
+    err = log::getLogObject() ;
     events = 0 ;
     input.bufferClear() ;
     output.bufferClear() ;
@@ -12,7 +13,6 @@ channel :: channel() {
 //接收新连接
 int channel::handleAccept(int servFd) {
     //设置监听套接字
-    
     sock->setListenFd(servFd) ;
     //获取新客户端连接
     cliFd = sock->acceptSocket() ;
@@ -20,20 +20,18 @@ int channel::handleAccept(int servFd) {
     setEvents(READ) ;
     return cliFd ;
 }
-
-//修改监听事件
-int channel :: updateChannel() {
+void channel::updateChannel() {
     struct epoll_event ev ;
     ev.data.fd = cliFd ;
     ev.events = events ;
     int ret = epoll_ctl(epFd, EPOLL_CTL_MOD, cliFd, &ev) ;
     if(ret < 0) {
-        std::cout << __FILE__ << "      " << __LINE__ << std::endl ;
-        return -1 ;
+        std::string s = to_string(__LINE__)+__FILE__ +strerror(errno);
+        (*err)<<s ;
+        return  ;
     } 
-    return 1 ;
+    return ;
 }
-
 
 void channel::clearBuffer() {
     input.bufferClear() ;
@@ -102,8 +100,7 @@ int channel :: handleWrite() {
             buf[index] = '\0' ;
             int ret = writen(cliFd, s.data(), index+1) ;
             if(ret < 0) {
-                cout << __LINE__ << "       " << __FILE__ <<"     " << strerror(errno)<< endl ;
-                return -1 ;
+                break ;
             }
             if(i == len-1) break ;
             bzero(buf, sizeof(buf)) ;

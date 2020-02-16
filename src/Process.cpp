@@ -34,7 +34,6 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
             sendHeader(chl) ;
             chl->clearBuffer() ;
             getSendBuffer(chl, res) ;
-            cout <<"hello" << endl ;
             sss.sendChunk(chl) ;
             if(ret < 0) {
                 return -1 ;
@@ -71,17 +70,22 @@ void process :: getSendBuffer(channel* chl, const string res) {
 string process :: processCgi() {
     //连接CGI服务器
     int ret = cgiConnect::connectCgiServer() ;
-    if(ret < 0)
-        cout << "连接失败！" << endl ;
+    if(ret < 0) {
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
+        return "";
+    }
     string info("1\r\n") ;
     info += cgiArg ;
     //设置环境变量
     if(ret < 0) {
-        cout << __LINE__ << "       " << __FILE__ << endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return "" ;
     }
     if(ret < 0) {
-        cout << __LINE__ << "      " << __FILE__ << endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return "" ;
     }
     char buf[BUFFERSIZE] ;
@@ -89,7 +93,8 @@ string process :: processCgi() {
     //向CGI服务器发送请求
     ret = cgiConnect ::sendMsg(buf) ;
     if(ret < 0) {
-        cout <<"发送cgi请求失败！" << endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return "" ;
     }
     //等待cgi服务器响应
@@ -106,21 +111,21 @@ string process :: changePostHtml(long len, string& bf) {
     if(tmp == "") {
         return "";
     }
-
     if(paths[0] == '/') {
         paths = paths.c_str()+1 ;
     }
+    auto conf = configure::getConfigure() ;
     //fastCgi处理请求
     ::FastCgi fc ;
     fc.setRequestId(1) ;
-    fc.startConnect() ;
+    fc.startConnect(conf->getPhpIp().c_str(), conf->getPhpPort()) ;
     fc.sendStartRequestRecord() ;
     long size = tmp.size() ;
     char l[10] ;
     sprintf(l, "%ld", size) ;
     char p[1024] ;
     //构造路径,绝对路径
-    sprintf(p, "/home/changke/ck_webServer/www/%s", paths.c_str()) ;
+    sprintf(p, "%s%s", conf->getPhpPath().c_str(), paths.c_str()) ;
     fc.sendParams("SCRIPT_FILENAME", p) ;
     //设置方法
     fc.sendParams("REQUEST_METHOD", "POST") ;
@@ -162,12 +167,13 @@ string process :: getSubmit(long len, string& bf) {
 string process :: changeHtml() {
     ::FastCgi fc ;
     string res ;
+    auto conf = configure::getConfigure() ;
     fc.setRequestId(1) ;
-    fc.startConnect() ;
+    fc.startConnect(conf->getPhpIp().c_str(), conf->getPhpPort()) ;
     fc.sendStartRequestRecord() ;
     char buff[1024] ;
     //这里必须是资源的绝对路径~~~~~~
-    sprintf(buff, "/home/changke/summer2019/util/summer2019/test/www/%s", paths.c_str()) ;
+    sprintf(buff, "%s%s", conf->getPhpPath().c_str(), paths.c_str()) ;
     fc.sendParams("SCRIPT_FILENAME", buff) ;
     fc.sendParams("REQUEST_METHOD", "GET") ;
     fc.sendEndRequestRecord() ;
@@ -211,19 +217,58 @@ int process:: sendCgiResult(channel* chl, string res) {
     }
     sendHeader(chl) ;
     chl->clearBuffer() ;
-    cout << "world!" << endl ;
     sss.sendChunk(chl) ;
     return 1 ;
 }
 
+void process::processDisConnect(channel* chl,  vector<pair<int, shared_ptr<channel>>>& mp){
+    int fd = chl->getFd() ;
+    for(auto s=mp.begin(); s!=mp.end(); s++) {
+        if(s->first == fd) {
+            int id = s->second->getId() ;
+            auto tmp = objectPool<channel>::getPool() ;
+            //归还对象
+            tmp->returnObject(s->second, id) ;
+            mp.erase(s) ;
+            break ;
+        }
+    }
+}
+
+bool process::isConnect(const string& a) {
+    //没设置connection选项
+    if(a.find("Connection:") == string::npos) {
+        return true ;
+    }
+    int index = a.find("Connection:") ;
+    string s = a.substr(index+11) ;
+    int countspace = 0 ;
+    for(int i=0; s[i]==' '; i++) {
+        countspace ++ ;
+    }
+    int index1 = s.find("\r\n") ;
+    s = s.substr(countspace, index1-countspace) ;
+    if(!strcasecmp(s.c_str(), "close")) {
+        return false ;
+    }
+    return true ;
+}
+
 //获取请求头
 int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>>>& mp) {
+    err = log::getLogObject() ;
     canDel = 0 ;
     Buffer* bf = chl->getReadBuffer() ;
     //解析请求行
     int readIndex = bf->getReadIndex() ;
     int writeIndex = bf->getWriteIndex() ;
     string a = bf->readBuffer(readIndex, writeIndex) ;
+    //检查请求头connection字段是close
+    if(!isConnect(a)) {
+        sss.over(chl) ;
+        processDisConnect(chl, mp) ;
+        return 1;
+    }
     //解析请求头
     int index = 0 ;
     string tmp ;
@@ -243,20 +288,11 @@ int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>
     }
     //当canDel设置成1的时候就会将相应的channel对象移除
     if(canDel == 1) {
-        int fd = chl->getFd() ;
-        for(auto s=mp.begin(); s!=mp.end(); s++) {
-            if(s->first == fd) {
-                int id = s->second->getId() ;
-                auto tmp = objectPool<channel>::getPool() ;
-               //归还对象
-                tmp->returnObject(s->second, id) ;
-                mp.erase(s) ;
-                break ;
-            }
-        }
+        processDisConnect(chl, mp) ;
     }
     return 0  ;  
 }   
+
 //获取请求的长度
 int process :: getContentLength(string a, channel* chl) {
     
@@ -268,7 +304,8 @@ int process :: getContentLength(string a, channel* chl) {
         //没找到，可能发的数据不够，也可能是请求头错误(少见)
         //设置的read buffer 长度为4096，第一个包里面80%有content-length
         if(pos == -1) {
-            cout << __FILE__ << "     " << __LINE__ << endl ;
+            string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+            (*err)<<s ;
             return -1 ;
         }
         int flag = 0 ;
@@ -379,7 +416,8 @@ int process::sendLittleFile(channel* chl, long len, int fd) {
     responseHead(chl, type, len, 200, "OK") ;
     ret = sendHeader(chl) ;
     if(ret < 0) {
-        cout << __LINE__ << "  "  << __FILE__<<"    " << strerror(errno) << endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         canDel = 1 ;
         return -1 ;
     }
@@ -483,7 +521,8 @@ int process :: messageSend(const string& tmp, channel* chl) {
 int process::getFileInfo(int& fd, long& len, const char* paths) {
     fd = open(paths, O_RDONLY) ;
     if(fd < 0) {
-        cout << __FILE__ <<"   " << __LINE__ << endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return -1;
     }
     struct stat st ;
@@ -588,12 +627,14 @@ void process :: sendNotFind(channel* chl) {
     chl->getWriteBuffer()->bufferClear() ;
     int fd = open("404.html", O_RDONLY) ;
     if(fd < 0) {
-        cout << __FILE__ << "       " << __LINE__ << endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return ;
     }
     int ret = fstat(fd,  &st) ;
     if(ret < 0) {
-        cout << __FILE__ << "       " << __LINE__ << endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return  ;
     }
     int len = st.st_size ;
@@ -607,7 +648,8 @@ void process :: sendNotFind(channel* chl) {
 //读文件
 void process :: readBigFile(channel* chl, int fd, unsigned long len) {
     if(fd < 0) {
-        cout << __FILE__ << "    " << __LINE__  << endl ;
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         canDel = 1 ;
         close(fd) ;
         return  ;

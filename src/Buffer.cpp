@@ -1,6 +1,7 @@
 #include"Buffer.h"
 
 Buffer :: Buffer():canProcess(0) {
+    err = log::getLogObject() ;
     contentLen = -1 ;
     readIndex = 0 ;
     writeIndex = 0 ;
@@ -8,6 +9,8 @@ Buffer :: Buffer():canProcess(0) {
 }
 
 Buffer :: Buffer(const char* buf) {
+    err = log::getLogObject() ;
+    contentLen = -1 ;
     assert(buf != NULL) ; 
     int len = strlen(buf) ;
     writeIndex = len ;
@@ -17,6 +20,8 @@ Buffer :: Buffer(const char* buf) {
 }
 
 Buffer :: Buffer(std::string buf) {
+    err = log::getLogObject() ;
+    contentLen = -1 ;
     int len = buf.size() ;
     writeIndex = len ;
     for(int i=0; i<len; i++) {
@@ -60,7 +65,6 @@ int Buffer :: retreiveBuffer(int start, int end) {
         buffer.clear() ;
     }   
     if(start > end) {
-        std :: cout << __FILE__ << "    " << __LINE__ << std :: endl ;
         return -1 ;
     }   
     readIndex += (end-start);
@@ -78,6 +82,8 @@ int Buffer :: readBuffer(int fd) {
     //接收消息
     int n ;
     if(((n = read(fd, buffer_, sizeof(buffer_))) < 0) && errno != EINTR) {
+        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        (*err)<<s ;
         return -1 ;
     }
     //如果读取到0字节，就关闭连接

@@ -12,6 +12,8 @@
 #include "Connection.h"
 #include "Socket.h"
 #include "ObjectPool.h"
+#include "ParseConf.h"
+#include "Log.h"
 using namespace std ;
 
 class epOperation ;
@@ -72,6 +74,7 @@ private :
     //设置套接字channel键值对
     channelMap clList ;
     int id ;
+    shared_ptr<log>err ;
 };
 
 

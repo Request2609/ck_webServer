@@ -10,7 +10,7 @@ aux_source_directory(. DIR_SRCS)
 # 指定生成目标
 add_executable(Server ${DIR_SRCS})
 set(CMAKE_BUILD_TYPE "Release")
-
+find_package(RapidJSON)
 
 if( CMAKE_BUILD_TYPE STREQUAL "Debug" )
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g -Wall -Wno-unused-variable -pthread")

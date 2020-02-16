@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include "Channel.h"
 #include "EventLoop.h"
+#include "Log.h"
 using namespace std ;
 
 class channel ;
@@ -16,6 +17,7 @@ public :
         epFd = epoll_create(1) ;
        //设置了epfds的capacity大小
         epFds.reserve(nfds) ;
+        err = log::getLogObject() ;
     }   
 
     ~epOperation() { close(epFd) ; }
@@ -33,5 +35,6 @@ private :
     int fds ;
     int nfds ;
     std :: vector<struct epoll_event> epFds ;
+    shared_ptr<log>err ;
 };
 #endif

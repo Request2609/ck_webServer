@@ -9,7 +9,7 @@
 #include "Buffer.h"
 #include "ObjectPool.h"
 #include "SendFile.h"
-
+#include "Log.h"
 using namespace std ;
 class epOperation ;
 class channel ;
@@ -51,7 +51,7 @@ public :
         readCallBack = cb ;
     }
     void print() ;
-    
+    void updateChannel() ; 
     void setWriteCallBack(callBack& cb) {
         writeCallBack = cb ;
     }
@@ -67,7 +67,6 @@ public :
     shared_ptr<epOperation> getEp() { return ep ; }
     void setEp(shared_ptr<epOperation> epo){ ep = epo ;}
     void setEpFd(int efd) { epFd = efd ;}
-    int updateChannel() ;
     //判断是否收到了一段消息完整的消息"\r\n"结束
     int handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp, int id) ;
     int handleWrite() ;
@@ -117,6 +116,7 @@ private :
     //要是监听套接字的话，就是监听套接字的文件描述符
     //否则就是目标客户端的fd
     int cliFd ;
+    shared_ptr<log>err ;
 };
 
 #endif
