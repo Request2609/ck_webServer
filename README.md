@@ -32,8 +32,7 @@ ck_webServer是一个小型web服务器，使用c++11编写！实现了GET、POS
 |cgiServer|进程池CGI服务器|
 |image|服务器介绍相关的图片|
 |conf|配置目录|
-|www|服务器资源目录|
-
+|log|日志目录|
 
 ### 配置说明
 
