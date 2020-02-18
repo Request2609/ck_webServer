@@ -30,12 +30,14 @@ public :
     int readBuffer(int fd) ;
     int getReadIndex() { return readIndex ; }
     void setReadIndex(int index) { readIndex = index ;}
+    bool checkBuffer() ;
     int getWriteIndex() { return writeIndex ; }
     void setPostPos(long pos) { contentLen = pos ; }
     long getPostPos() { return contentLen ; }
     char operator[](int i) { return buffer[i] ;}
     int getSize() { return buffer.size(); }
     void changeBuf(std::vector<char> s) { buffer = move(s); }
+    int checkBody() ;
 private :
     //记录post请求的末尾数据长度
     long contentLen ;
@@ -50,6 +52,7 @@ private :
     int readIndex = 0;
     //开始写的地方
     int writeIndex = 0;
+    int conLen ;
     std::vector<char>buffer ;
     shared_ptr<log>err ;
 };

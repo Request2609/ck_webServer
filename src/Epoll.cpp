@@ -29,17 +29,16 @@ void epOperation :: change(int fd, int events) {
 }
 
 void epOperation :: del(int fd) {
-
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
-        (*err)<<s ;
+        //string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno) ;
+        //(*err)<<s ;
         return  ;
     }
     fds -- ;
 }
 void epOperation :: del(int epFd, int fd) {
     if(epoll_ctl(epFd, EPOLL_CTL_DEL, fd, NULL) < 0){
-       // std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
+        std :: cout << __FILE__ << "   " << __LINE__ << std :: endl ;
         return  ;
     }
 }

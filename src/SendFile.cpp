@@ -107,15 +107,15 @@ int sendFile :: sendChunk(channel* chl) {
 
 void sendFile :: over(channel* chl) {
     if(chl == nullptr) {
+        return  ;
     }
-   int fd = chl->getFd() ; 
-   chl->getEp()->del(fd) ;
-   close(fd) ;
+    int fd = chl->getFd() ; 
+    chl->getEp()->del(fd) ;
+    close(fd) ;
 }
 
 void sendFile :: setWrite(channel* chl) {
     chl->enableWriting() ;
-    
     chl->updateChannel() ;
 }
 

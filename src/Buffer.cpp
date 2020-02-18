@@ -78,7 +78,7 @@ void Buffer :: append(char c) {
 }
 
 int Buffer :: readBuffer(int fd) {
-    char buffer_[1024] ;
+    char buffer_[4096] ;
     //接收消息
     int n ;
     if(((n = read(fd, buffer_, sizeof(buffer_))) < 0) && errno != EINTR) {
@@ -107,11 +107,25 @@ int Buffer :: readBuffer(int fd) {
             end.clear() ;
         }
     }
+    conLen = 0 ;
+    conLen =checkBuffer() ;
+    //状态机不满足，继续等待
+    if(conLen == 0) {
+        canProcess = false ;
+        return n ;
+    }
     //如果收到了最后面的两个"\r\n\r\n",表明可以处理了
     //就可以调用消息处理函数
     if(end == "\r\n\r\n") {
-        canProcess = true ;
-        return n ;
+        if(conLen == 1) {
+            canProcess = true ;
+            return n ;
+        }
+        else {
+            //否则检查请求体
+            canProcess = checkBody() ;
+            return canProcess ;
+        }
     }
     //且指针指向的不是０位置，读指针和写指针在同一位置，清空缓冲区
     if((readIndex != 0 && writeIndex!=0) && readIndex == writeIndex) {
@@ -121,4 +135,52 @@ int Buffer :: readBuffer(int fd) {
     }
     return n ;
 }
+
+int Buffer::checkBody() {
+    int index = buffer.size() ;
+    int count =  0 ;
+    for(int i=index-1; buffer[i]!='\r'&&buffer[i]!='\n'&&i>0; i--) {
+        count++ ;
+    }
+    if(count == conLen) {
+        return true ;
+    }
+    return false ;
+}
+
+bool Buffer::checkBuffer() {
+    int index= 0 ;
+    string s="" ;
+    for(int i=0; i<writeIndex; i++) {
+        s +=buffer[i]  ;     
+    }
+    if(s.find("\r\n") != string::npos) {
+        index = s.find("\r\n") ;
+        string head = s.substr(0, index) ;
+        if(head.find("GET") != string::npos) {
+            return 1 ;
+        }
+        if(head.find("POST") != string::npos) {
+            if(s.find("Content-Length: ") != string::npos) {
+                index = s.find("Content-Length: ") ;
+                head = s.substr(index) ;
+                if(head.find("\r\n") == string::npos) {
+                    return 0 ;
+                }
+                int end = head.find("\r\n") ;
+                head = head.substr(10, end-16) ;
+                ///获取长度
+                int n = atoi(head.c_str()) ;
+                return n ;
+            }
+            else {
+                return 0 ;
+            }
+        }
+    }
+    else {
+        return 0 ;
+    }
+    return 1 ;
+}      
 

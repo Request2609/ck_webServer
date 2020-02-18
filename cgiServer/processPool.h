@@ -299,7 +299,6 @@ public :
     void getArg(int& a, int& b) {
         cout << cgiArg << endl ;
         cgiArg = cgiArg.data()+3 ;
-        cout << "数据:" << cgiArg << endl ;
         sscanf(cgiArg.data(), "a=%d&b=%d", &a, &b) ;
     }
 public :

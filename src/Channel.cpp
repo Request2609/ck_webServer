@@ -64,10 +64,9 @@ int channel :: handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp, 
             }
             ep->del(fd) ;
             close(fd) ;
-            return 0 ;
+            return 1 ;
         }
     }
-
     if(events&EPOLLOUT) {
         //发送数据
         handleWrite() ;

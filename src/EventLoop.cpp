@@ -171,7 +171,7 @@ void eventLoop :: loop() {
             for(shared_ptr<channel> chl : activeChannels[0]) {
                 int fd = chl->getFd() ;
                 int ret = chl->handleEvent(fd, clList[0], 0) ;
-                if(ret < 0) {
+                if(ret <= 0) {
                     obp->returnObject(chl, 0) ;
                     closeLst.push_back(chl) ;     
                 }

@@ -1,0 +1,17 @@
+[INFO|2020-02-18 21:57:27,219] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:27,219] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:27,369] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Resource temporarily unavailable
+[INFO|2020-02-18 21:57:27,369] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:27,369] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:27,730] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:28,293] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:28,345] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:28,582] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:28,768] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:29,130] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:29,501] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:57:29,502] 34  /home/changke/code/ck_webServer/src/Epoll.cpp    No such file or directory
+[INFO|2020-02-18 21:59:22,510] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:59:22,801] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:59:22,979] 85  /home/changke/code/ck_webServer/src/Buffer.cpp    Bad file descriptor
+[INFO|2020-02-18 21:59:23,104] 34  /home/changke/code/ck_webServer/src/Epoll.cpp    No such file or directory
