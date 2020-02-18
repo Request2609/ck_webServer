@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
         cout << "监听失败！" << endl ;
         return -1 ;
     }
+
     //创建
     shared_ptr<processPool<cgiConn>> pool = processPool<cgiConn> :: create(listenFd, num);
     if(pool)

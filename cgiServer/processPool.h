@@ -360,6 +360,7 @@ void tool :: addSig(int sig, void(handle)(int), bool restart) {
     sigfillset(&sa.sa_mask) ;
 }
 
+
 int process :: createSocketPair() {
     int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) ;
     if(ret < 0) {
