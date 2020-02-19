@@ -73,6 +73,23 @@ make
 
 使用webbench进行测试，和nginx服务器性能作了对比如下。
 
+##### 单线程的ck\_webServer性能
+
+每分钟响应的请求数量：878784
+
+![a](image/dan_xian_cheng_ck.png)
+
+##### 单进程的ngnix性能
+
+每分钟响应的请求数量：803880 
+
+![a](image/dan_xian_cheng_nginx.png)
+
+
+##### 多线程的ck_webServer和多进程nginx性能比较
+
+***nginx设置进程数 = ck_webServer设置线程数目 = 5***
+
 测试方式：在开启服务器的情况下，执行以下命令，时间保持15s不变。
 (并在同样的情况下测试nginx)
 

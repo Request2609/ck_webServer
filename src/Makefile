@@ -312,33 +312,6 @@ Fcgi.cpp.s:
 	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Fcgi.cpp.s
 .PHONY : Fcgi.cpp.s
 
-Http.o: Http.cpp.o
-
-.PHONY : Http.o
-
-# target to build an object file
-Http.cpp.o:
-	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Http.cpp.o
-.PHONY : Http.cpp.o
-
-Http.i: Http.cpp.i
-
-.PHONY : Http.i
-
-# target to preprocess a source file
-Http.cpp.i:
-	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Http.cpp.i
-.PHONY : Http.cpp.i
-
-Http.s: Http.cpp.s
-
-.PHONY : Http.s
-
-# target to generate assembly for a file
-Http.cpp.s:
-	$(MAKE) -f CMakeFiles/Server.dir/build.make CMakeFiles/Server.dir/Http.cpp.s
-.PHONY : Http.cpp.s
-
 Log.o: Log.cpp.o
 
 .PHONY : Log.o
@@ -639,9 +612,6 @@ help:
 	@echo "... Fcgi.o"
 	@echo "... Fcgi.i"
 	@echo "... Fcgi.s"
-	@echo "... Http.o"
-	@echo "... Http.i"
-	@echo "... Http.s"
 	@echo "... Log.o"
 	@echo "... Log.i"
 	@echo "... Log.s"

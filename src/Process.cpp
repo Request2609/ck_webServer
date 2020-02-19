@@ -396,10 +396,10 @@ void  process :: responseHead(channel* chl, string type,
     //构造响应头
     string head ;
     if(len != -1)
-        sprintf(buf, "%s %d %s\r\nContent-Type: %s\r\nConnection: Keep-Alive\r\nContent-Length:%ld\r\n\r\n",
+        sprintf(buf, "%s %d %s\r\nContent-Type: %s\r\nConnection: close\r\nContent-Length:%ld\r\n\r\n",
             version.c_str(), statusCode, tip.c_str(), type.c_str(),len) ;
     else 
-        sprintf(buf, "%s %d %s\r\nContent-Type: %s\r\nConnection: Keep-Alive\r\nTransfer-Encoding: chunked\r\n\r\n",
+        sprintf(buf, "%s %d %s\r\nContent-Type: %s\r\nConnection: close\r\nTransfer-Encoding: chunked\r\n\r\n",
             version.c_str(), statusCode, tip.c_str(), type.c_str()) ;
     //将信息存入输入缓冲区中    
     int l = strlen(buf) ;
