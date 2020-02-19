@@ -2,7 +2,7 @@
     "以下信息填写说明":"填写字符串需要加双引，填写整型数字不加，日志文件路径为绝对路径",
     "ip addr":"127.0.0.1",
     "port":8888,
-    "thread(s) number":0,
+    "thread(s) number":5,
     "FastCGI dir path":"/home/changke/ck_webServer/www/",
     "php-fpm ip addr":"127.0.0.1",
     "php-fpm port":9000,
