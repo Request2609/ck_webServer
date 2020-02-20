@@ -7,8 +7,7 @@
 #include "Connection.h"
 #include "EventLoop.h"
 
-class tcpServer
-{
+class tcpServer {
     //将连接名置为端口号
     typedef std::map<std::string, connection> connMap ;
 public:

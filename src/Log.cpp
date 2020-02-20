@@ -10,7 +10,8 @@ std::shared_ptr<log>log::rcd ;
 
 log::~log() {
       el::Helpers::uninstallPreRollOutCallback();
-    }
+}
+
 std::shared_ptr<log>log::getLogObject(){
     if(rcd == nullptr) {
         rcd = std::shared_ptr<log>(new log) ;
@@ -40,6 +41,6 @@ void log::record(const char* s) {
     LOG(INFO) << s ;
 }  
 
-void log::operator<<(string s) {
+void log::operator<<(std::string s) {
     LOG(INFO) << s ;
 }

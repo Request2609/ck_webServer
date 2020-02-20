@@ -18,7 +18,6 @@
 #include "Log.h"
 
 
-using namespace std ;
 enum {
     GET = 1, POST, DEFAULT
 } ;
@@ -45,54 +44,56 @@ public:
     ~process() {}
 public :
     void fastCgi() ;
-    int getRequest(channel* chl, string& tmp) ;
-    int postRequest(string& tmp, channel* chl, string& bf) ;
+    int getRequest(channel* chl, std::string& tmp) ;
+    int postRequest(std::string& tmp, 
+                    channel* chl, std::string& bf) ;
     int isExist() ;
     int requestHeader(channel* channel_, 
-                      vector<pair<int, 
-                      shared_ptr<channel>>>& mp) ;
+                      std::vector<std::pair<int, 
+                      std::shared_ptr<channel>>>& mp) ;
     int requestBody(channel* channel_) ;
-    int getMethod(string& line) ;
-    int messageSend(const string& tmp, channel*chl) ;
-    int getVersionPath(string  tmp) ;
-    void responseHead(channel* chl, string type, 
-                      long len, int statusCode, string tip) ;
+    int getMethod(std::string& line) ;
+    int messageSend(const std::string& tmp, channel*chl) ;
+    int getVersionPath(std::string  tmp) ;
+    void responseHead(channel* chl, std::string type, 
+                      long len, int statusCode, std::string tip) ;
     void readBigFile(channel* chl, int fd, unsigned long len) ;
     void sendNotFind(channel* chl) ;
-    string getFileType() ;
-    int processArgGet(string tmp, channel* chl) ;
-    int getContentLength(string a, channel* chl) ;  
-    int getSubmitInfo(string& info, int pos, 
-                      int l, string& a, channel* chl) ;
-    int doPost(string& info) ;
+    std::string getFileType() ;
+    int processArgGet(std::string tmp, channel* chl) ;
+    int getContentLength(std::string a, channel* chl) ;  
+    int getSubmitInfo(std::string& info, int pos, 
+                      int l, std::string& a, channel* chl) ;
+    int doPost(std::string& info) ;
     int sendSock(logBuf& buf, int fd, int connFd) ;
-    string changeHtml() ;
-    string changePostHtml(long len, string&bf) ;
-    string getSubmit(long len, string&bf) ;
-    int sendCgiResult(channel * chl, string res) ;
-    string processCgi() ;
-    void getSendBuffer(channel* chl, const string res) ;
+    std::string changeHtml() ;
+    std::string changePostHtml(long len, std::string&bf) ;
+    std::string getSubmit(long len, std::string&bf) ;
+    int sendCgiResult(channel * chl, std::string res) ;
+    std::string processCgi() ;
+    void getSendBuffer(channel* chl, const std::string res) ;
     void sendBuffer(channel* chl) ;
     int sendHeader(channel* chl) ;
     int sendfiles(channel* chl, int fd, int size) ;
-    void readFile(string filename) ;
+    void readFile(std::string filename) ;
     void chunkEncodingHead() ;
     int getFileInfo(int& fd, long& len, const char* paths) ;
     int sendLittleFile(channel* chl, long len, int fd) ;
-    bool isConnect(const string& a) ;
+    bool isConnect(const std::string& a) ;
     void processDisConnect( channel* chl,  
-                            vector<pair<int, shared_ptr<channel>>>& mp) ;
+                            std::vector<std::pair<int, 
+                            std::shared_ptr<channel>>>& mp) ;
 private :
-    string post ;
-    string paths ;
+    std::string post ;
+    std::string paths ;
     int method ;
-    string version ;
+    std::string version ;
     //是get请求的话，就设置为1
     int flag ;
-    string cgiArg ;
+    std::string cgiArg ;
     sendFile sss ;
     int canDel ;
-    shared_ptr<log>err ;
-    string connection ;
+    std::shared_ptr<log>err ;
+    std::string connection ;
 };
 #endif

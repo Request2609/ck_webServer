@@ -6,7 +6,7 @@ socketFd :: socketFd() {
     err = log::getLogObject() ;
     sockFd = socket(AF_INET, SOCK_STREAM, 0) ;
     if(sockFd < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return ;
     }
@@ -15,10 +15,10 @@ socketFd :: socketFd() {
 
 socketFd :: socketFd(int port) {
     err = log::getLogObject() ;
-    this->port = to_string(port) ;
+    this->port = std::to_string(port) ;
     sockFd = socket(AF_INET, SOCK_STREAM, 0) ;
     if(sockFd < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return ;
     }
@@ -34,7 +34,7 @@ socketFd :: socketFd(const char* port) {
     this->port = port ;
     sockFd = socket(AF_INET, SOCK_STREAM, 0) ;
     if(sockFd < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return ;
     }
@@ -51,7 +51,7 @@ socketFd :: socketFd(const std::string addr, const std::string port) {
     this->port = port ;
     sockFd = socket(AF_INET, SOCK_STREAM, 0) ;
     if(sockFd < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return ;
     }
@@ -62,7 +62,7 @@ socketFd :: socketFd(const std::string addr, const std::string port) {
     sockAddr.sin_addr.s_addr =inet_addr(addr.c_str()) ; ;
     setReusePort() ;
     if(bind(sockFd, (struct sockaddr*)&sockAddr, sizeof(sockAddr)) < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return ;
     }
@@ -72,7 +72,7 @@ socketFd :: socketFd(const std::string addr, const std::string port) {
 
 int socketFd :: setAddr(int port) {
     bzero(&sockAddr, sizeof(sockAddr)) ;
-    this->port = to_string(port) ;
+    this->port = std::to_string(port) ;
     sockAddr.sin_family = AF_INET ;
     sockAddr.sin_port = htons(port) ;
     sockAddr.sin_addr.s_addr = inet_addr(ip.c_str()) ;
@@ -106,7 +106,7 @@ int socketFd :: setAddr(const char* port) {
 void socketFd :: shutdownWrite(int fd) {
     int ret = shutdown(fd, SHUT_WR) ;
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return ;
     }
@@ -128,7 +128,7 @@ int socketFd :: setLinger(int fd) {
     so_linger.l_linger = 0 ;
     int ret = setsockopt(fd, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger)) ;
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1 ;
     }
@@ -138,13 +138,13 @@ int socketFd :: setLinger(int fd) {
 int socketFd :: setReuseAddr() {
     int flag = 1 ;
     if(sockFd < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1;;
     }
     int ret = setsockopt(sockFd, SOL_SOCKET, SO_REUSEADDR, &flag, sizeof(flag)) ;
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1;
     }
@@ -155,7 +155,7 @@ int socketFd :: setReusePort() {
     int flag = 1;
     int ret = setsockopt(sockFd, SOL_SOCKET, SO_REUSEPORT, &flag, sizeof(flag)) ;
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1 ;
     }
@@ -166,7 +166,7 @@ int socketFd :: setReusePort() {
 int socketFd :: bindAddress() {
     assert(sockFd != -1) ;
     if(bind(sockFd, (struct sockaddr*)&sockAddr, sizeof(sockAddr))< 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1 ;
     }
@@ -179,7 +179,7 @@ int socketFd :: acceptSocket() {
     assert(sockFd != -1) ;
     int connFd = accept(sockFd,(struct sockaddr*)&sock, &len) ;
     if(connFd < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1 ;
     }
@@ -189,7 +189,7 @@ int socketFd :: acceptSocket() {
 int socketFd :: startListen() {
     assert(sockFd != -1) ;
     if(listen(sockFd, BACKLOG) < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1 ;
     }
@@ -202,7 +202,7 @@ int socketFd :: setNoBlocking(int fd) {
     int newA = old|O_NONBLOCK ;
     int ret = fcntl(fd, F_SETFL, newA) ;
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1 ;
     }

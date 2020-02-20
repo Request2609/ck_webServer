@@ -7,7 +7,7 @@ ck_webServer是一个小型web服务器，使用c++11编写！实现了GET、POS
 - 系统：ubuntu19.10
 - 处理器：Intel® Core™ i5-7300HQ CPU @ 2.50GHz × 4
 - 内存：7.7 GiB
-- 编译器：Gcc编译器，Vim+Vimplus编写，使用CMake自动生成Makefile
+- 编译器：Gcc编译器
 
 ### 技术点
 

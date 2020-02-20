@@ -10,11 +10,9 @@
 #include "ObjectPool.h"
 #include "SendFile.h"
 #include "Log.h"
-using namespace std ;
 class epOperation ;
 class channel ;
 class sendFile ;
-using namespace std :: placeholders ;
 enum {
     READ = EPOLLIN,
     WRITE = EPOLLOUT,
@@ -26,7 +24,9 @@ enum {
 //事件分发
 class channel {
 public :
-    typedef std::function<void(channel* chl, vector<pair<int, shared_ptr<channel>>>&)> callBack ;
+    typedef std::function<void(channel* chl, 
+                               std::vector<std::pair<int, 
+                               std::shared_ptr<channel>>>&)> callBack ;
     typedef std::function<void(channel* chl)> wakeCall ;
 public :
     channel() ;
@@ -64,13 +64,13 @@ public :
     }
     void  clearBuffer() ;
     void setSock(std::shared_ptr<socketFd>sock) { this->sock = sock; }
-    shared_ptr<epOperation> getEp() { return ep ; }
-    void setEp(shared_ptr<epOperation> epo){ ep = epo ;}
+    std::shared_ptr<epOperation> getEp() { return ep ; }
+    void setEp(std::shared_ptr<epOperation> epo){ ep = epo ;}
     void setEpFd(int efd) { epFd = efd ;}
     //判断是否收到了一段消息完整的消息"\r\n"结束
-    int handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp, int id) ;
+    int handleEvent(int fd, std::vector<std::pair<int, std::shared_ptr<channel>>>& tmp, int id) ;
     int handleWrite() ;
-    int handleRead(vector<pair<int, shared_ptr<channel>>>&tmp) ;
+    int handleRead(std::vector<std::pair<int, std::shared_ptr<channel>>>&tmp) ;
     int handleAccept(int fd) ;
     //设置channel监听的事件类型
     void setEvents(int event) { events = event ;}
@@ -85,7 +85,7 @@ public :
     long getLen() { return len ; }
     Buffer* getReadBuffer() { return  &input ;}
     Buffer* getWriteBuffer() { return  &output ;}
-    static void delFd(int fd, map<int, shared_ptr<channel>>& tmp) ;
+    static void delFd(int fd, std::map<int, std::shared_ptr<channel>>& tmp) ;
 private :
     int id ;
     std ::shared_ptr<epOperation>ep ;
@@ -116,7 +116,7 @@ private :
     //要是监听套接字的话，就是监听套接字的文件描述符
     //否则就是目标客户端的fd
     int cliFd ;
-    shared_ptr<log>err ;
+    std::shared_ptr<log>err ;
 };
 
 #endif

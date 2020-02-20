@@ -5,7 +5,7 @@ void epOperation :: add(int fd, int events) {
     ev.data.fd = fd ;
     ev.events = events ;
     if(epoll_ctl(epFd, EPOLL_CTL_ADD, fd, &ev) < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return ;
     }
@@ -22,7 +22,7 @@ void epOperation :: change(int fd, int events) {
     ev.data.fd = fd ;
     ev.events = events ;
     if(epoll_ctl(epFd, EPOLL_CTL_MOD, fd, &ev) < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return ;
     }
@@ -49,11 +49,11 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout, int index, int listenF
     struct epoll_event epFd_[200] ;
     try{
         eventNum = epoll_wait(epFd, epFd_, 200, timeout) ;
-    }catch(exception e) {
-        cout << e.what() ;
+    }catch(std::exception e) {
+        std::cout << e.what() ;
     }
     if(eventNum < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1 ;
     }
@@ -65,7 +65,7 @@ int epOperation :: wait(eventLoop* loop, int64_t timeout, int index, int listenF
             loop->handleAccept(index, listenFd) ;
         }
         else {
-            shared_ptr<channel> chl = loop->search(index, fd) ;
+            std::shared_ptr<channel> chl = loop->search(index, fd) ;
             loop->fillChannelList(index, chl) ;
         }
     }

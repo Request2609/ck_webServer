@@ -8,34 +8,33 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 #include <memory>
-using namespace std ;
 
 
 class configure {
 public:
     ~configure() {}
-    static shared_ptr<configure>getConfigure() ;
-    string getServIP() { return servIp ; }
+    static std::shared_ptr<configure>getConfigure() ;
+    std::string getServIP() { return servIp ; }
     int getServPort() { return servPort; }
     int getThreadNum() { return threadNum ; }
-    string getPhpPath() { return phpPath ; }
-    string getPhpIp() { return phpIp ;}
+    std::string getPhpPath() { return phpPath ; }
+    std::string getPhpIp() { return phpIp ;}
     int getPhpPort() { return phpPort; }
-    string getLogFile() { return  logFile ;}
+    std::string getLogFile() { return  logFile ;}
     int getObjectNumber() { return objectNum ;}
 private:
     void init() ;
     configure():servIp(""), servPort(-1), 
     threadNum(1), phpPath(""), 
     phpIp(""), phpPort(-1), logFile(""){}
-    static shared_ptr<configure>conf ;
-    string servIp ;
+    static std::shared_ptr<configure>conf ;
+    std::string servIp ;
     int servPort ;
     int threadNum ;
-    string phpPath ;
-    string phpIp ;
+    std::string phpPath ;
+    std::string phpIp ;
     int phpPort ;
-    string logFile ;
+    std::string logFile ;
     int objectNum ;
 };
 

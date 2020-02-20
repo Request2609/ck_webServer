@@ -16,7 +16,9 @@ public:
     ~threadPool() ;
 public :
     template<class F, class... Args> 
-        auto commit(F&& f, Args&&... args)-> std :: future<decltype(f(args...))> ;
+        auto commit(F&& f, Args&&... args)->
+        std :: future<decltype(f(args...))> ;
+
     int count() ;
 private:    
     //定义线程中的函数类型
@@ -36,7 +38,8 @@ private:
 };
 
 template<class F, class... Args> 
-auto threadPool :: commit(F&& f, Args&&... args)-> std :: future<decltype(f(args...))> {
+auto threadPool :: commit(F&& f, Args&&... args)-> 
+                    std :: future<decltype(f(args...))> {
     
     if(stop.load()) {
        throw std :: runtime_error("线程池已经停止工作")  ;
@@ -44,20 +47,17 @@ auto threadPool :: commit(F&& f, Args&&... args)-> std :: future<decltype(f(args
     //获取函数返回值类型
     using retType = decltype(f(args...)) ;
    //任意参数的函数/任务转化成同样的void()类型的函数，通过task接收
-    auto task = std :: make_shared<std::packaged_task<retType()>> (
-                                                                  std :: bind(std :: forward<F>(f), std :: forward<Args>(args)...)                                                             
-                                                                     ) ;
+    auto task = std :: make_shared<std::packaged_task<retType()>>(
+                std :: bind(std :: forward<F>(f), std :: forward<Args>(args)...)) ;
     //先获取future
     std :: future<retType> future  = task->get_future() ;
     {
         //对当前语句加锁
         std :: lock_guard<std :: mutex> lock{ muteLock } ;
         //将任务加入到队列中
-        taskQueue.emplace(
-                          [task](){
+        taskQueue.emplace([task]() {
                           (*task)() ;
-                          }
-                          ) ;
+                          }) ;
     }
     //唤醒线程
     cond.notify_one() ;

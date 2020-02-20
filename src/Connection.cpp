@@ -1,6 +1,5 @@
 #include"Connection.h"
 
-using namespace std :: placeholders ;
 
 connection :: connection() {
     readCallBack = nullptr ;
@@ -45,12 +44,12 @@ connection :: connection(std::string ip, std::string port) {
 connection :: ~connection() {
 }
 
-void connection :: setWakeChlCall(shared_ptr<channel>&chl) { 
+void connection :: setWakeChlCall(std::shared_ptr<channel>&chl) { 
     chl->setWakeCall(wakeCb);
 }
 
 //给channel设置回调
-void connection :: setCallBackToChannel(shared_ptr<channel> channel_) {
+void connection :: setCallBackToChannel(std::shared_ptr<channel> channel_) {
     int flag = 0 ;
     if(readCallBack != nullptr) {
         flag = 1 ;

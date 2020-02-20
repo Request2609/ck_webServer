@@ -1,9 +1,10 @@
 #include "SendFile.h"
 
 const int SEND_SIZE=4096 ;
+std::shared_ptr<log>sendFile::err=log::getLogObject() ;
 
-string sendFile::makeChunk(const char* chunk) {
-    string buf ;
+std::string sendFile::makeChunk(const char* chunk) {
+    std::string buf ;
     char hexStr[10] ;
     bzero(hexStr, sizeof(hexStr)) ;
     //长度不应该包含\r\n
@@ -43,7 +44,9 @@ void sendFile::sendEmptyChunk(int fd) {
     const char buf[] = "0\r\n\r\n" ;
     int ret = writen(fd, buf, strlen(buf)) ;
     if(ret < 0) {
-        cout << __FILE__ <<"     "  << __LINE__ <<"    "<< strerror(errno)<< endl ;
+        std::string s =  __FILE__ ;
+        s+=" "  +std::to_string(__LINE__) +"    "+ strerror(errno) ;
+        (*err)<<s ;
         return ;
     }
 }
@@ -68,7 +71,7 @@ int sendFile::sendStaticInfo(channel* chl, const char* buf, unsigned long size) 
 
 int sendFile :: sendChunk(channel* chl) {
     int index= 0 ;
-    string s = "" ;
+    std::string s = "" ;
     char buf[SEND_SIZE] ;
     int cliFd = chl->getFd() ;
     Buffer* bf = chl->getWriteBuffer() ;
@@ -82,7 +85,7 @@ int sendFile :: sendChunk(channel* chl) {
             int ret = writen(cliFd, s.data(), s.size()) ;
             if(ret < 0 && (errno == EAGAIN ||errno==EWOULDBLOCK)) {
                 int size = strlen(buf) ;
-                string data ;
+                std::string data ;
                 for(int j=i-size;j<len;j++) {
                     data.push_back((*bf)[j]) ;
                 }
@@ -119,7 +122,7 @@ void sendFile :: setWrite(channel* chl) {
     chl->updateChannel() ;
 }
 
-int sendFile::newBuffer(Buffer* bf, long pos,  string& s) {
+int sendFile::newBuffer(Buffer* bf, long pos,  std::string& s) {
     long len = s.size() ;
     for(int i=pos; i<len; i++) {
         bf->append(s[pos]) ;
@@ -127,7 +130,7 @@ int sendFile::newBuffer(Buffer* bf, long pos,  string& s) {
     return 1 ;
 }
 
-void sendFile::setBuf(Buffer* bf, const string& s) {
+void sendFile::setBuf(Buffer* bf, const std::string& s) {
     for(int i=0; i<(int)s.size(); i++) {
         bf->append(s[i]) ;
     }

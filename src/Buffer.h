@@ -54,7 +54,7 @@ private :
     int writeIndex = 0;
     int conLen ;
     std::vector<char>buffer ;
-    shared_ptr<log>err ;
+    std::shared_ptr<log>err ;
 };
 #endif
 

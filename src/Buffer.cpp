@@ -82,7 +82,7 @@ int Buffer :: readBuffer(int fd) {
     //接收消息
     int n ;
     if(((n = read(fd, buffer_, sizeof(buffer_))) < 0) && errno != EINTR) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1 ;
     }
@@ -150,21 +150,21 @@ int Buffer::checkBody() {
 
 bool Buffer::checkBuffer() {
     int index= 0 ;
-    string s="" ;
+    std::string s="" ;
     for(int i=0; i<writeIndex; i++) {
         s +=buffer[i]  ;     
     }
-    if(s.find("\r\n") != string::npos) {
+    if(s.find("\r\n") != std::string::npos) {
         index = s.find("\r\n") ;
-        string head = s.substr(0, index) ;
-        if(head.find("GET") != string::npos) {
+        std::string head = s.substr(0, index) ;
+        if(head.find("GET") != std::string::npos) {
             return 1 ;
         }
-        if(head.find("POST") != string::npos) {
-            if(s.find("Content-Length: ") != string::npos) {
+        if(head.find("POST") != std::string::npos) {
+            if(s.find("Content-Length: ") != std::string::npos) {
                 index = s.find("Content-Length: ") ;
                 head = s.substr(index) ;
-                if(head.find("\r\n") == string::npos) {
+                if(head.find("\r\n") == std::string::npos) {
                     return 0 ;
                 }
                 int end = head.find("\r\n") ;

@@ -26,7 +26,7 @@ void channel::updateChannel() {
     ev.events = events ;
     int ret = epoll_ctl(epFd, EPOLL_CTL_MOD, cliFd, &ev) ;
     if(ret < 0) {
-        std::string s = to_string(__LINE__)+__FILE__ +strerror(errno);
+        std::string s = std::to_string(__LINE__)+__FILE__ +strerror(errno);
         (*err)<<s ;
         return  ;
     } 
@@ -46,7 +46,7 @@ bool channel :: operator==(channel& chl) {
     return 0 ;
 }
 
-int channel :: handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp, int index) {    
+int channel :: handleEvent(int fd, std::vector<std::pair<int, std::shared_ptr<channel>>>& tmp, int index) {    
     if(events&EPOLLIN) {
         int n = handleRead(tmp) ;
         if(n < 0) {
@@ -76,7 +76,7 @@ int channel :: handleEvent(int fd, vector<pair<int, shared_ptr<channel>>>& tmp, 
 }
 
 
-void channel :: delFd(int fd, map<int, shared_ptr<channel>>& tmp) {
+void channel :: delFd(int fd, std::map<int, std::shared_ptr<channel>>& tmp) {
     auto ret = tmp.find(fd) ;
     if(ret == tmp.end()) {
         return ;
@@ -89,7 +89,7 @@ int channel :: handleWrite() {
     //写缓冲区
     char buf[SIZE] ;
     int index = 0;
-    string s = "" ;
+    std::string s = "" ;
     bzero(buf, sizeof(buf)) ;
     int len = output.getSize() ;
     for(int i=0; i<len; i++) {
@@ -111,7 +111,8 @@ int channel :: handleWrite() {
 }
 
 //执行读回调
-int channel :: handleRead(vector<pair<int, shared_ptr<channel>>>&tmp) {
+int channel :: handleRead(std::vector<std::pair<int, 
+                          std::shared_ptr<channel>>>&tmp) {
     //读数据
     int n = input.readBuffer(cliFd) ;
     if(n < 0) {

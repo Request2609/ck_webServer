@@ -7,20 +7,20 @@
 #include "Buffer.h"
 #include "EventLoop.h"
 #include "Channel.h"
-using namespace std ;
 class channel ;
 //封装TCP连接
 class connection :
     public std::enable_shared_from_this<connection> {
+    //将套接字类和channel进行绑定
+    typedef std :: function<void(channel*, 
+    std::vector<std::pair<int, std::shared_ptr<channel>>>&)> callBack ;
+    typedef std :: function<void(channel*)> wakeCallBack ;
 public:
     connection() ;
     connection(std::string ip, std::string port) ;
     ~connection() ;
 public :
-    //将套接字类和channel进行绑定
-    typedef std :: function<void(channel*, std::vector<pair<int, std::shared_ptr<channel>>>&)> callBack ;
-    typedef std :: function<void(channel*)> wakeCallBack ;
-public :
+
     void getChannel(channel* chl) ;
     void createListenFd(socketFd* sock) ;
     void createChannel() {channel_ = std :: make_shared<channel>() ;}
@@ -28,7 +28,7 @@ public :
     void setConf(std::string ip, std::string port) ;
     std::shared_ptr<socketFd> getSock() { return sock ; }
     void setnoBlocking(int fd_) {sock->setNoBlocking(fd_) ;}
-    void setCallBackToChannel(shared_ptr<channel> channel_) ;
+    void setCallBackToChannel(std::shared_ptr<channel> channel_) ;
     //设置channel的各种回调函数
     void setWriteCallBack(callBack cb) ;
     void setCloseCallBack(callBack cb) ;

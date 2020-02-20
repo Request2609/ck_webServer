@@ -6,7 +6,6 @@
 #include "Channel.h"
 #include "EventLoop.h"
 #include "Log.h"
-using namespace std ;
 
 class channel ;
 class loopInfo ;
@@ -35,6 +34,6 @@ private :
     int fds ;
     int nfds ;
     std :: vector<struct epoll_event> epFds ;
-    shared_ptr<log>err ;
+    std::shared_ptr<log>err ;
 };
 #endif

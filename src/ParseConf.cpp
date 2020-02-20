@@ -1,10 +1,10 @@
 #include "ParseConf.h"
 
-shared_ptr<configure>configure::conf ;
+std::shared_ptr<configure>configure::conf ;
 
-shared_ptr<configure>configure::getConfigure() {
+std::shared_ptr<configure>configure::getConfigure() {
     if(conf == nullptr) {       
-        conf = shared_ptr<configure>(new configure) ;
+        conf = std::shared_ptr<configure>(new configure) ;
         conf->init() ;
     }
     return conf ;

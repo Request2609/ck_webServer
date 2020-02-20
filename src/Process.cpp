@@ -8,7 +8,8 @@ const int BUFLEN = 65535 ;
 const int FASTCGI = 1 ;
 const int CGI = 2 ; 
 
-int process :: postRequest(string& tmp, channel* chl, string& bf) {
+int process :: postRequest(std::string& tmp, channel* chl, 
+                           std::string& bf) {
     long ret = 0 ;
     //获取到请求路径和版本号
     getVersionPath(tmp) ;
@@ -27,9 +28,9 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
         int ret = paths.find("php") ;
         //如果请求php文件
         //CGI程序
-        if(paths.find("php") == string::npos) { 
+        if(paths.find("php") == std::string::npos) { 
             //cgi请求的数据
-            string res = processCgi() ;
+            auto res = processCgi() ;
             responseHead(chl, "text/html", -1, 200, "OK") ;
             sendHeader(chl) ;
             chl->clearBuffer() ;
@@ -41,7 +42,7 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
         } 
         else {
             //传入contentlenth
-            string file = changePostHtml(chl->getWriteBuffer()->getPostPos(), bf) ; 
+            std::string file = changePostHtml(chl->getWriteBuffer()->getPostPos(), bf) ; 
             if(file == "") {
                 sendNotFind(chl) ;
                 return -1 ;
@@ -58,7 +59,7 @@ int process :: postRequest(string& tmp, channel* chl, string& bf) {
     return 1 ;
 }
 
-void process :: getSendBuffer(channel* chl, const string res) {
+void process :: getSendBuffer(channel* chl, const std::string res) {
     Buffer* input = chl->getWriteBuffer() ;
     int size = res.size() ;
     for(int i=0; i<size; i++) {
@@ -67,24 +68,24 @@ void process :: getSendBuffer(channel* chl, const string res) {
 }
 
 //发送post请求
-string process :: processCgi() {
+std::string process :: processCgi() {
     //连接CGI服务器
     int ret = cgiConnect::connectCgiServer() ;
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return "";
     }
-    string info("1\r\n") ;
+    std::string info("1\r\n") ;
     info += cgiArg ;
     //设置环境变量
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return "" ;
     }
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return "" ;
     }
@@ -93,20 +94,20 @@ string process :: processCgi() {
     //向CGI服务器发送请求
     ret = cgiConnect ::sendMsg(buf) ;
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return "" ;
     }
     //等待cgi服务器响应
-    string ss = cgiConnect :: recvMsg() ;
+    std::string ss = cgiConnect :: recvMsg() ;
     //关闭连接套接字
     cgiConnect::closeFd() ;
     return ss ;
 }
 
-string process :: changePostHtml(long len, string& bf) {
+std::string process :: changePostHtml(long len, std::string& bf) {
     //现根据contentlen找相应提交内容
-    string tmp = getSubmit(len, bf) ;
+    std::string tmp = getSubmit(len, bf) ;
     //将要提交的内容
     if(tmp == "") {
         return "";
@@ -137,7 +138,7 @@ string process :: changePostHtml(long len, string& bf) {
     fc.sendRequest(const_cast<char*>(tmp.c_str()), size) ;
     FCGI_Header endHead = fc.makeHeader(FCGI_STDIN, 1, 0, 0) ;
     fc.sendRequest(endHead) ;
-    string res = fc.readFromPhp() ;
+    std::string res = fc.readFromPhp() ;
     int ret = res.find("<html>") ;
     if(ret == -1) {
         return "" ;
@@ -146,8 +147,8 @@ string process :: changePostHtml(long len, string& bf) {
     return res ;
 }
 
-string process :: getSubmit(long len, string& bf) {
-    string info ;
+std::string process :: getSubmit(long len, std::string& bf) {
+    std::string info ;
     long index = bf.find("\r\n\r\n") ;
     if(index == -1) {
         return "" ;
@@ -164,9 +165,9 @@ string process :: getSubmit(long len, string& bf) {
     return info ;
 }
 
-string process :: changeHtml() {
+std::string process :: changeHtml() {
     ::FastCgi fc ;
-    string res ;
+    std::string res ;
     auto conf = configure::getConfigure() ;
     fc.setRequestId(1) ;
     fc.startConnect(conf->getPhpIp().c_str(), conf->getPhpPort()) ;
@@ -177,21 +178,21 @@ string process :: changeHtml() {
     fc.sendParams("SCRIPT_FILENAME", buff) ;
     fc.sendParams("REQUEST_METHOD", "GET") ;
     fc.sendEndRequestRecord() ;
-    string a =  fc.readFromPhp() ;
+    std::string a =  fc.readFromPhp() ;
     int index = a.find("<html>") ;
     a = a.substr(index, a.size()) ;
     return a ;
 }
 
-int process :: getRequest(channel* chl, string& tmp) {
+int process :: getRequest(channel* chl, std::string& tmp) {
         int ret =  0 ;
         getVersionPath(tmp) ;
         paths.find("php") ;
-        if(paths.find("php") != string::npos) {
+        if(paths.find("php") != std::string::npos) {
             if(paths[0] == '/') {
                 paths = paths.c_str()+1 ;
             }
-            string file = changeHtml() ;
+            std::string file = changeHtml() ;
             if(isExist() < 0) {
                 return -1;
             }
@@ -208,7 +209,7 @@ int process :: getRequest(channel* chl, string& tmp) {
         return 1 ;
 }
 
-int process:: sendCgiResult(channel* chl, string res) {
+int process:: sendCgiResult(channel* chl, std::string res) {
     Buffer* bf =  chl->getWriteBuffer() ;
     long len = res.size() ;
     responseHead(chl, "text/html", -1, OK, "OK") ;
@@ -221,7 +222,8 @@ int process:: sendCgiResult(channel* chl, string res) {
     return 1 ;
 }
 
-void process::processDisConnect(channel* chl,  vector<pair<int, shared_ptr<channel>>>& mp){
+void process::processDisConnect(channel* chl,  
+                                std::vector<std::pair<int, std::shared_ptr<channel>>>& mp){
     int fd = chl->getFd() ;
     for(auto s=mp.begin(); s!=mp.end(); s++) {
         if(s->first == fd) {
@@ -235,13 +237,13 @@ void process::processDisConnect(channel* chl,  vector<pair<int, shared_ptr<chann
     }
 }
 
-bool process::isConnect(const string& a) {
+bool process::isConnect(const std::string& a) {
     //没设置connection选项
-    if(a.find("Connection:") == string::npos) {
+    if(a.find("Connection:") == std::string::npos) {
         return true ;
     }
     int index = a.find("Connection:") ;
-    string s = a.substr(index+11) ;
+    std::string s = a.substr(index+11) ;
     int countspace = 0 ;
     for(int i=0; s[i]==' '; i++) {
         countspace ++ ;
@@ -255,14 +257,15 @@ bool process::isConnect(const string& a) {
 }
 
 //获取请求头
-int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>>>& mp) {
+int process :: requestHeader(channel* chl,  
+                             std::vector<std::pair<int, std::shared_ptr<channel>>>& mp) {
     err = log::getLogObject() ;
     canDel = 0 ;
     Buffer* bf = chl->getReadBuffer() ;
     //解析请求行
     int readIndex = bf->getReadIndex() ;
     int writeIndex = bf->getWriteIndex() ;
-    string a = bf->readBuffer(readIndex, writeIndex) ;
+    std::string a = bf->readBuffer(readIndex, writeIndex) ;
     //检查请求头connection字段是close
     if(!isConnect(a)) {
         sss.over(chl) ;
@@ -271,7 +274,7 @@ int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>
     }
     //解析请求头
     int index = 0 ;
-    string tmp ;
+    std::string tmp ;
     int e = a.find("\r\n");
     //修改相应的结束标识
     a[e] = '\n' ;
@@ -294,7 +297,7 @@ int process :: requestHeader(channel* chl,  vector<pair<int, shared_ptr<channel>
 }   
 
 //获取请求的长度
-int process :: getContentLength(string a, channel* chl) {
+int process :: getContentLength(std::string a, channel* chl) {
     
     int l = chl->getReadBuffer()->getPostPos()  ;
     int pos = 0;
@@ -304,12 +307,12 @@ int process :: getContentLength(string a, channel* chl) {
         //没找到，可能发的数据不够，也可能是请求头错误(少见)
         //设置的read buffer 长度为4096，第一个包里面80%有content-length
         if(pos == -1) {
-            string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+            std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
             (*err)<<s ;
             return -1 ;
         }
         int flag = 0 ;
-        string len ;
+        std::string len ;
         for(int i=pos; i<(int)a.length(); i++) {
             if(flag == 1) {
                 len+=a[i] ;
@@ -338,35 +341,14 @@ int process :: getContentLength(string a, channel* chl) {
     }
     //确定提交的数据
     //根据\r\n\r\n找ontent-length获取信息
-    string info ;
+    std::string info ;
     getSubmitInfo(info, p+4, l, a, chl) ;
     //post只提交登录功能
     return l ;
 }
 
-int process :: doPost(string& info) {
-    int index = info.find("name") ;
-    string name ;
-    for(int i=index+5; info[i] != '&'; i++) {
-        name+=info[i] ;
-    }
-
-    string password ;
-    index = info.find("password") ;
-    for(int i=index+9; i< (int)info.size() ; i++) {
-        password+=info[i] ;
-    }
-    //验证post请求
-    if(name == "la" && password == "ha") {
-        return 0 ;
-    }
-    else {
-         return 1 ;
-    }
-    return 1 ;
-}
-
-int process :: getSubmitInfo(string& info, int pos, int l, string &a, channel* chl) {
+int process :: getSubmitInfo(std::string& info, int pos, int l, 
+                             std::string &a, channel* chl) {
     long len = a.length() ;
     long i = pos ;
     //移动读指针
@@ -388,13 +370,13 @@ int process :: getSubmitInfo(string& info, int pos, int l, string &a, channel* c
     }    
 }
 
-void  process :: responseHead(channel* chl, string type, 
+void  process :: responseHead(channel* chl, std::string type, 
                               long len, int statusCode, 
-                              string tip) {
+                              std::string tip) {
      //发送响应头
     char buf[1024] ;
     //构造响应头
-    string head ;
+    std::string head ;
     if(len != -1)
         sprintf(buf, "%s %d %s\r\nContent-Type: %s\r\nConnection: close\r\nContent-Length:%ld\r\n\r\n",
             version.c_str(), statusCode, tip.c_str(), type.c_str(),len) ;
@@ -412,11 +394,11 @@ void  process :: responseHead(channel* chl, string type,
 
 int process::sendLittleFile(channel* chl, long len, int fd) {
     int ret ; 
-    string type = getFileType() ;
+    std::string type = getFileType() ;
     responseHead(chl, type, len, 200, "OK") ;
     ret = sendHeader(chl) ;
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         canDel = 1 ;
         return -1 ;
@@ -436,7 +418,7 @@ int process::sendLittleFile(channel* chl, long len, int fd) {
 }
 
 //处理get请求，发送响应头和
-int process :: messageSend(const string& tmp, channel* chl) {
+int process :: messageSend(const std::string& tmp, channel* chl) {
     //找出现第一个空格的地方
     if(flag == 0)
         getVersionPath(tmp) ;
@@ -451,7 +433,7 @@ int process :: messageSend(const string& tmp, channel* chl) {
             canDel = 1 ;
             return 1 ;
         }
-        string type = getFileType() ;
+        std::string type = getFileType() ;
         if(len < G_2) {
             int ret = sendLittleFile(chl, len, fd) ;
             if(ret  <  0) {
@@ -491,7 +473,7 @@ int process :: messageSend(const string& tmp, channel* chl) {
         }
 
         if(len>G_2) {
-            string type = getFileType() ;
+            std::string type = getFileType() ;
             responseHead(chl, type, len, 200, "OK") ;
             sendHeader(chl) ;
             readBigFile(chl, fd, len) ;
@@ -504,7 +486,7 @@ int process :: messageSend(const string& tmp, channel* chl) {
                 canDel = 1 ;
                 return 1 ;
             }
-            string type = getFileType() ;
+            std::string type = getFileType() ;
             if(len < G_2) {
                 int ret = sendLittleFile(chl, len, fd) ;
                 close(fd) ;
@@ -521,7 +503,7 @@ int process :: messageSend(const string& tmp, channel* chl) {
 int process::getFileInfo(int& fd, long& len, const char* paths) {
     fd = open(paths, O_RDONLY) ;
     if(fd < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1;
     }
@@ -571,9 +553,9 @@ int process :: sendfiles(channel* chl, int fd, int len) {
     return 0 ;
 }
 
-string process :: getFileType() {
+std::string process :: getFileType() {
     int index = paths.find(".") ;
-    string type ;
+    std::string type ;
     //没找到的话
     if(index == -1) {
         return "text/html" ;
@@ -627,13 +609,15 @@ void process :: sendNotFind(channel* chl) {
     chl->getWriteBuffer()->bufferClear() ;
     int fd = open("404.html", O_RDONLY) ;
     if(fd < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__
+            +"    " +strerror(errno)  ;
         (*err)<<s ;
         return ;
     }
     int ret = fstat(fd,  &st) ;
     if(ret < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " 
+            + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return  ;
     }
@@ -648,7 +632,8 @@ void process :: sendNotFind(channel* chl) {
 //读文件
 void process :: readBigFile(channel* chl, int fd, unsigned long len) {
     if(fd < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) 
+            +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         canDel = 1 ;
         close(fd) ;
@@ -678,7 +663,7 @@ int process :: isExist() {
 }
 
 //获取版本号和请求路径
-int process :: getVersionPath(string tmp) {
+int process :: getVersionPath(std::string tmp) {
     paths.clear() ;
     int pathIndex = tmp.find(' ') ;
     pathIndex += 1 ;
@@ -694,7 +679,7 @@ int process :: getVersionPath(string tmp) {
     return 1 ;   
 }
 
-int process :: getMethod(string& line) {
+int process :: getMethod(std::string& line) {
     if((int)line.find("GET") != -1) {
         method = GET ;
         return GET ;

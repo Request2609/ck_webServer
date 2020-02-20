@@ -14,7 +14,6 @@
 #include<assert.h>
 #include "Log.h"
 #define PATH "/tmp/sss"
-using namespace std ;
 
 //创建Unix套接字,连接服务器
 class unixSocket {
@@ -39,8 +38,7 @@ public :
 } ;
 
 //创建网络套接字
-class socketFd
-{
+class socketFd {
 public:
     socketFd() ;
     socketFd(const char* port) ;
@@ -81,16 +79,16 @@ public :
     //是否绑定过地址
     void setBindAddr(int i) { isBindAddr = i; }
     int getBindAddr() { return isBindAddr ; }
-    string getIp() { return ip ; }
-    string getPort() { return port ; }
+    std::string getIp() { return ip ; }
+    std::string getPort() { return port ; }
 private:
     int isBindAddr = 0 ;
     int sockFd = -1 ;
     int connFd =  -1 ;
     struct sockaddr_in sockAddr ;
-    string ip ;
-    string port ;
-    shared_ptr<log>err ;
+    std::string ip ;
+    std::string port ;
+    std::shared_ptr<log>err ;
 };
 
 #endif

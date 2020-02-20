@@ -11,12 +11,12 @@ eventLoop :: eventLoop() {
     quit = false ;
     epPtr = std::make_shared<epOperation>() ;
     for(int i=0; i<=threadNums; i++) {
-        vector<pair<int, shared_ptr<channel>>>ls ;
+        std::vector<std::pair<int, std::shared_ptr<channel>>>ls ;
         clList.push_back(ls) ;
     }
     //初始化epoll事件集合
     for(int i=0; i<=threadNums; i++) {
-        vector<shared_ptr<channel>> ls ;
+        std::vector<std::shared_ptr<channel>> ls ;
         activeChannels.push_back(ls) ;
     }
     epSet[0] = epPtr ;
@@ -52,8 +52,8 @@ int eventLoop :: clearCloseChannel(int index, int fd) {
     return 1 ;
 }
 
-shared_ptr<socketFd> eventLoop :: getSock() {
-    shared_ptr<socketFd>sockFd = make_shared<socketFd>(ip.c_str(), port.c_str()) ;
+std::shared_ptr<socketFd> eventLoop :: getSock() {
+    std::shared_ptr<socketFd>sockFd = std::make_shared<socketFd>(ip.c_str(), port.c_str()) ;
     return sockFd ;
 }
 //创建线程
@@ -61,13 +61,13 @@ void eventLoop :: runThread() {
 
     for(int i=0; i<threadNums; i++) {
         //创建套接字，并且绑定地址
-        shared_ptr<epOperation> ep = make_shared<epOperation>() ;
-        shared_ptr<channel> chan = make_shared<channel>() ;
+        std::shared_ptr<epOperation> ep = std::make_shared<epOperation>() ;
+        std::shared_ptr<channel> chan = std::make_shared<channel>() ;
         chan->setEpFd(ep->getEpFd()) ;
         chan->setId(i+1) ;
         epSet[i+1] = ep ;
         //开始监听
-        auto func = bind(&eventLoop::round, this, placeholders::_1, placeholders::_2) ;
+        auto func = bind(&eventLoop::round, this, std::placeholders::_1, std::placeholders::_2) ;
         pool->commit(func, chan, ep) ;
     }
 }
@@ -77,20 +77,21 @@ int eventLoop :: wakeup(int fd) {
     ret++ ;
     int res = send(fd, &ret, sizeof(ret), 0) ;
     if(res < 0) {
-        string s = to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
+        std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return -1 ;
     }
     return 1 ;
 }
 //绑定匿名unix套接字
-void eventLoop :: round(shared_ptr<channel>chl, shared_ptr<epOperation> ep) {
+void eventLoop :: round(std::shared_ptr<channel>chl, 
+                        std::shared_ptr<epOperation> ep) {
     int stop = 0 ;
     //获取epoll
     if(chl == nullptr) {
         return ;
     } 
-    shared_ptr<socketFd> sfd = getSock() ;
+    std::shared_ptr<socketFd> sfd = getSock() ;
     chl->setSock(sfd) ;
     chl->setEp(ep) ;
     int fd = sfd->getListenFd() ;
@@ -102,7 +103,7 @@ void eventLoop :: round(shared_ptr<channel>chl, shared_ptr<epOperation> ep) {
     ep->add(fd, EPOLLIN) ;
     //为唤醒描述符添加id号码
     //将当前唤醒的channel加入到list中
-    vector<shared_ptr<channel>> closeLst ;
+    std::vector<std::shared_ptr<channel>> closeLst ;
     //将wakeFd加入到epoll中
     while(!stop) {
         int ret = ep->wait(this, -1, id, fd) ;    
@@ -112,7 +113,7 @@ void eventLoop :: round(shared_ptr<channel>chl, shared_ptr<epOperation> ep) {
         if(ret == 0) {
             continue ;
         } 
-        for(shared_ptr<channel> chl : activeChannels[id]) {
+        for(auto chl : activeChannels[id]) {
             int fd = chl->getFd() ;
             int ret = chl->handleEvent(fd, clList[id], id)  ;      
             if(ret == 0) {
@@ -142,7 +143,7 @@ void eventLoop :: loop() {
     initObjectPool() ;
     //创建线程0的epoll
     //创建线程池
-    pool = make_shared<threadPool>(threadNums);
+    pool = std::make_shared<threadPool>(threadNums);
     //初始化时间列表
     //开始跑线程
     runThread() ;
@@ -154,7 +155,7 @@ void eventLoop :: loop() {
         len=sizeof(sock) ;
  
     epPtr->add(servFd, READ) ;
-    vector<shared_ptr<channel>>closeLst ;
+    std::vector<std::shared_ptr<channel>>closeLst ;
     while(!quit) {
         //等待事件
         int ret = epPtr->wait(this, -1, 0, servFd) ;
@@ -168,7 +169,7 @@ void eventLoop :: loop() {
         //将事件分发给各个线程
         else {
             //处理连接，所有连接事件分给各个线程中的reactor
-            for(shared_ptr<channel> chl : activeChannels[0]) {
+            for(std::shared_ptr<channel> chl : activeChannels[0]) {
                 int fd = chl->getFd() ;
                 int ret = chl->handleEvent(fd, clList[0], 0) ;
                 if(ret <= 0) {
@@ -186,7 +187,8 @@ void eventLoop :: loop() {
 }
 
 //将活跃的事件加入到活跃事件表中
-int eventLoop :: fillChannelList(int index, shared_ptr<channel>chl) {
+int eventLoop :: fillChannelList(int index,
+                                 std::shared_ptr<channel>chl) {
    activeChannels[index].push_back(chl) ;
    return 1 ;
 }
@@ -210,7 +212,7 @@ void eventLoop :: addConnection(connection* con) {
     chl->setEvents(READ) ;
 }
 
-shared_ptr<channel> eventLoop :: search(int index, int fd) {
+std::shared_ptr<channel> eventLoop :: search(int index, int fd) {
     auto it = clList[index] ;
     for(auto s=it.begin(); s!=it.end(); s++) {
         if(fd == s->first) {   
@@ -224,11 +226,11 @@ shared_ptr<channel> eventLoop :: search(int index, int fd) {
 } 
 
 //接收连接并添加channel
-shared_ptr<channel> eventLoop :: handleAccept(int index, int listenFd) {
+std::shared_ptr<channel> eventLoop :: handleAccept(int index, int listenFd) {
     
     //cout << index << "号线程      " << endl ;
     //直接从对象池中对应的队列中拿对象
-    shared_ptr<channel> tmp = obp->getObject(index) ;
+    std::shared_ptr<channel> tmp = obp->getObject(index) ;
     tmp->setSock(conn->getSock()) ;
     //创建新连接
     int conFd = tmp->handleAccept(listenFd) ;
