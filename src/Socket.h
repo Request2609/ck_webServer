@@ -49,8 +49,10 @@ public:
     socketFd(const std::string addr, const std::string port);
     socketFd(int port) ;
     ~socketFd() {
-        close(connFd) ;
-        close(sockFd) ;
+        if(connFd != -1)
+            close(connFd) ;
+        if(sockFd != -1)
+            close(sockFd) ;
     } ;
 
 public :
