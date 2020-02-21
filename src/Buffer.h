@@ -18,25 +18,47 @@ public:
     Buffer() ;
     ~Buffer() {}
 public :
-    void moveRead() { readIndex++ ; }
+    void moveRead() { 
+        readIndex++ ; 
+    }
     void append(char i) ;
-    void setCanProcess(int flag) { this->canProcess = flag ; }
-    int getCanProcess() {return canProcess ;}
+    void setCanProcess(int flag) { 
+        this->canProcess = flag ; 
+    }
+    int getCanProcess() {
+        return canProcess ;
+    }
     std :: string readBuffer(int start, int end) ;
     int retreiveBuffer(int start, int end) ;
     int retreiveBuffer(int n) ;
     void bufferClear() ;
     //传入目标的描述符，读取数据
     int readBuffer(int fd) ;
-    int getReadIndex() { return readIndex ; }
-    void setReadIndex(int index) { readIndex = index ;}
+    int getReadIndex() { 
+        return readIndex ; 
+    }
+    void setReadIndex(int index) { 
+        readIndex = index ;
+    }
     bool checkBuffer() ;
-    int getWriteIndex() { return writeIndex ; }
-    void setPostPos(long pos) { contentLen = pos ; }
-    long getPostPos() { return contentLen ; }
-    char operator[](int i) { return buffer[i] ;}
-    int getSize() { return buffer.size(); }
-    void changeBuf(std::vector<char> s) { buffer = move(s); }
+    int getWriteIndex() { 
+        return writeIndex ; 
+    }
+    void setPostPos(long pos) { 
+        contentLen = pos ; 
+    }
+    long getPostPos() { 
+        return contentLen ; 
+    }
+    char operator[](int i) { 
+        return buffer[i] ;
+    }
+    int getSize() { 
+        return buffer.size(); 
+    }
+    void changeBuf(std::vector<char> s) { 
+        buffer = move(s); 
+    }
     int checkBody() ;
 private :
     //记录post请求的末尾数据长度

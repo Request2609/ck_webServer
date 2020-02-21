@@ -23,11 +23,19 @@ public :
 
     void getChannel(channel* chl) ;
     void createListenFd(socketFd* sock) ;
-    void createChannel() {channel_ = std :: make_shared<channel>() ;}
-    void createSock() { sock = std::make_shared<socketFd>(); }
+    void createChannel() {
+        channel_ = std :: make_shared<channel>() ;
+    }
+    void createSock() { 
+        sock = std::make_shared<socketFd>(); 
+    }
     void setConf(std::string ip, std::string port) ;
-    std::shared_ptr<socketFd> getSock() { return sock ; }
-    void setnoBlocking(int fd_) {sock->setNoBlocking(fd_) ;}
+    std::shared_ptr<socketFd> getSock() { 
+        return sock ; 
+    }
+    void setnoBlocking(int fd_) {
+        sock->setNoBlocking(fd_) ;
+    }
     void setCallBackToChannel(std::shared_ptr<channel> channel_) ;
     //设置channel的各种回调函数
     void setWriteCallBack(callBack cb) ;
@@ -38,7 +46,9 @@ public :
         return  readCallBack ;
     }
     //绑定唤醒函数
-    void setWakeCb(wakeCallBack cb) { wakeCb = move(cb) ; }
+    void setWakeCb(wakeCallBack cb) { 
+        wakeCb = move(cb) ; 
+    }
     void setWakeChlCall(std::shared_ptr<channel>&chl) ;
 public :
     //创建监听套接字

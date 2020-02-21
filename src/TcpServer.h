@@ -19,15 +19,6 @@ public:
 public :
     void create(eventLoop* loop) ;
     void create(eventLoop* loop, std::string port) ;
-    void print() {
-        std::cout << port << std::endl ;
-        std::cout << "hello world!" << std::endl ; }
-    void create() {
-        
-        pool = std::make_shared<threadPool>(1) ; 
-        threadPool tp(10);
-        pool->commit(std::bind(&tcpServer::print, this)) ;
-    }
     void  addNewConnection(connection* conn) ;
     void start() ;
 private :
@@ -36,8 +27,6 @@ private :
     //连接名称
     int port ;
     std::string addr ;
-    //线程池
-    std :: shared_ptr<threadPool> pool ;
     //连接列表
     connection* conn ;
 };

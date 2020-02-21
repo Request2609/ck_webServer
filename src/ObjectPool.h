@@ -36,13 +36,6 @@ public:
         }
     }
 
-    static void print() {
-        int num = objectPool<T>::objectQueueNum ;
-        for(int i=0; i<num; i++) {
-            std::cout << i<<"号队列"<<"  " << "可用对象数量:" <<freeList[i].size()<<std:: endl ;
-        }
-    }
-
     //获取对象
     std::shared_ptr<T> getObject(int index) {
         std::lock_guard<std::mutex>lk(mute) ;

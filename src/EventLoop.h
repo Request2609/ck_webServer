@@ -25,7 +25,8 @@ class socketFd ;
 class eventLoop {   
     //线程号码
     typedef std::vector<std::vector<std::pair<int, std::shared_ptr<channel>>>> channelMap;
-    typedef std::function<void(channel* chl, std::vector<std::pair<int, std::shared_ptr<channel>>>&)> callBack ;
+    typedef std::function<void(channel* chl, 
+                               std::vector<std::pair<int, std::shared_ptr<channel>>>&)> callBack ;
 public:
     eventLoop() ;
     ~eventLoop() ;
@@ -33,7 +34,9 @@ public :
     int wakeup(int fd) ;
     void runThread() ;
     std::shared_ptr<channel> search(int index, int fd) ;
-    int getListenFd() { return servFd ; }
+    int getListenFd() { 
+        return servFd ; 
+    }
     void loop() ;
     void initObjectPool() ;
     void addConnection(connection* con) ;

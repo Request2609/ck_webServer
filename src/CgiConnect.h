@@ -12,11 +12,15 @@ const int BUFFERSIZE = 1024 ;
 class cgiConnect {
 public:
     cgiConnect() ;
-    ~cgiConnect() {close(sockFd) ;}
+    ~cgiConnect() {
+        close(sockFd) ;
+    }
     static int connectCgiServer() ;
     static std::string recvMsg() ;
     static int sendMsg(const char* buf) ;
-    static void closeFd() {close(sockFd) ;}
+    static void closeFd() {
+        close(sockFd) ;
+    }
 private:
     static int sockFd ;
     static struct sockaddr_in addr ;

@@ -14,14 +14,30 @@ class configure {
 public:
     ~configure() {}
     static std::shared_ptr<configure>getConfigure() ;
-    std::string getServIP() { return servIp ; }
-    int getServPort() { return servPort; }
-    int getThreadNum() { return threadNum ; }
-    std::string getPhpPath() { return phpPath ; }
-    std::string getPhpIp() { return phpIp ;}
-    int getPhpPort() { return phpPort; }
-    std::string getLogFile() { return  logFile ;}
-    int getObjectNumber() { return objectNum ;}
+    std::string getServIP() { 
+        return servIp ; 
+    }
+    int getServPort() { 
+        return servPort; 
+    }
+    int getThreadNum() { 
+        return threadNum ; 
+    }
+    std::string getPhpPath() { 
+        return phpPath ; 
+    }
+    std::string getPhpIp() { 
+        return phpIp ;
+    }
+    int getPhpPort() { 
+        return phpPort; 
+    }
+    std::string getLogFile() { 
+        return  logFile ;
+    }
+    int getObjectNumber() { 
+        return objectNum ;
+    }
 private:
     void init() ;
     configure():servIp(""), servPort(-1), 

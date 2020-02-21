@@ -28,9 +28,13 @@ public :
             return ;
         } 
     }
-    ~unixSocket() {close(sockFd) ;}
+    ~unixSocket() {
+        close(sockFd) ;
+    }
 public :
-    int getFd() { return sockFd ; }
+    int getFd() { 
+        return sockFd ; 
+    }
 public :
     int len ;
     int sockFd ;
@@ -50,9 +54,15 @@ public:
     } ;
 
 public :
-    void setListenFd(int fd) { sockFd = fd ; }
-    void setConnFd(int fd) { connFd = fd ; }
-    int getListenFd() { return sockFd ;}
+    void setListenFd(int fd) { 
+        sockFd = fd ; 
+    }
+    void setConnFd(int fd) { 
+        connFd = fd ; 
+    }
+    int getListenFd() { 
+        return sockFd ;
+    }
     //设置地址
     int setAddr(int port) ;
     int setAddr(const char* ip, const char* port) ;
@@ -77,10 +87,18 @@ public :
     //关闭读端
     void shutdownWrite(int fd) ;
     //是否绑定过地址
-    void setBindAddr(int i) { isBindAddr = i; }
-    int getBindAddr() { return isBindAddr ; }
-    std::string getIp() { return ip ; }
-    std::string getPort() { return port ; }
+    void setBindAddr(int i) { 
+        isBindAddr = i; 
+    }
+    int getBindAddr() { 
+        return isBindAddr ; 
+    }
+    std::string getIp() { 
+        return ip ; 
+    }
+    std::string getPort() { 
+        return port ; 
+    }
 private:
     int isBindAddr = 0 ;
     int sockFd = -1 ;
