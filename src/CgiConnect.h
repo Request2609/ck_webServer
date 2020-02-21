@@ -5,6 +5,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include "Log.h"
+
 #define IP  "127.0.0.1" 
 #define PORT 7000 
 const int BUFFERSIZE = 1024 ;
