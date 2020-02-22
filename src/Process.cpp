@@ -30,7 +30,7 @@ int process :: postRequest(std::string& tmp, channel* chl,
         //CGI程序
         if(paths.find("php") == std::string::npos) { 
             //cgi请求的数据
-            std::cout << "链接CGI上服务器" << std::endl ;
+            std::cout << "路径名称:" << paths << std::endl ;
             auto res = processCgi() ;
             responseHead(chl, "text/html", -1, 200, "OK") ;
             sendHeader(chl) ;

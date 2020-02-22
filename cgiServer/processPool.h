@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/epoll.h>
 #include <arpa/inet.h>
+#include <sys/eventfd.h>
 #include <sys/socket.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -27,6 +28,17 @@ const int BUFFERSIZE = 1024 ;
 class process ;
 class tool ;
 class cgiConn ;
+
+
+class tool {
+public :
+    static int setNoBlock(int fd) ;
+    static int addFd(int epollFd, int fd) ;
+    static int removeFd(int epollFd, int fd) ;
+    static void addSig(int sig, void(handle)(int), bool restart=true) ;
+    static int createSocketPair(int* pipe) ;
+    static int createEventFd() ;
+};
 
 class process {
 public:
@@ -55,11 +67,12 @@ public :
 public :
     static std::shared_ptr<processPool<T>> create(int listenFd, 
                                              int processNum = 8) ;
+    static void sigHandle(int signo) ;
 public :
     void run() ;
+    void init() ;
 private :
     //设置进程对应的管道
-    void setupSigPipe() ;
     //父进程运行
     void runParent() ;
     //子进程运行
@@ -69,7 +82,7 @@ private :
     static const int userPreProcess = 65535 ;//每个进程最多能处理的客户数量
     static const int maxEventNum = 10000 ; //epoll最多处理的事件数量
     static std::shared_ptr<processPool<T>> object ; //进程池的静态实例 
-
+    static int sigFd ;
     int curProcessNum ; //进程池目前能处理的进城数量
     int index ; //子进程在进程中的序号
     int epollFd ;  //epoll句柄
@@ -78,13 +91,9 @@ private :
     std::vector<std::shared_ptr<process>> proDescInfo ; // 保存进程的描述信息
 };
 
-class tool {
-public :
-    static int setNoBlock(int fd) ;
-    static int addFd(int epollFd, int fd) ;
-    static int removeFd(int epollFd, int fd) ;
-    static void addSig(int sig, void(handle)(int), bool restart=true) ;
-};
+
+template<typename T> 
+int processPool<T>::sigFd = -1 ;
 
 template<typename T> 
 std::shared_ptr<processPool<T>> processPool<T> :: object = nullptr ;
@@ -104,6 +113,7 @@ processPool<T> :: processPool(int listenFd, int pNum)
     for(int i=0; i<pNum; i++) {
         proDescInfo[i] = std::make_shared<process>() ;
     }
+
     //创建子进程
     for(int i=0; i<pNum; i++) {
         //创建unix双向匿名管道
@@ -130,8 +140,38 @@ std::shared_ptr<processPool<T>> processPool<T> :: create(int listenFd,
                                                     int processNum) {
     if(object == nullptr) {
         object = std::make_shared<processPool<T>>(listenFd, processNum) ;
+        object->init() ;
     }
     return object ;
+}
+
+
+//统一事件源
+template<typename T>
+void processPool<T>::sigHandle(int signo) {
+    uint64_t count = signo ;   
+    int ret = write(sigFd, &count, sizeof(count)) ;
+    if(ret < 0) {
+        std::cout << __FILE__ << "      " << __LINE__ << std::endl ;
+        return ;
+    }
+    return ;
+}
+
+//初始化epoll，并统一事件源
+template<typename T>
+void processPool<T>::init() {
+    epollFd = epoll_create(EPOLLNUM) ;
+    if(epollFd < 0) {
+        std::cout << __LINE__ << "       " << __FILE__ << std::endl; 
+        return  ;
+    }
+    sigFd = tool::createEventFd() ;
+    tool::addFd(epollFd, sigFd) ;
+    signal(SIGCHLD, sigHandle) ;
+    signal(SIGINT, sigHandle) ;
+    signal(SIGTERM, sigHandle) ;
+    signal(SIGPIPE, SIG_IGN) ;
 }
 
 //父进程在进程中的下标-1
@@ -141,18 +181,9 @@ void processPool<T>::run() {
     else runParent() ;
 }
 
-//统一事件
-template<typename T> 
-void processPool<T> :: setupSigPipe() {
-    epollFd = epoll_create(EPOLLNUM) ;
-    assert(epollFd > 0) ;
-    tool :: addSig(SIGPIPE, SIG_IGN) ;
-}
-
 template<typename T> 
 void processPool<T> :: runParent() {
     //设置信号
-    setupSigPipe() ;
     tool :: addFd(epollFd, listenFd)  ; 
     epoll_event ev[maxEventNum] ;
     int count = 0 ;
@@ -183,6 +214,42 @@ void processPool<T> :: runParent() {
                     return ;
                 }
             }
+            //信号事件，处理
+            if(sockFd == sigFd) {
+                if(ev[i].events&EPOLLIN) {
+                    uint64_t count = 0 ;
+                    read(sigFd, &count, sizeof(count)) ;
+                    switch(count) {
+                        case SIGCHLD :
+                            pid_t pid ;
+                            int stat ;
+                            while((pid = waitpid(-1, &stat, WNOHANG)) > 0) {
+                                for(int i=0; i<proDescInfo.size(); i++) {
+                                    close(proDescInfo[i]->getWriteFd()) ;
+                                    proDescInfo[i]->pid = -1 ;
+                                }
+                            }
+                            stop = true ;
+                            //检查进程池子进程是否没有回收完
+                            for(int i=0; i<proDescInfo.size(); i++) {
+                                if(proDescInfo[i].pid != -1) {
+                                    stop = false ;
+                                    break ;
+                                }
+                            }
+                            break ;
+                        case SIGINT :
+                        case SIGTERM :
+                            for(int i=0; i<proDescInfo.size(); i++) {
+                                int pid = proDescInfo[i].pid ;
+                                if(pid != -1) {
+                                    kill(pid, SIGTERM) ;
+                                }
+                            }
+                            break ;
+                    }
+                }           
+            }
         }   
     }
     close(epollFd) ;
@@ -191,7 +258,6 @@ void processPool<T> :: runParent() {
 //子进程的执行函数
 template<typename T>
 void processPool<T> :: runChild() {
-    setupSigPipe() ;
     int pipeFd = proDescInfo[index]->getReadFd() ;
     //将管道描述符加入到epoll中
     tool::addFd(epollFd, pipeFd) ;
@@ -231,8 +297,27 @@ void processPool<T> :: runChild() {
             else if(ev[i].events&EPOLLIN) {
                 user[fd]->process() ;
             }
+
+            //父进程接收到信号事件
+            else if(fd == sigFd) {
+                uint64_t count = 1 ;
+                read(fd, &count, sizeof(count)) ;
+                switch(count) {
+                    case SIGINT :
+                    case SIGTERM :
+                        stop = true ;
+                        break ;
+                }
+            }
         }
     }
+    //回收资源
+    if(!user.empty()) {
+        for(auto res : user) {
+            close(res.first) ;
+        }
+    }
+    close(sigFd) ;
     close(pipeFd) ;
     close(epollFd) ;
 }
@@ -249,13 +334,9 @@ public :
     ~cgiConn() {
         close(sockFd) ;
     }
+
     int createSocketPair() {
-        int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) ;
-        if(ret < 0) {
-            std::cout << __LINE__ << "        " << __FILE__ << std::endl ;
-            return -1 ;
-        }
-        return 1 ;
+        return tool::createSocketPair(pipe) ;
     }
 
     void process() {
@@ -266,7 +347,6 @@ public :
                     tool :: removeFd(epollFd, sockFd) ;
                     break ;
                 }
-                std::cout << __LINE__ << "        " << __FILE__ << std::endl ;
                 return ;
             }
             else if(ret == 0) {
@@ -329,6 +409,26 @@ int tool :: setNoBlock(int fd) {
     return old ;
 }
 
+int tool::createEventFd() {
+    int fd = eventfd(0, 0) ;
+    if(fd < 0) {
+        std::cout << __FILE__ << "      " << __LINE__ << std::endl ;
+        return -1 ;
+    }
+    return fd ;
+}
+
+int tool ::createSocketPair(int* pipe) {
+    if(pipe == NULL) return -1 ;
+    int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) ;
+    if(ret < 0) {
+        std::cout << __LINE__ << "      " << __FILE__ << std::endl ;
+        return -1 ; 
+    }
+    return 1 ;
+}
+
+
 int tool :: addFd(int epollFd, int fd) {
     epoll_event ev ;
     ev.data.fd = fd ;
@@ -366,11 +466,6 @@ void tool :: addSig(int sig, void(handle)(int), bool restart) {
 
 
 int process :: createSocketPair() {
-    int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) ;
-    if(ret < 0) {
-        std::cout << __LINE__ << "      " << __FILE__ << std::endl ;
-        return -1 ; 
-    }
-    return 1 ;
+    tool::createSocketPair(pipe) ;
 }   
 
