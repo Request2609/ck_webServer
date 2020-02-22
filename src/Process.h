@@ -25,20 +25,9 @@ enum {
 enum {
     NOT_FOUND=404, OK=200
 } ;
-//向进程发送的登录信息
-struct logBuf {
-    //暂时业务为登录
-    int flag ;
-    int type ;
-    char name[512] ;
-    char password[512] ;
-    char version[1024] ;
-    char path_[1024] ;
-} ;
 
 class eventLoop ;
-class process
-{
+class process {
 public:
     process():paths(""), method(-1), version(""), flag(0) {}
     ~process() {}
@@ -65,7 +54,6 @@ public :
     int getSubmitInfo(std::string& info, int pos, 
                       int l, std::string& a, channel* chl) ;
     int doPost(std::string& info) ;
-    int sendSock(logBuf& buf, int fd, int connFd) ;
     std::string changeHtml() ;
     std::string changePostHtml(long len, std::string&bf) ;
     std::string getSubmit(long len, std::string&bf) ;

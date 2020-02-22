@@ -30,7 +30,6 @@ int process :: postRequest(std::string& tmp, channel* chl,
         //CGI程序
         if(paths.find("php") == std::string::npos) { 
             //cgi请求的数据
-            std::cout << "路径名称:" << paths << std::endl ;
             auto res = processCgi() ;
             responseHead(chl, "text/html", -1, 200, "OK") ;
             sendHeader(chl) ;
@@ -68,7 +67,7 @@ void process :: getSendBuffer(channel* chl, const std::string res) {
     }
 }
 
-//发送post请求
+//发送post请
 std::string process :: processCgi() {
     //连接CGI服务器
     int ret = cgiConnect::connectCgiServer() ;
@@ -77,9 +76,11 @@ std::string process :: processCgi() {
         (*err)<<s ;
         return "";
     }
-    std::string info ;
-    info += cgiArg ;
-    //设置环境变量
+    struct cgiData cd ;
+    bzero(&cd, sizeof(cd)) ;
+    cd.isEOF = 1 ;
+    strcpy(cd.body, cgiArg.c_str()) ;
+    strcpy(cd.path, paths.c_str()) ;
     if(ret < 0) {
         std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
@@ -90,17 +91,15 @@ std::string process :: processCgi() {
         (*err)<<s ;
         return "" ;
     }
-    char buf[BUFFERSIZE] ;
-    strcpy(buf, info.data()) ;
     //向CGI服务器发送请求
-    ret = cgiConnect ::sendMsg(buf) ;
+    ret = cgiConnect ::sendMsg(cd) ;
     if(ret < 0) {
         std::string s = std::to_string(__LINE__) +"  " + __FILE__+"    " +strerror(errno)  ;
         (*err)<<s ;
         return "" ;
     }
     //等待cgi服务器响应
-    std::string ss = cgiConnect :: recvMsg() ;
+    auto ss = cgiConnect :: recvMsg() ;
     //关闭连接套接字
     cgiConnect::closeFd() ;
     return ss ;

@@ -10,5 +10,6 @@
     "object number":15,
     "cgi ip":"127.0.0.1",
     "cgi port":8001,
+    "cgi source path":"../cgi",
     "process number":3
 }

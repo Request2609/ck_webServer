@@ -28,10 +28,9 @@ int cgiConnect ::connectCgiServer() {
     return sockFd ;
 }
 
-int cgiConnect :: sendMsg(const char*  buffer) {
+int cgiConnect :: sendMsg(struct cgiData& cd) {
     auto  err = log::getLogObject() ;
-    strcpy(buf, buffer) ;
-    if(send(sockFd, buf, sizeof(buf), 0) < 0) {
+    if(send(sockFd, &cd, sizeof(cd), 0) < 0) {
         std::string s =  std::to_string(__LINE__)+"       " + __FILE__ ;
         (*err)<<s ;
         return -1 ;
@@ -42,11 +41,12 @@ int cgiConnect :: sendMsg(const char*  buffer) {
 std::string cgiConnect :: recvMsg() {
     auto  err = log::getLogObject() ;
     std::string ss ;
+    char buf[BUFSIZ] ;
     if(recv(sockFd, buf, sizeof(buf), 0)<0) {       
         std::string s =  std::to_string(__LINE__)+"       " + __FILE__ ;
         (*err)<<s ;
         return "" ;
-    } 
-    ss += buf ;
-    return ss ;
+    }
+    ss = buf ;
+   return ss ;
 }

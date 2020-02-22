@@ -1,12 +1,6 @@
 #include "processPool.h"
 
-void handle(int sig) {
-    if(sig == SIGINT) {
-        exit(0) ;
-    }
-}
-
-void init(std::string& ip, int& port, int& num) {
+void init(std::string& ip, int& port, int& num, std::string cgiPath) {
     int fd = open("../conf/server.json", O_RDONLY);
     if(fd < 0) {
         return ;
@@ -24,6 +18,8 @@ void init(std::string& ip, int& port, int& num) {
     rapidjson::Value&cport = doc["cgi port"] ;
     port = cport.GetInt() ;
     rapidjson::Value&tnum = doc["process number"] ;
+    rapidjson::Value&path = doc["cgi source path"] ;
+    cgiPath = path.GetString() ;
     num = tnum.GetInt() ;
     munmap(buf, st.st_size) ;
     close(fd) ;
@@ -33,7 +29,12 @@ int main(int argc, char** argv) {
     std::string ip; 
     int port ;
     int num ;
-    init(ip, port, num) ;
+    std::string paths ;
+    init(ip, port, num, paths) ;
+
+    //切换到cgi资源目录下
+    chdir(paths.c_str()) ;
+
     struct sockaddr_in addr ;
     bzero(&addr, sizeof(addr)) ;
     addr.sin_family = AF_INET ;
