@@ -15,9 +15,10 @@ int cgiConnect ::connectCgiServer() {
         (*err)<<s ;
         return -1 ;
     }
+    auto res = configure::getConfigure() ;
     addr.sin_family = AF_INET ;
-    addr.sin_port = htons(PORT) ;
-    addr.sin_addr.s_addr = inet_addr(IP) ;
+    addr.sin_port = htons(res->getCgiPort()) ;
+    addr.sin_addr.s_addr = inet_addr(res->getCgiIP().c_str()) ;
     int ret = connect(sockFd, (struct sockaddr*)&addr, sizeof(addr)) ;
     if(ret < 0) {
         std::string s =  std::to_string(__LINE__)+"       " + __FILE__ ;

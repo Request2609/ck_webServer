@@ -6,11 +6,9 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "Log.h"
+#include "ParseConf.h"
 
-#define IP  "127.0.0.1" 
-#define PORT 7000 
 const int BUFFERSIZE = 1024 ;
-
 class cgiConnect {
 public:
     cgiConnect() ;

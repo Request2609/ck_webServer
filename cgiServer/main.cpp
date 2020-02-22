@@ -6,7 +6,7 @@ void handle(int sig) {
     }
 }
 
-void init(string& ip, int& port, int& num) {
+void init(std::string& ip, int& port, int& num) {
     int fd = open("../conf/server.json", O_RDONLY);
     if(fd < 0) {
         return ;
@@ -30,7 +30,7 @@ void init(string& ip, int& port, int& num) {
 }   
 
 int main(int argc, char** argv) {
-    string ip; 
+    std::string ip; 
     int port ;
     int num ;
     init(ip, port, num) ;
@@ -39,34 +39,34 @@ int main(int argc, char** argv) {
     addr.sin_family = AF_INET ;
     int ret = inet_pton(AF_INET, ip.c_str(), &addr.sin_addr) ;
     if(ret < 0) {
-        cout << __LINE__ << "        " << __FILE__ << endl ;
+        std::cout << __LINE__ << "        " << __FILE__ << std::endl ;
         return 0 ;
     }
     addr.sin_port = htons(port) ;
     int listenFd = socket(AF_INET, SOCK_STREAM, 0) ; 
     if(listenFd < 0) {
-        cout << __LINE__ << "       " << __FILE__ << endl ;
+        std::cout << __LINE__ << "       " << __FILE__ << std::endl ;
         return 1;
     }
     int use = 1 ;
     ret = setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, &use, sizeof(use)) ;
     if(ret < 0) {
-        cout << __LINE__ << "       " << __FILE__ << endl ;
+        std::cout << __LINE__ << "       " << __FILE__ << std::endl ;
         return 0;
     }
     ret = bind(listenFd, (const sockaddr*)&addr, sizeof(addr)) ;
     if(ret < 0) {
-        cout << __FILE__ << "       " << __LINE__ << endl ;
+        std::cout << __FILE__ << "       " << __LINE__ << std::endl ;
         return 0 ;
     }
     ret = listen(listenFd, 100) ;
     if(ret < 0) {
-        cout << "监听失败！" << endl ;
+        std::cout << "监听失败！" << std::endl ;
         return -1 ;
     }
-
     //创建
-    shared_ptr<processPool<cgiConn>> pool = processPool<cgiConn> :: create(listenFd, num);
+    std::shared_ptr<processPool<cgiConn>> pool = 
+        processPool<cgiConn> :: create(listenFd, num);
     if(pool)
         pool->run() ;
     close(listenFd) ;

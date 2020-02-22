@@ -40,7 +40,7 @@ public :
     void setReadIndex(int index) { 
         readIndex = index ;
     }
-    bool checkBuffer() ;
+    int checkBuffer() ;
     int getWriteIndex() { 
         return writeIndex ; 
     }

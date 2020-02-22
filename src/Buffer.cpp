@@ -108,7 +108,7 @@ int Buffer :: readBuffer(int fd) {
         }
     }
     conLen = 0 ;
-    conLen =checkBuffer() ;
+    conLen = checkBuffer() ;
     //状态机不满足，继续等待
     if(conLen == 0) {
         canProcess = false ;
@@ -148,7 +148,7 @@ int Buffer::checkBody() {
     return false ;
 }
 
-bool Buffer::checkBuffer() {
+int Buffer::checkBuffer() {
     int index= 0 ;
     std::string s="" ;
     for(int i=0; i<writeIndex; i++) {
@@ -168,7 +168,7 @@ bool Buffer::checkBuffer() {
                     return 0 ;
                 }
                 int end = head.find("\r\n") ;
-                head = head.substr(10, end-16) ;
+                head = head.substr(16, end-16) ;
                 ///获取长度
                 int n = atoi(head.c_str()) ;
                 return n ;
@@ -177,9 +177,6 @@ bool Buffer::checkBuffer() {
                 return 0 ;
             }
         }
-    }
-    else {
-        return 0 ;
     }
     return 1 ;
 }      

@@ -23,7 +23,6 @@
 #include <memory> 
 const int EPOLLNUM = 1024 ;
 const int BUFFERSIZE = 1024 ;
-using namespace std ;
 
 class process ;
 class tool ;
@@ -35,8 +34,12 @@ public:
     ~process() {}
 public :
     int createSocketPair() ;
-    int getReadFd() { return pipe[0] ; }
-    int getWriteFd() { return pipe[1] ; }
+    int getReadFd() { 
+        return pipe[0] ; 
+    }
+    int getWriteFd() { 
+        return pipe[1] ; 
+    }
 public :
     pid_t pid ;
 private :
@@ -50,8 +53,7 @@ public :
     processPool(int listenFd, int processNum = 8) ;
     ~processPool() {}
 public :
-    //保证时钟只产生一个进程池
-    static shared_ptr<processPool<T>> create(int listenFd, 
+    static std::shared_ptr<processPool<T>> create(int listenFd, 
                                              int processNum = 8) ;
 public :
     void run() ;
@@ -66,14 +68,14 @@ private :
     static const int maxProcessNum = 16 ; //进程池允许的最大子进程数量
     static const int userPreProcess = 65535 ;//每个进程最多能处理的客户数量
     static const int maxEventNum = 10000 ; //epoll最多处理的事件数量
-    static shared_ptr<processPool<T>> object ; //进程池的静态实例 
+    static std::shared_ptr<processPool<T>> object ; //进程池的静态实例 
 
     int curProcessNum ; //进程池目前能处理的进城数量
     int index ; //子进程在进程中的序号
     int epollFd ;  //epoll句柄
     int listenFd ; //监听的文件描述符
     bool stop ; //进程终止标记
-    vector<shared_ptr<process>> proDescInfo ; // 保存进程的描述信息
+    std::vector<std::shared_ptr<process>> proDescInfo ; // 保存进程的描述信息
 };
 
 class tool {
@@ -85,22 +87,27 @@ public :
 };
 
 template<typename T> 
-shared_ptr<processPool<T>> processPool<T> :: object = nullptr ;
+std::shared_ptr<processPool<T>> processPool<T> :: object = nullptr ;
 
 //创建进程池
 template<typename T>
 processPool<T> :: processPool(int listenFd, int pNum)
-    : listenFd(listenFd), curProcessNum(pNum), index(-1), stop(false) {
+    : listenFd(listenFd), curProcessNum(pNum), 
+    index(-1), stop(false) {
+
     assert(pNum > 0 && pNum <= maxProcessNum) ;
     proDescInfo.reserve(pNum)  ;
     for(int i=0; i<pNum; i++) {
-        proDescInfo[i] = make_shared<process>() ;
+        std::shared_ptr<process> ptr ;
+        proDescInfo.push_back(ptr) ;
+    }
+    for(int i=0; i<pNum; i++) {
+        proDescInfo[i] = std::make_shared<process>() ;
     }
     //创建子进程
     for(int i=0; i<pNum; i++) {
         //创建unix双向匿名管道
-        int ret = proDescInfo[i]->createSocketPair() ;
-        assert(ret > 0) ;
+        proDescInfo[i]->createSocketPair() ;
         proDescInfo[i]->pid = fork() ;
         assert(proDescInfo[i]->pid >= 0) ;
         //父进程
@@ -119,10 +126,10 @@ processPool<T> :: processPool(int listenFd, int pNum)
 }
 
 template <typename T>
-shared_ptr<processPool<T>> processPool<T> :: create(int listenFd, 
+std::shared_ptr<processPool<T>> processPool<T> :: create(int listenFd, 
                                                     int processNum) {
     if(object == nullptr) {
-        object = make_shared<processPool<T>>(listenFd, processNum) ;
+        object = std::make_shared<processPool<T>>(listenFd, processNum) ;
     }
     return object ;
 }
@@ -153,7 +160,7 @@ void processPool<T> :: runParent() {
     while(!stop) {
         int number = epoll_wait(epollFd, ev, maxEventNum, -1) ;
         if(number < 0) {
-            cout << __LINE__ << "      " << __FILE__ << endl ;
+            std::cout << __LINE__ << "      " << __FILE__ << std::endl ;
             return  ;
         }
         for(int i=0; i<number; i++) {
@@ -172,7 +179,7 @@ void processPool<T> :: runParent() {
                 count = (index+1)%curProcessNum ;
                 int ret = send(proDescInfo[index]->getWriteFd(), &newConn, sizeof(newConn), 0) ;
                 if(ret < 0) {
-                    cout << __LINE__ << "         " << __FILE__ << endl ;
+                    std::cout << __LINE__ << "         " << __FILE__ << std::endl ;
                     return ;
                 }
             }
@@ -184,19 +191,18 @@ void processPool<T> :: runParent() {
 //子进程的执行函数
 template<typename T>
 void processPool<T> :: runChild() {
-
     setupSigPipe() ;
     int pipeFd = proDescInfo[index]->getReadFd() ;
     //将管道描述符加入到epoll中
     tool::addFd(epollFd, pipeFd) ;
     epoll_event ev[maxEventNum]  ;
     //客户事件集合
-    map<int, shared_ptr<T>> user ; 
+    std::map<int, std::shared_ptr<T>> user ; 
     //为客户端设置处理的对象的池子
     while(!stop) {
         int num = epoll_wait(epollFd, ev, maxEventNum, -1) ;
         if(num < 0&&errno != EINTR) {
-            cout << __LINE__ << "        " << __FILE__ << endl ;
+            std::cout << __LINE__ << "        " << __FILE__ << std::endl ;
             return ;
         } 
         for(int i=0; i<num; i++) {
@@ -205,21 +211,21 @@ void processPool<T> :: runChild() {
                 char client ;
                 int ret = recv(fd, &client, sizeof(client), 0) ;
                 if(ret < 0) {
-                    cout << __LINE__ << "      " << __FILE__ << endl ;
+                    std::cout << __LINE__ << "      " << __FILE__ << std::endl ;
                     return ;
                 }
                 int connFd = accept(listenFd, NULL, NULL) ;
                 if(connFd < 0) {
-                    cout << __LINE__ << "       " << __FILE__ << endl ;
+                    std::cout << __LINE__ << "       " << __FILE__ << std::endl ;
                     return ;
                 }
                 ret = tool::addFd(epollFd, connFd) ;
                 if(ret < 0) {
-                    cout << __LINE__ <<  "         " << __FILE__ << endl ;
+                    std::cout << __LINE__ <<  "         " << __FILE__ << std::endl ;
                     return ;
                 }
                 //创建用户对象
-                user[connFd] = make_shared<T>(epollFd, connFd) ;
+                user[connFd] = std::make_shared<T>(epollFd, connFd) ;
             } 
             //处理事件
             else if(ev[i].events&EPOLLIN) {
@@ -246,7 +252,7 @@ public :
     int createSocketPair() {
         int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) ;
         if(ret < 0) {
-            cout << __LINE__ << "        " << __FILE__ << endl ;
+            std::cout << __LINE__ << "        " << __FILE__ << std::endl ;
             return -1 ;
         }
         return 1 ;
@@ -260,7 +266,7 @@ public :
                     tool :: removeFd(epollFd, sockFd) ;
                     break ;
                 }
-                cout << __LINE__ << "        " << __FILE__ << endl ;
+                std::cout << __LINE__ << "        " << __FILE__ << std::endl ;
                 return ;
             }
             else if(ret == 0) {
@@ -272,41 +278,38 @@ public :
             }
             else {
                 cgiArg = buf ;
-                if(cgiArg[0] == '1') {
-                    int a, b ;
-                    getArg(a, b) ;
-                    cgiProcess(a, b, a+b) ;
-                }
+                int a, b ;
+                getArg(a, b) ;
+                cgiProcess(a, b, a+b) ;
                 break ;
             }
         }
     }
 
     int cgiProcess(int a, int b, int t) {
-        string body = "<html><meta charset=\"UTF-8\"><head><title>CK_webServerCGI</title></head>";
-        body += "<body><p>The result is " + to_string(a) + "+" + to_string(b) + " = " + to_string(t);
+        std::string body = "<html><meta charset=\"UTF-8\"><head><title>CK_webServerCGI</title></head>";
+        body += "<body><p>The result is " + std::to_string(a) + "+" + std::to_string(b) + " = " + std::to_string(t);
         body += "</p></body></html>";
         strcpy(buf, body.data()) ;
         int ret  = send(sockFd, buf, sizeof(buf), 0) ;
         if(ret < 0) {
-            cout << __LINE__ << "          " <<  __FILE__ << endl ;
+            std::cout << __LINE__ << "          " <<  __FILE__ << std::endl ;
             return -1 ;
         }
         bzero(buf, sizeof(buf)) ;
         return 1 ;
     }
-
+    //获取参数
     void getArg(int& a, int& b) {
-        cout << cgiArg << endl ;
-        cgiArg = cgiArg.data()+3 ;
+        cgiArg = cgiArg.data();
         sscanf(cgiArg.data(), "a=%d&b=%d", &a, &b) ;
     }
 public :
     
     //cgi路径
-    string cgiPath ;
+    std::string cgiPath ;
     //cgi参数
-    string cgiArg ;
+    std::string cgiArg ;
     static int epollFd ;
     int sockFd ;
     char buf[BUFFERSIZE] ;
@@ -320,7 +323,7 @@ int tool :: setNoBlock(int fd) {
     int old = fcntl(fd, F_GETFL) ;
     int ret = fcntl(fd, F_SETFL, old|O_NONBLOCK) ;
     if(ret < 0) {
-        cout << __FILE__ << "       " << __LINE__ << endl ;
+        std::cout << __FILE__ << "       " << __LINE__ << std::endl ;
         return -1 ;
     }
     return old ;
@@ -332,11 +335,12 @@ int tool :: addFd(int epollFd, int fd) {
     ev.events = EPOLLIN|EPOLLET ;
     int ret = epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev) ;
     if(ret < 0) {
-        cout << __FILE__ << "      " << __LINE__ << endl ;
+        std::cout << __FILE__ << "      " << __LINE__ << std::endl ;
+        return -1 ;
     }
     ret = setNoBlock(fd) ;
     if(ret < 0) {
-        cout << __LINE__ << "      " << __FILE__ << endl ;
+        std::cout << __LINE__ << "      " << __FILE__ <<std::endl ;
         return -1 ;
     }
     return 1 ;
@@ -345,7 +349,7 @@ int tool :: addFd(int epollFd, int fd) {
 int tool :: removeFd(int epollFd, int fd) {
    int ret = epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, 0) ;
    if(ret < 0) {
-        cout << __LINE__ << "     " << __FILE__ << endl ;
+       std::cout << __LINE__ << "     " << __FILE__ << std::endl ;
         return -1 ;
    }
    return 1 ;
@@ -364,7 +368,7 @@ void tool :: addSig(int sig, void(handle)(int), bool restart) {
 int process :: createSocketPair() {
     int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) ;
     if(ret < 0) {
-        cout << __LINE__ << "      " << __FILE__ << endl ;
+        std::cout << __LINE__ << "      " << __FILE__ << std::endl ;
         return -1 ; 
     }
     return 1 ;

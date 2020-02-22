@@ -19,9 +19,6 @@ void configure::init() {
     struct stat st ;
     fstat(fd, &st) ;
     char* buf = (char*)mmap(NULL, st.st_size, PROT_READ, MAP_SHARED, fd, 0) ;
-    if(buf == NULL) {
-
-    }
     rapidjson::Document doc ;
     doc.Parse<0>(buf) ;
     rapidjson::Value&ip = doc["ip addr"] ;
@@ -40,9 +37,10 @@ void configure::init() {
     logFile = log_file.GetString() ;
     rapidjson::Value&objNumber = doc["object number"] ;
     objectNum = objNumber.GetInt() ;
-    int ret = munmap(buf, st.st_size) ;   
-    if(ret < 0) {
-
-    }
+    rapidjson::Value&cgiip = doc["cgi ip"] ;
+    rapidjson::Value&cgiport = doc["cgi port"] ;
+    cgiIP = cgiip.GetString() ;
+    cgiPort = cgiport.GetInt() ;
+    munmap(buf, st.st_size) ;   
     close(fd) ;
 }

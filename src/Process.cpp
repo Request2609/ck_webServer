@@ -30,6 +30,7 @@ int process :: postRequest(std::string& tmp, channel* chl,
         //CGI程序
         if(paths.find("php") == std::string::npos) { 
             //cgi请求的数据
+            std::cout << "链接CGI上服务器" << std::endl ;
             auto res = processCgi() ;
             responseHead(chl, "text/html", -1, 200, "OK") ;
             sendHeader(chl) ;
@@ -76,7 +77,7 @@ std::string process :: processCgi() {
         (*err)<<s ;
         return "";
     }
-    std::string info("1\r\n") ;
+    std::string info ;
     info += cgiArg ;
     //设置环境变量
     if(ret < 0) {
@@ -326,9 +327,9 @@ int process :: getContentLength(std::string a, channel* chl) {
         }
         l = atoi(len.c_str()) ;
         
-        long ret = paths.find(".CGI") ;
+        if(paths.find(".CGI") != std::string::npos) {
+            std::cout << "处理CGI" <<std:: endl ;
         //正在请求CGI程序处理
-        if(ret != -1) {
             int r = a.find("\r\n\r\n") ;
             cgiArg = a.substr(r+4, l) ;
             return -4 ;

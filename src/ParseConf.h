@@ -38,11 +38,18 @@ public:
     int getObjectNumber() { 
         return objectNum ;
     }
+    int getCgiPort() {
+        return cgiPort ;
+    }
+    std::string getCgiIP() {
+        return cgiIP ;
+    }
 private:
     void init() ;
     configure():servIp(""), servPort(-1), 
     threadNum(1), phpPath(""), 
-    phpIp(""), phpPort(-1), logFile(""){}
+    phpIp(""), phpPort(-1), logFile("")
+    ,cgiIP(""), cgiPort(-1){}
     static std::shared_ptr<configure>conf ;
     std::string servIp ;
     int servPort ;
@@ -52,5 +59,7 @@ private:
     int phpPort ;
     std::string logFile ;
     int objectNum ;
+    std::string cgiIP ;
+    int cgiPort ;
 };
 
