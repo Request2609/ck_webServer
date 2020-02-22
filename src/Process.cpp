@@ -31,13 +31,18 @@ int process :: postRequest(std::string& tmp, channel* chl,
         if(paths.find("php") == std::string::npos) { 
             //cgi请求的数据
             auto res = processCgi() ;
-            responseHead(chl, "text/html", -1, 200, "OK") ;
-            sendHeader(chl) ;
-            chl->clearBuffer() ;
-            getSendBuffer(chl, res) ;
-            sss.sendChunk(chl) ;
-            if(ret < 0) {
-                return -1 ;
+            if(res.find("404") != std::string::npos) {
+                sendNotFind(chl) ;
+            }
+            else {
+                responseHead(chl, "text/html", -1, 200, "OK") ;
+                sendHeader(chl) ;
+                chl->clearBuffer() ;
+                getSendBuffer(chl, res) ;
+                sss.sendChunk(chl) ;
+                if(ret < 0) {
+                    return -1 ;
+                }
             }
         } 
         else {

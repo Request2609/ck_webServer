@@ -51,6 +51,7 @@ ck_webServer是一个小型web服务器，使用c++11编写！实现了GET、POS
     "object number":15     //每个对象池初始化时的对象数量
     "cgi ip":"127.0.0.1",  //CGI服务器的IP地址
     "cgi port":8001, 　    //CGI服务器的端口
+    "cgi source path":"../cgiSource",  //CGI服务器资源的路径
     "process number":3　　 // CGI服务器的进程数量
 }
 ```
