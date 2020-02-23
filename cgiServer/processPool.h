@@ -98,10 +98,12 @@ std::shared_ptr<processPool<T>> processPool<T> :: create(int listenFd,
 //统一事件源
 template<typename T>
 void processPool<T>::sigHandle(int signo) {
+    //是执行完cgi进程后收到的中断信号，忽略
     uint64_t count = signo ;   
     int ret = write(sigFd, &count, sizeof(count)) ;
     if(ret < 0) {
-        std::cout << __FILE__ << "      " << __LINE__ << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*(tool::err)) << str ;
         return ;
     }
     return ;
@@ -112,12 +114,12 @@ template<typename T>
 void processPool<T>::init() {
     epollFd = epoll_create(EPOLLNUM) ;
     if(epollFd < 0) {
-        std::cout << __LINE__ << "       " << __FILE__ << std::endl; 
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*(tool::err)) << str ;
         return  ;
     }
     sigFd = tool::createEventFd() ;
     tool::addFd(epollFd, sigFd) ;
-    signal(SIGCHLD, sigHandle) ;
     signal(SIGINT, sigHandle) ;
     signal(SIGTERM, sigHandle) ;
     signal(SIGPIPE, SIG_IGN) ;
@@ -139,9 +141,10 @@ void processPool<T> :: runParent() {
     char newConn = 'c' ;
     while(!stop) {
         int number = epoll_wait(epollFd, ev, maxEventNum, -1) ;
-        if(number < 0) {
-            std::cout << __LINE__ << "      " << __FILE__ << std::endl ;
-            return  ;
+        if(number < 0 && errno != EINTR) {
+            std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__+""+strerror(errno);
+            (*(tool::err)) << str ;
+            continue ;
         }
         for(int i=0; i<number; i++) {
             int sockFd = ev[i].data.fd ;
@@ -156,51 +159,43 @@ void processPool<T> :: runParent() {
                     stop = true ;
                     break ;
                 }
+
                 count = (index+1)%curProcessNum ;
                 int ret = send(proDescInfo[index]->getWriteFd(), &newConn, sizeof(newConn), 0) ;
                 if(ret < 0) {
-                    std::cout << __LINE__ << "         " << __FILE__ << std::endl ;
-                    return ;
+                    std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+                    (*(tool::err)) << str ;
+                    continue ;
                 }
             }
             //信号事件，处理
             if(sockFd == sigFd) {
                 if(ev[i].events&EPOLLIN) {
                     uint64_t count = 0 ;
-                    read(sigFd, &count, sizeof(count)) ;
+                    int ret = read(sigFd, &count, sizeof(count)) ;
+                    if(ret < 0) {
+                        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+                        (*(tool::err)) << str ;
+                        break ;
+                    }
                     switch(count) {
-                        case SIGCHLD :
-                            pid_t pid ;
-                            int stat ;
-                            while((pid = waitpid(-1, &stat, WNOHANG)) > 0) {
-                                for(int i=0; i<proDescInfo.size(); i++) {
-                                    close(proDescInfo[i]->getWriteFd()) ;
-                                    proDescInfo[i]->pid = -1 ;
-                                }
+                    case SIGINT :
+                    case SIGTERM :
+                        for(int i=0; i<proDescInfo.size(); i++) {
+                            int pid = proDescInfo[i]->pid ;
+                            if(pid != -1) {
+                                kill(pid, SIGTERM) ;
                             }
-                            stop = true ;
-                            //检查进程池子进程是否没有回收完
-                            for(int i=0; i<proDescInfo.size(); i++) {
-                                if(proDescInfo[i].pid != -1) {
-                                    stop = false ;
-                                    break ;
-                                }
-                            }
-                            break ;
-                        case SIGINT :
-                        case SIGTERM :
-                            for(int i=0; i<proDescInfo.size(); i++) {
-                                int pid = proDescInfo[i].pid ;
-                                if(pid != -1) {
-                                    kill(pid, SIGTERM) ;
-                                }
-                            }
-                            break ;
+                        }
+                        stop = true ;
+                        break ;
                     }
                 }           
             }
         }   
     }
+    wait(NULL) ;
+    //检查进程池子进程是否没有回收完
     close(epollFd) ;
 }
 
@@ -217,8 +212,9 @@ void processPool<T> :: runChild() {
     while(!stop) {
         int num = epoll_wait(epollFd, ev, maxEventNum, -1) ;
         if(num < 0&&errno != EINTR) {
-            std::cout << __LINE__ << "        " << __FILE__ << std::endl ;
-            return ;
+            std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__+""+strerror(errno);
+            (*(tool::err)) << str ;
+            continue ;
         } 
         for(int i=0; i<num; i++) {
             int fd =ev[i].data.fd ;
@@ -226,18 +222,21 @@ void processPool<T> :: runChild() {
                 char client ;
                 int ret = recv(fd, &client, sizeof(client), 0) ;
                 if(ret < 0) {
-                    std::cout << __LINE__ << "      " << __FILE__ << std::endl ;
-                    return ;
+                    std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+                    (*(tool::err)) << str ;
+                    continue ;
                 }
                 int connFd = accept(listenFd, NULL, NULL) ;
                 if(connFd < 0) {
-                    std::cout << __LINE__ << "       " << __FILE__ << std::endl ;
-                    return ;
+                    std::string str = "  "+ std::to_string(__LINE__)+"  "+__FILE__ +"    "+strerror(errno);
+                    (*(tool::err)) << str ;
+                    continue ;
                 }
                 ret = tool::addFd(epollFd, connFd) ;
                 if(ret < 0) {
-                    std::cout << __LINE__ <<  "         " << __FILE__ << std::endl ;
-                    return ;
+                    std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+                    (*(tool::err)) << str ;
+                    continue ;
                 }
                 //创建用户对象
                 user[connFd] = std::make_shared<T>(epollFd, connFd) ;
@@ -245,8 +244,8 @@ void processPool<T> :: runChild() {
             //处理事件
             else if(ev[i].events&EPOLLIN) {
                 user[fd]->process() ;
+                tool::sigOK = 1 ;
             }
-
             //父进程接收到信号事件
             else if(fd == sigFd) {
                 uint64_t count = 1 ;

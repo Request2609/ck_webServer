@@ -15,6 +15,8 @@ int main(int argc, char** argv) {
     std::string body = "<html><meta charset=\"UTF-8\"><head><title>CK_webServerCGI</title></head>";
     body += "<body><p>The result is " + std::to_string(a) + "+" + std::to_string(b) + " = " + std::to_string(t);
     body += "</p></body></html>";
+    int size = body.size() ;
+    body = std::to_string(size)+"\r\n"+body ;
     printf("%s", body.c_str()) ;
     return 0;
 }

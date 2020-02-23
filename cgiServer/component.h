@@ -22,6 +22,7 @@
 #include <sys/wait.h>
 #include <vector>
 #include <memory> 
+#include "Log.h"
 
 const int BUFFERSIZE = 1024 ;
 class tool {
@@ -32,6 +33,8 @@ public :
     static void addSig(int sig, void(handle)(int), bool restart=true) ;
     static int createSocketPair(int* pipe) ;
     static int createEventFd() ;
+    static std::shared_ptr<log>err ;
+    static int sigOK ;
 };
 
 class process {
@@ -53,6 +56,7 @@ private :
 };
 
 struct cgiData {
+    int isEof ;
     char path[FILENAME_MAX] ;
     char body[BUFFERSIZE] ;
     char contentType[BUFFERSIZE] ;

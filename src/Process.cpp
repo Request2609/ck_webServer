@@ -96,6 +96,7 @@ std::string process :: processCgi() {
         (*err)<<s ;
         return "" ;
     }
+
     //向CGI服务器发送请求
     ret = cgiConnect ::sendMsg(cd) ;
     if(ret < 0) {

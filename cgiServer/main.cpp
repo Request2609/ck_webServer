@@ -1,6 +1,6 @@
 #include "processPool.h"
 
-void init(std::string& ip, int& port, int& num, std::string cgiPath) {
+void init(std::string& ip, int& port, int& num, std::string& cgiPath) {
     int fd = open("../conf/server.json", O_RDONLY);
     if(fd < 0) {
         return ;
@@ -33,36 +33,45 @@ int main(int argc, char** argv) {
     init(ip, port, num, paths) ;
 
     //切换到cgi资源目录下
-    chdir(paths.c_str()) ;
-
+    int ret = chdir(paths.c_str()) ;
+    if(ret < 0) {
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*(tool::err)) << str ;
+        return 1;
+    }
     struct sockaddr_in addr ;
     bzero(&addr, sizeof(addr)) ;
     addr.sin_family = AF_INET ;
-    int ret = inet_pton(AF_INET, ip.c_str(), &addr.sin_addr) ;
+    ret = inet_pton(AF_INET, ip.c_str(), &addr.sin_addr) ;
     if(ret < 0) {
-        std::cout << __LINE__ << "        " << __FILE__ << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*(tool::err)) << str ;
         return 0 ;
     }
     addr.sin_port = htons(port) ;
     int listenFd = socket(AF_INET, SOCK_STREAM, 0) ; 
     if(listenFd < 0) {
-        std::cout << __LINE__ << "       " << __FILE__ << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*(tool::err)) << str ;
         return 1;
     }
     int use = 1 ;
     ret = setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, &use, sizeof(use)) ;
     if(ret < 0) {
-        std::cout << __LINE__ << "       " << __FILE__ << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*(tool::err)) << str ;
         return 0;
     }
     ret = bind(listenFd, (const sockaddr*)&addr, sizeof(addr)) ;
     if(ret < 0) {
-        std::cout << __FILE__ << "       " << __LINE__ << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*(tool::err)) << str ;
         return 0 ;
     }
     ret = listen(listenFd, 100) ;
     if(ret < 0) {
-        std::cout << "监听失败！" << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*(tool::err)) << str ;
         return -1 ;
     }
     //创建

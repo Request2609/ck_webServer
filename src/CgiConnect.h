@@ -12,7 +12,7 @@
 const int BUFFERSIZE = 1024 ;
 
 struct cgiData {
-    bool isEOF ;
+    int isEOF ;
     char path[FILENAME_MAX] ;
     char body[BUFFERSIZE] ;
     char contentType[BUFFERSIZE] ;

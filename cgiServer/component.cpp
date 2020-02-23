@@ -2,11 +2,14 @@
 
 int cgiConn :: epollFd ;
 
+std::shared_ptr<log> tool::err = log::getLogObject() ;
+int tool::sigOK = 0 ;
 int tool :: setNoBlock(int fd) {
     int old = fcntl(fd, F_GETFL) ;
     int ret = fcntl(fd, F_SETFL, old|O_NONBLOCK) ;
     if(ret < 0) {
-        std::cout << __FILE__ << "       " << __LINE__ << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*err) << str ;
         return -1 ;
     }
     return old ;
@@ -15,7 +18,8 @@ int tool :: setNoBlock(int fd) {
 int tool::createEventFd() {
     int fd = eventfd(0, 0) ;
     if(fd < 0) {
-        std::cout << __FILE__ << "      " << __LINE__ << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*err) << str ;
         return -1 ;
     }
     return fd ;
@@ -25,7 +29,8 @@ int tool ::createSocketPair(int* pipe) {
     if(pipe == NULL) return -1 ;
     int ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe) ;
     if(ret < 0) {
-        std::cout << __LINE__ << "      " << __FILE__ << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*err) << str ;
         return -1 ; 
     }
     return 1 ;
@@ -38,24 +43,27 @@ int tool :: addFd(int epollFd, int fd) {
     ev.events = EPOLLIN|EPOLLET ;
     int ret = epoll_ctl(epollFd, EPOLL_CTL_ADD, fd, &ev) ;
     if(ret < 0) {
-        std::cout << __FILE__ << "      " << __LINE__ << std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*err) << str ;
         return -1 ;
     }
     ret = setNoBlock(fd) ;
     if(ret < 0) {
-        std::cout << __LINE__ << "      " << __FILE__ <<std::endl ;
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*err) << str ;
         return -1 ;
     }
     return 1 ;
 }
 
 int tool :: removeFd(int epollFd, int fd) {
-   int ret = epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, 0) ;
-   if(ret < 0) {
-       std::cout << __LINE__ << "     " << __FILE__ << std::endl ;
-       return -1 ;
-   }
-   return 1 ;
+    int ret = epoll_ctl(epollFd, EPOLL_CTL_DEL, fd, 0) ;
+    if(ret < 0) {
+        std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+        (*err) << str ;
+        return -1 ;
+    }
+    return 1 ;
 }
 
 void cgiConn::process() {
@@ -77,12 +85,16 @@ void cgiConn::process() {
             break ;
         }
         else {
-            if(access(cd.path, F_OK) == -1) {
+            char buf[BUFSIZ] ;
+            getcwd(buf, sizeof(buf)) ;
+            if(access("a.CGI", F_OK) == -1) {
                 const char* error = "3\r\n404" ;
                 if(send(sockFd, error, strlen(error), 0)< 0) {
-                    std::cout << __FILE__ << "   " << __LINE__ << std::endl; 
-                    break ;
+                    std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+                    (*(tool::err)) << str ;
                 }
+                tool::removeFd(epollFd, sockFd) ;
+                return ;
             }
             cgiProcess(sockFd, cd.path, cd.body) ;
             break ;
@@ -92,16 +104,19 @@ void cgiConn::process() {
 int cgiConn::cgiProcess(int sockFd, std::string path, std::string arg) {
     pid_t pid ;
     //复制管道描述复位标准输出
-    dup2(sockFd, STDIN_FILENO) ;
     pid = fork() ;
     if(pid == 0) {
-        execl(path.c_str(), arg.c_str()) ;
+        dup2(sockFd, STDOUT_FILENO) ;
+        int ret =  execl(path.c_str(), arg.c_str(), NULL) ;
+        if(ret < 0) {
+            std::string str = "  "+ std::to_string(__LINE__)+"   " +__FILE__;
+            (*(tool::err)) << str ;
+        }
     }
     else {
-        close(sockFd) ;
-        int sta ;
+        tool::removeFd(epollFd, sockFd) ;
         //等待子进程结束
-        while((pid != waitpid(-1, &sta, WNOHANG))) ;
+        wait(NULL) ;
     }
     return 1 ;
 }
@@ -117,6 +132,6 @@ void tool :: addSig(int sig, void(handle)(int), bool restart) {
 
 
 int process :: createSocketPair() {
-    tool::createSocketPair(pipe) ;
+    return tool::createSocketPair(pipe) ;
 }   
 
