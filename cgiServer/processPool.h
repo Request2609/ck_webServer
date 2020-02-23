@@ -98,6 +98,10 @@ std::shared_ptr<processPool<T>> processPool<T> :: create(int listenFd,
 //统一事件源
 template<typename T>
 void processPool<T>::sigHandle(int signo) {
+    if(signo == SIGCHLD) {
+        wait(NULL) ;
+        return  ;
+    }
     //是执行完cgi进程后收到的中断信号，忽略
     uint64_t count = signo ;   
     int ret = write(sigFd, &count, sizeof(count)) ;
@@ -121,6 +125,7 @@ void processPool<T>::init() {
     sigFd = tool::createEventFd() ;
     tool::addFd(epollFd, sigFd) ;
     signal(SIGINT, sigHandle) ;
+    signal(SIGCHLD, sigHandle) ;
     signal(SIGTERM, sigHandle) ;
     signal(SIGPIPE, SIG_IGN) ;
 }
@@ -194,7 +199,7 @@ void processPool<T> :: runParent() {
             }
         }   
     }
-    wait(NULL) ;
+ //   wait(NULL) ;
     //检查进程池子进程是否没有回收完
     close(epollFd) ;
 }
