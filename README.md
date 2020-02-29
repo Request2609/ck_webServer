@@ -83,6 +83,8 @@ webbench -c [客户端数量] -t [运行时间] http://[IP]:[PORT]/
 
 每分钟响应的请求数量：878784（qpm越大说明响应速度越快，性能越高）
 
+***qpm(query per minutes) 即每分钟请求数量＝服务器每分钟响应的数量***
+
 ![a](image/dan_xian_cheng_ck.png)
 
 ##### 单进程的ngnix性能
