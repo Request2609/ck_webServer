@@ -81,7 +81,7 @@ webbench -c [客户端数量] -t [运行时间] http://[IP]:[PORT]/
 
 ##### 单线程的ck\_webServer性能
 
-每分钟响应的请求数量：878784（越大说明响应速度越快，性能越高）
+每分钟响应的请求数量：878784（qpm越大说明响应速度越快，性能越高）
 
 ![a](image/dan_xian_cheng_ck.png)
 
