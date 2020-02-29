@@ -16,8 +16,7 @@ public:
     ~threadPool() ;
 public :
     template<class F, class... Args> 
-        auto commit(F&& f, Args&&... args)->
-        std :: future<decltype(f(args...))> ;
+        auto commit(F&& f, Args&&... args)-> std :: future<decltype(f(args...))> ;
 
     int count() ;
 private:    
@@ -38,9 +37,9 @@ private:
 };
 
 template<class F, class... Args> 
-auto threadPool :: commit(F&& f, Args&&... args)-> 
-                    std :: future<decltype(f(args...))> {
-    
+auto threadPool :: commit(F&& f, Args&&... args) 
+    -> std :: future<decltype(f(args...))>
+{
     if(stop.load()) {
        throw std :: runtime_error("线程池已经停止工作")  ;
     }
