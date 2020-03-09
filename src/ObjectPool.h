@@ -38,7 +38,7 @@ public:
 
     //获取对象
     std::shared_ptr<T> getObject(int index) {
-        std::lock_guard<std::mutex>lk(mute) ;
+        //std::lock_guard<std::mutex>lk(mute) ;
         //第index号队列为空
         if(freeList[index].empty()) {
             //创建对象
@@ -61,7 +61,7 @@ public:
 
     //归还对象
     void returnObject(std::shared_ptr<T>tmp, int index) {
-        std::lock_guard<std::mutex>lk(mute) ;
+        //std::lock_guard<std::mutex>lk(mute) ;
         objectPool<T>::freeList[index].push(tmp) ;
     } 
 private:
@@ -76,7 +76,7 @@ private:
         }    
     }
     //加锁
-    std::mutex mute ;
+    //std::mutex mute ;
     static int isUsing ;
     //对象池中对象队列数量
     static int objectQueueNum ;
@@ -98,7 +98,9 @@ template<class T>
 int objectPool<T>::num = 0 ;
 
 template<class T>
-std::vector<std::queue<std::shared_ptr<T>>> objectPool<T> :: freeList ;
+std::vector<std::queue<std::shared_ptr<T>>> 
+objectPool<T> :: freeList ;
 
 template<class T>
-std::shared_ptr<objectPool<T>>objectPool<T>:: instance ;
+std::shared_ptr<objectPool<T>>
+objectPool<T>:: instance ;
