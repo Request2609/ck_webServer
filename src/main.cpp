@@ -25,6 +25,7 @@ void init(eventLoop& loop,
 }
 
 int main(int argc, char** argv) {
+    //setuid(200) ;
     //切换到资源目录
     int ret =  chdir("../www") ;
     signal(SIGPIPE, SIG_IGN) ;

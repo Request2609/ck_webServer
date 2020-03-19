@@ -104,7 +104,7 @@ void cgiConn::process() {
 int cgiConn::cgiProcess(int sockFd, std::string path, std::string arg) {
     pid_t pid ;
     //复制管道描述复位标准输出
-    pid = fork() ;
+    pid = vfork() ;
     if(pid == 0) {
         dup2(sockFd, STDOUT_FILENO) ;
         int ret =  execl(path.c_str(), arg.c_str(), NULL) ;
@@ -115,8 +115,6 @@ int cgiConn::cgiProcess(int sockFd, std::string path, std::string arg) {
     }
     else {
         tool::removeFd(epollFd, sockFd) ;
-        //等待子进程结束
-        wait(NULL) ;
     }
     return 1 ;
 }
